@@ -1,13 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { Button, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/stack';
-import { HomeScreen } from './Routes/Home';
-import { ProfileScreen } from './Routes/Profile';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import HomeScreen from './Routes/Home';
+import ProfileScreen from './Routes/Profile';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
@@ -18,17 +18,4 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  test: {
-    backgroundColor: '#1E1E1E',
-    color: '#fff',
-    padding: 20,
-  }
-});
+export default App;
