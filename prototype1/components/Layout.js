@@ -23,8 +23,10 @@ function MainContainer() {
   return (
     <NavigationContainer>
       <Tab.Navigator
+        headerStyle={{ backgroundColor: '#232323' }}
         initialRouteName={homeName}
         screenOptions={({ route }) => ({
+            headerShown: false,
             activeTintColor: '#1E80ED',
             inactiveTintColor: '#686868',
 
@@ -52,7 +54,7 @@ function MainContainer() {
                 return <FontAwesomeIcon icon={iconName} size={28} color={color} />;
             },
           // styles for the whole tabbar
-          tabBarStyle: {paddingVertical: 10, backgroundColor: '#232323', height: 90 }
+          tabBarStyle: {paddingVertical: 10, backgroundColor: '#232323', height: 90, borderTopWidth: 0 }
           
         })}
         >
