@@ -18,7 +18,7 @@ const ReservationsScreen = () => {
   ];
 
   const renderReservationItem = ({ item }) => (
-    <Card containerStyle={{ backgroundColor: 'blue' }}>
+    <Card containerStyle={{ backgroundColor: 'cyan', borderRadius: 10 }}>
       <Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
       <Card.Divider />
       <Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
@@ -29,7 +29,7 @@ const ReservationsScreen = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
       <Text style={{ fontSize: 20, color: '#00ffff' }}>Reservations Screen</Text>
-      <Text style={{ fontSize: 15, color: '#00ffff' }}>Upcoming Reservations</Text>
+      <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline' }}>Upcoming Reservations</Text>
 
       {/* FlatList of Reservation Cards */}
       <FlatList
