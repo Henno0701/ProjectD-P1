@@ -19,7 +19,7 @@ const ReservationsScreen = () => {
 
   // Function to render each reservation item
   const renderReservationItem = ({ item }) => (
-    <Card containerStyle={{ backgroundColor: 'cyan', borderRadius: 10 }}>
+    <Card containerStyle={{ backgroundColor: 'cyan', borderRadius: 20, width: 390, height: 120 }}>
       <Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
       <Card.Divider />
       <Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
