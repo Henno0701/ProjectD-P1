@@ -1,5 +1,15 @@
 {
   "expo": {
+
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/Poppins-Regular.ttf"]
+        }
+      ]
+    ],
+
     "name": "prototype1",
     "slug": "prototype1",
     "version": "1.0.0",
