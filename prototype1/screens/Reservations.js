@@ -7,7 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 
 
-const ReservationsScreen = () => {
+const ReservationsExpired = () => {
   // Sample data for the list of reservations
   const reservationsData = [
     { id: 1, date: '2024-02-26', timeSlot: '10:00 AM - 12:00 PM', location: 'New York' },
@@ -30,7 +30,7 @@ const ReservationsScreen = () => {
 
   const handleExpiredPress = () => {
     // Navigate to the "Expired" screen
-    navigation.navigate('Expired');
+    navigation.navigate('ReservationsExpired');
   };
 
   return (
@@ -52,4 +52,4 @@ const ReservationsScreen = () => {
   );
 };
 
-export default ReservationsScreen;
+export default ReservationsExpired;
