@@ -5,7 +5,10 @@ import { Button, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'reac
 import { ListItem, Card } from 'react-native-elements';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
+import { styled } from 'nativewind';
 
+const StyledView = styled(View);
+const StyledText = styled(Text);
 
 
 const ReservationsExpired = () => {
@@ -20,7 +23,7 @@ const ReservationsExpired = () => {
 
     // Function to render each reservation item
     const renderReservationItem = ({ item }) => (
-        <Card containerStyle={{ backgroundColor: 'cyan', borderRadius: 20, width: 390, height: 120 }}>
+        <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 120 }}>
             <Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
             <Card.Divider />
             <Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
@@ -36,12 +39,7 @@ const ReservationsExpired = () => {
 
     return (
         <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
-            <Text style={{ fontSize: 20, color: '#00ffff' }}>Reservations Screen</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={handleReservationPress}>
-                    <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline' }}>Upcoming Reservations</Text>
-                </TouchableOpacity>
-                <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline', marginLeft: 10 }}>Expired Reservations</Text>
             </View>
             {/* FlatList of Reservation Cards */}
             <FlatList

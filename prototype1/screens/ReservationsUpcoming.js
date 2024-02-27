@@ -5,6 +5,11 @@ import { Button, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'reac
 import { ListItem, Card } from 'react-native-elements';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
+import { styled } from 'nativewind';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+
+const StyledView = styled(View);
+const StyledText = styled(Text);
 
 
 const Reservations = () => {
@@ -19,13 +24,14 @@ const Reservations = () => {
 
   // Function to render each reservation item
   const renderReservationItem = ({ item }) => (
-    <Card containerStyle={{ backgroundColor: 'cyan', borderRadius: 20, width: 390, height: 120 }}>
-      <Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
+    <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 120 }}>
+      <FontAwesomeIcon icon="fa-solid fa-calendar" /><Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
       <Card.Divider />
-      <Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
-      <Text style={{ color: 'white' }}>Location: {item.location}</Text>
+      <FontAwesomeIcon icon="fa-solid fa-clock" /><Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
+      <FontAwesomeIcon icon="fa-solid fa-map-marker-alt" /><Text style={{ color: 'white' }}>Location: {item.location}</Text>
     </Card>
   );
+
   const navigation = useNavigation();
 
   const handleExpiredPress = () => {
@@ -35,12 +41,7 @@ const Reservations = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
-      <Text style={{ fontSize: 20, color: '#00ffff' }}>Reservations Screen</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline' }}>Upcoming Reservations</Text>
-        <TouchableOpacity onPress={handleExpiredPress}>
-          <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline', marginLeft: 10 }}>Expired Reservations</Text>
-        </TouchableOpacity>
       </View>
       {/* FlatList of Reservation Cards */}
       <FlatList
