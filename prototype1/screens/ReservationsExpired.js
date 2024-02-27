@@ -7,7 +7,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 
 
-const ReservationsScreen = () => {
+
+const ReservationsExpired = () => {
     // Sample data for the list of reservations
     const reservationsData = [
         { id: 1, date: '2024-02-26', timeSlot: '10:00 AM - 12:00 PM', location: 'Amsterdam' },
@@ -28,7 +29,7 @@ const ReservationsScreen = () => {
     );
     const navigation = useNavigation();
 
-    const handleExpiredPress = () => {
+    const handleReservationPress = () => {
         // Navigate to the "Expired" screen
         navigation.navigate('Reservations');
     };
@@ -37,7 +38,7 @@ const ReservationsScreen = () => {
         <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
             <Text style={{ fontSize: 20, color: '#00ffff' }}>Reservations Screen</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity onPress={handleExpiredPress}>
+                <TouchableOpacity onPress={handleReservationPress}>
                     <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline' }}>Upcoming Reservations</Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: 15, color: '#00ffff', textDecorationLine: 'underline', marginLeft: 10 }}>Expired Reservations</Text>
@@ -52,4 +53,4 @@ const ReservationsScreen = () => {
     );
 };
 
-export default ReservationsScreen;
+export default ReservationsExpired;
