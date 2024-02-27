@@ -26,11 +26,13 @@ export default function ProfileScreen() {
       {/* zogenaamde div met account settings komt hieronder met zn eigen view*/}
       <View className="bg-secondary_bg_color my-8 mx-4 h-44 rounded-xl">
         {/* ervoor zorgen dat het wel goeie css krijgt, maar liep veel vast */}
-        <Button
-          style={styles.button}
-          title="Edit Account Settings"
-          onPress={() => console.log("Navigate to Account Settings")}
-        />
+        <View style={styles.button}>
+          <Button
+            style={styles.button}
+            title="Edit Account Settings"
+            onPress={() => console.log("Navigate to Account Settings")}
+          />
+        </View>
       </View>
     </View>
   );
