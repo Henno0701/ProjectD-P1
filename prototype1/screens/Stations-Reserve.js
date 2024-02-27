@@ -1,7 +1,7 @@
 import { Button, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
 import { styled } from 'nativewind';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { faCalendar, faCalendarDays } from '@fortawesome/free-regular-svg-icons';
 
@@ -34,8 +34,27 @@ function dates(date) {
 
 // Generate the buttons of the week
 const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
+    const [backgroundColor, setBackgroundColor] = useState(selectedButton === date ? '#1E80ED' : '#2E2E2E');
+
+  const changeColor = () => {
+    if (backgroundColor === '#2E2E2E') {
+      setBackgroundColor('#1E80ED');
+      handleButtonPress(date);
+    } else {
+      setBackgroundColor('#2E2E2E');
+    }
+  };
+
     return (
-        <TouchableHighlight key={date} className={`${selectedButton === date ? "bg-schuberg_blue" : "bg-secondary_box_color"} w-10 h-10 justify-center items-center rounded-lg`} onPress={() => handleButtonPress(date)} underlayColor="transparent" >
+        <TouchableHighlight 
+            key={date} 
+            style={{
+                backgroundColor: backgroundColor,
+            }} 
+            className={`w-10 h-10 justify-center items-center rounded-lg`} 
+            onPress={changeColor} 
+            underlayColor="transparent" 
+            >
             <Text className="text-lg text-[#fff]">{date.getDate()}</Text>
         </TouchableHighlight>
     );
@@ -52,7 +71,7 @@ const GenerateTimeSlots = (time) => {
 
 export default function StationsReserveScreen() {
     var curr = new Date; // get current date
-    var first = curr.getDate() - curr.getDay() + 1; // First day is the day of the month - the day of the week + 1
+    var first = curr.getDate(); // First day is the day of the month - the day of the week + 1
     var last = first + 6; // last day is the first day + 6
     var week = dates(new Date(curr.setDate(first))); // get the dates of the week
 
