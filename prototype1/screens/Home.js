@@ -109,6 +109,3 @@ export default function HomeScreen({ navigation: { navigate } }) {
       alignItems: 'center',
     },
   });
-
-
-  
