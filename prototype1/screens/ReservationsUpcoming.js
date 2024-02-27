@@ -6,10 +6,12 @@ import { ListItem, Card } from 'react-native-elements';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
 import { styled } from 'nativewind';
+import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
+
 
 
 const Reservations = () => {
@@ -24,11 +26,16 @@ const Reservations = () => {
 
   // Function to render each reservation item
   const renderReservationItem = ({ item }) => (
-    <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 120 }}>
-      <FontAwesomeIcon icon="fa-solid fa-calendar" /><Card.Title style={{ color: 'white' }}>Date: {item.date}</Card.Title>
-      <Card.Divider />
-      <FontAwesomeIcon icon="fa-solid fa-clock" /><Text style={{ color: 'white' }}>Time Slot: {item.timeSlot}</Text>
-      <FontAwesomeIcon icon="fa-solid fa-map-marker-alt" /><Text style={{ color: 'white' }}>Location: {item.location}</Text>
+    <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 220 }}>
+      <FontAwesomeIcon icon={faCalendarDays} /><Card.Title style={{
+        color: 'white', paddingVertical: 15,
+        paddingHorizontal: 10,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>Date: {item.date}</Card.Title>
+      <FontAwesomeIcon icon={faClock} /><Text style={{ color: 'white', padding: 12 }}>Time Slot: {item.timeSlot}</Text>
+      <FontAwesomeIcon icon={faFlag} /><Text style={{ color: 'white', padding: 8 }}>Location: {item.location}</Text>
     </Card>
   );
 
