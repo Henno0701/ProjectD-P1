@@ -21,25 +21,25 @@ export default function ProfileScreen() {
     setModalVisible(false);
   };
   const handleSave = () => {
-    // Update the state variables or variables holding your data
+    // update de data in de backend
     setName(editedName);
     setFoto(editedImageURL);
 
-    // Save the edited details to AsyncStorage (if needed)
+    // roep save data aan
     saveData();
 
-    // Close the modal after saving
+    // en sluit het dan
     closeModal();
   };
 
   useEffect(() => {
-    // Load data from AsyncStorage when the component mounts
+    // laad de data via asycnstorage
     loadData();
   }, []);
 
   const saveData = async () => {
     try {
-      // Save the edited data to AsyncStorage
+      // save de data via async storage ( later gaat het gwn via db)
       await AsyncStorage.setItem('name', editedName);
       await AsyncStorage.setItem('imageURL', editedImageURL);
     } catch (error) {
@@ -49,11 +49,11 @@ export default function ProfileScreen() {
 
   const loadData = async () => {
     try {
-      // Load data from AsyncStorage
+      // laad hier dan de data async
       const savedName = await AsyncStorage.getItem('name');
       const savedImageURL = await AsyncStorage.getItem('imageURL');
 
-      // Set the loaded data to state
+      // save het indien het niet nulss i=
       if (savedName !== null) {
         setName(savedName);
       }
