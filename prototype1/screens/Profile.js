@@ -120,8 +120,8 @@ export default function ProfileScreen() {
           style={[styles.wrapperCustom,]}>
           <Text style={styles.text}>Security</Text>
         </Pressable>
-      </View>
-    </View>
+      </View >
+    </View >
   );
 }
 const styles = StyleSheet.create({
