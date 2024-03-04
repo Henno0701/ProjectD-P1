@@ -2,67 +2,82 @@ import { Image, Text, View, Pressable, StyleSheet, Modal, TextInput } from 'reac
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function ProfileScreen() {
-
-  // deze data moet wel uit de backend komen
   var secondary_bg_color = "#232323";
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const [editedImageURL, setEditedImageURL] = useState("");
-  const [Name, setName] = useState("Maruf Rodjan");
-  const [foto, setFoto] = useState("https://imgur.com/4OxZys5.jpg");
 
-  const handlePress = () => {
-    // Show the modal
-    setModalVisible(true);
-  };
+  // Account Modal
+  const [isAccountModalVisible, setAccountModalVisible] = useState(false);
+  const [editedAccountName, setEditedAccountName] = useState("");
+  const [editedAccountImageURL, setEditedAccountImageURL] = useState("");
+  const [accountName, setAccountName] = useState("Maruf Rodjan");
+  const [accountImageURL, setAccountImageURL] = useState("https://imgur.com/4OxZys5.jpg");
 
-  const closeModal = () => {
+  const handleAccountPress = () => setAccountModalVisible(true);
+  const closeAccountModal = () => setAccountModalVisible(false);
+  const handleAccountSave = () => {
+    // Check if editedAccountName is not empty, if empty, use current accountName
+    const nameToSave = editedAccountName.trim() !== '' ? editedAccountName : accountName;
+
+    // Check if editedAccountImageURL is not empty, if empty, use current accountImageURL
+    const imageURLToSave = editedAccountImageURL.trim() !== '' ? editedAccountImageURL : accountImageURL;
+
+    // Update the state variables with the values to save
+    setAccountName(nameToSave);
+    setAccountImageURL(imageURLToSave);
+
+    // Save the data
+    saveAccountData();
+
     // Close the modal
-    setModalVisible(false);
+    closeAccountModal();
   };
-  const handleSave = () => {
-    // update de data in de backend
-    setName(editedName);
-    setFoto(editedImageURL);
+  // Contact Details Modal
+  const [isContactDetailsModalVisible, setContactDetailsModalVisible] = useState(false);
+  const handleContactDetailsPress = () => setContactDetailsModalVisible(true);
+  const closeContactDetailsModal = () => setContactDetailsModalVisible(false);
+  const handleContactDetailsSave = () => {
+    // Logic for saving Contact details
+    // ...
 
-    // roep save data aan
-    saveData();
-
-    // en sluit het dan
-    closeModal();
+    // Close the modal
+    closeContactDetailsModal();
   };
-
   useEffect(() => {
     // laad de data via asycnstorage
-    loadData();
+    loadAccountData();
   }, []);
 
-  const saveData = async () => {
+  const saveAccountData = async () => {
     try {
-      // save de data via async storage ( later gaat het gwn via db)
-      await AsyncStorage.setItem('name', editedName);
-      await AsyncStorage.setItem('imageURL', editedImageURL);
+      // Check if editedAccountName is not empty, if empty, use current accountName
+      const nameToSave = editedAccountName.trim() !== '' ? editedAccountName : accountName;
+
+      // Check if editedAccountImageURL is not empty, if empty, use current accountImageURL
+      const imageURLToSave = editedAccountImageURL.trim() !== '' ? editedAccountImageURL : accountImageURL;
+
+      // Save the account data via AsyncStorage (later it will go through a database)
+      await AsyncStorage.setItem('accountName', nameToSave);
+      await AsyncStorage.setItem('accountImageURL', imageURLToSave);
     } catch (error) {
-      console.error('Error saving data:', error);
+      console.error('Error saving account data:', error);
     }
   };
 
-  const loadData = async () => {
+  const loadAccountData = async () => {
     try {
-      // laad hier dan de data async
-      const savedName = await AsyncStorage.getItem('name');
-      const savedImageURL = await AsyncStorage.getItem('imageURL');
+      // Load account data via AsyncStorage
+      const savedAccountName = await AsyncStorage.getItem('accountName');
+      const savedAccountImageURL = await AsyncStorage.getItem('accountImageURL');
 
-      // save het indien het niet nulss i=
-      if (savedName !== null) {
-        setName(savedName);
+      // Update the state with the loaded data if not null
+      if (savedAccountName !== null) {
+        setAccountName(savedAccountName);
       }
 
-      if (savedImageURL !== null) {
-        setFoto(savedImageURL);
+      if (savedAccountImageURL !== null) {
+        setAccountImageURL(savedAccountImageURL);
       }
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading account data:', error);
     }
   };
 
@@ -78,44 +93,67 @@ export default function ProfileScreen() {
         <Image
           className="m-3 w-20 h-20 rounded-full"
           source={{
-            uri: foto,
+            uri: accountImageURL,
           }}
         />
-        <Text className="text-wit m-5 text-base flex-2">{Name}</Text>
+        <Text className="text-wit m-5 text-base flex-2">{accountName}</Text>
       </View>
       <Text className="text-profile-grijs mx-5 text-base -my-7">Account settings</Text>
       {/* zogenaamde div met account settings komt hieronder met zn eigen view*/}
       <View className="bg-secondary_bg_color my-8 mx-4 h-44 rounded-xl">
-        <Pressable onPress={handlePress} style={styles.wrapperCustom}>
+        <Pressable onPress={handleAccountPress} style={styles.wrapperCustom}>
           <Text style={styles.text}>Account</Text>
         </Pressable>
-        <Modal visible={isModalVisible} animationType="slide">
-          <View style={styles.container}>
-            <Text>Edit Details</Text>
-            <TextInput
-              placeholder="Enter Name"
-              value={editedName}
-              onChangeText={(text) => setEditedName(text)}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="Enter Image URL"
-              value={editedImageURL}
-              onChangeText={(text) => setEditedImageURL(text)}
-              style={styles.input}
-            />
-            <Pressable onPress={handleSave} style={styles.wrapperCustom}>
-              <Text style={styles.text}>Save</Text>
-            </Pressable>
-            <Pressable onPress={closeModal} style={styles.wrapperCustom}>
-              <Text style={styles.text}>Close</Text>
-            </Pressable>
+        <Modal visible={isAccountModalVisible} animationType="slide">
+          <View className="flex-1 bg-main_bg_color">
+            <Text className="text-wit text-xl m-5">Edit Details</Text>
+            <View className="rounded-md bg-secondary_bg_color p-6 m-2">
+              <Text className="text-wit text-xl">Gebruikersnaam:</Text>
+              <TextInput
+                placeholder="Naam..."
+                placeholderTextColor="grey"
+                value={editedAccountName}
+                onChangeText={(text) => setEditedName(text)}
+                style={styles.textInput}
+              />
+              <Text className="text-wit text-xl">Gebruikersnaam:</Text>
+              <TextInput
+                placeholder="Url..."
+                placeholderTextColor="grey"
+                value={editedAccountImageURL}
+                onChangeText={(text) => setEditedImageURL(text)}
+                style={styles.textInput}
+              />
+              <View className="my-10">
+                {/* View zodat je wat margin met de top kan geven */}
+                <Pressable onPress={handleAccountSave}>
+                  <Text className="text-wit text-xl">Save</Text>
+                </Pressable>
+                <Pressable onPress={closeAccountModal}>
+                  <Text className="text-wit text-xl my-5">Close</Text>
+                </Pressable>
+              </View>
+            </View>
           </View>
         </Modal>
         <Pressable
+          onPress={handleContactDetailsPress}
           style={[styles.wrapperCustom,]}>
           <Text style={styles.text}>Contact details</Text>
         </Pressable>
+        {/* nu komt de modal voor contact details */}
+        <Modal visible={isContactDetailsModalVisible} animationType="slide">
+          <View className="flex-1 bg-main_bg_color">
+            <Text className="text-wit text-xl m-5">Edit Details</Text>
+            {/* View zodat je wat margin met de top kan geven */}
+            <Pressable onPress={closeContactDetailsModal}>
+              <Text className="text-wit text-xl">Save</Text>
+            </Pressable>
+            <Pressable onPress={closeContactDetailsModal}>
+              <Text className="text-wit text-xl my-5">Close</Text>
+            </Pressable>
+          </View>
+        </Modal>
         <Pressable
           style={[styles.wrapperCustom,]}>
           <Text style={styles.text}>Security</Text>
@@ -126,6 +164,10 @@ export default function ProfileScreen() {
 }
 const styles = StyleSheet.create({
   text: {
+    fontSize: 16,
+    color: 'white',
+  },
+  textInput: {
     fontSize: 16,
     color: 'white',
   },
