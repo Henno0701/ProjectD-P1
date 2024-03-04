@@ -1,7 +1,7 @@
 import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable } from 'react-native';
 import { styled } from 'nativewind';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
 
@@ -34,16 +34,31 @@ function dates(date) {
     return week; 
 }
 
-function timesSlots() {
-    var times= new Array(); 
-    var nowHour = new Date().getHours();  // Get current hour of the day
+function timesSlots(date = new Date()) {
+    var times = [];
+    var current = date;
+    var nowHour = current.getHours();  // Get current hour of the day
 
-    // Loop from current hour number to 23
-    for(var i = nowHour; i < 24; i++){
-        times.push(i + ":00");
+    // If it's not the current day, start from the beginning of the day
+    if (current.getHours() !== 0 || current.getMinutes() !== 0 || current.getSeconds() !== 0) {
+        current.setHours(0, 0, 0, 0); // Set time to beginning of the day
     }
 
-    return times; 
+    // Loop from current hour number to 23 if it's the current day,
+    // otherwise loop from 0 to 23
+    for (var hour = nowHour; hour <= 23; hour++) {
+        if (current.getHours() === nowHour) {
+            // If it's the current day, add only upcoming hours
+            if (hour >= nowHour) {
+                times.push(hour);
+            }
+        } else {
+            // If it's not the current day, add all hours
+            times.push(hour);
+        }
+    }
+
+    return times;
 
 }
 
@@ -51,7 +66,7 @@ function timesSlots() {
 const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
     const [backgroundColor, setBackgroundColor] = useState(selectedButton === date ? '#1E80ED' : '#2E2E2E');
 
-  const changeColor = () => {
+  const isPressed = () => {
     if (backgroundColor === '#2E2E2E') {
       setBackgroundColor('#1E80ED');
       handleButtonPress(date);
@@ -62,12 +77,12 @@ const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
 
     return (
         <TouchableHighlight 
-            key={date} 
+            key={date} // Every button has a unique key
             style={{
                 backgroundColor: backgroundColor,
             }} 
             className={`w-10 h-10 justify-center items-center rounded-lg`} 
-            onPress={changeColor} 
+            onPress={isPressed} 
             underlayColor="transparent" 
             >
             <Text className="text-lg text-[#fff]">{date.getDate()}</Text>
@@ -78,7 +93,7 @@ const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
 const GenerateTimeSlots = (time) => {
     return (
         <TouchableHighlight key={time} className={`bg-secondary_box_color w-[30%] mb-2.5 h-10 justify-center items-center rounded-lg`} >
-            <Text className="text-lg text-[#fff]">{time}</Text>
+            <Text className="text-lg text-[#fff]">{time}:00</Text>
         </TouchableHighlight>
     );
 }
@@ -93,15 +108,24 @@ export default function StationsReserveScreen() {
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
-    var times = timesSlots();
+    const [times, setTimes] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(null);
+
+    //In the code below we are getting the timeslots of the day
+    useEffect(() => {
+        const times = timesSlots(selectedDate || new Date());
+        setTimes(times);
+    }, [selectedDate]);
+
 
     const [selectedButton, setSelectedButton] = useState(null);
 
     const [selectedItemSelect, setSelectedItemSelect] = useState("0");
 
-
     const handleDateSelectorButton = (buttonIndex) => {
         setSelectedButton(buttonIndex);
+        setSelectedDate(buttonIndex);
+        console.log(buttonIndex);
     };
 
     return (
@@ -167,7 +191,7 @@ export default function StationsReserveScreen() {
                                 { label: 'I need it but someone can go first.', value: '1' },
                                 { label: 'I need it.', value: '2' },
                                 { label: 'I realy need it.', value: '3' },
-                                { label: "I need it or i’m not be able to go.", value: '2' },
+                                { label: "I need it or i’m not be able to go.", value: '4' },
                             ]}
                         />
                         </StyledView>
@@ -176,7 +200,7 @@ export default function StationsReserveScreen() {
         </StyledView>
 
         <StyledView className='w-full'>
-            <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={console.log("TESTT")}>
+            <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center">
                 <Text style={{
                     color: 'white',
                     fontSize: 20,
