@@ -34,8 +34,11 @@ function dates(date) {
     return week; 
 }
 
-function timesSlots(date = new Date()) {
+function timesSlots(date) {
     var times = [];
+
+    if (date === null) return times;
+
     var current = date;
     var nowHour = current.getHours();  // Get current hour of the day
 
@@ -76,25 +79,25 @@ const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
   };
 
     return (
-        <TouchableHighlight 
+        <Pressable 
             key={date} // Every button has a unique key
             style={{
                 backgroundColor: backgroundColor,
-            }} 
+            }}             
             className={`w-10 h-10 justify-center items-center rounded-lg`} 
             onPress={isPressed} 
             underlayColor="transparent" 
             >
             <Text className="text-lg text-[#fff]">{date.getDate()}</Text>
-        </TouchableHighlight>
+        </Pressable>
     );
 }
 
-const GenerateTimeSlots = (time) => {
+const GenerateTimeSlotsButtons = (time) => {
     return (
-        <TouchableHighlight key={time} className={`bg-secondary_box_color w-[30%] mb-2.5 h-10 justify-center items-center rounded-lg`} >
+        <Pressable key={time} className={`bg-secondary_box_color w-[30%] mb-2.5 h-10 justify-center items-center rounded-lg`} >
             <Text className="text-lg text-[#fff]">{time}:00</Text>
-        </TouchableHighlight>
+        </Pressable>
     );
 }
 
@@ -108,25 +111,27 @@ export default function StationsReserveScreen() {
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
-    const [times, setTimes] = useState([]);
+    // The selected date
     const [selectedDate, setSelectedDate] = useState(null);
 
-    //In the code below we are getting the timeslots of the day
-    useEffect(() => {
-        const times = timesSlots(selectedDate || new Date());
-        setTimes(times);
-    }, [selectedDate]);
-
-
+    // The timeslots of the day
+    const [times, setTimes] = useState([]);
     const [selectedButton, setSelectedButton] = useState(null);
 
+    // The selected item of the urgency dropdown
     const [selectedItemSelect, setSelectedItemSelect] = useState("0");
 
     const handleDateSelectorButton = (buttonIndex) => {
         setSelectedButton(buttonIndex);
         setSelectedDate(buttonIndex);
-        console.log(buttonIndex);
+        console.log(selectedDate);
     };
+
+    //In the code below we are getting the timeslots of the day by every date change
+    useEffect(() => {
+        setTimes(timesSlots(selectedDate));
+        console.log(times);
+    }, [selectedDate]);
 
     return (
       <StyledView className="flex-1 bg-main_bg_color items-center p-2.5">
@@ -145,17 +150,20 @@ export default function StationsReserveScreen() {
                 </StyledView>
             </StyledView>
 
-            <StyledView className="flex-row w-full items-center mb-3">
-                <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
-                    <StyledView className="flex flex-row items-center justify-between">
-                        <Text className="text-lg text-[#fff] font-semibold">Select Time slot</Text>
-                        <FontAwesomeIcon icon={faClock} size={20} color="#fff" />
-                    </StyledView>
-                    <StyledView className="flex-row flex-wrap w-full items-center justify-between mt-2">
-                        {times.map((time) => GenerateTimeSlots(time))}
+            {/* If the date is selected, show the time slots */}
+            {selectedDate && (
+                <StyledView className="flex-row w-full items-center mb-3">
+                    <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
+                        <StyledView className="flex flex-row items-center justify-between">
+                            <Text className="text-lg text-[#fff] font-semibold">Select Time slot</Text>
+                            <FontAwesomeIcon icon={faClock} size={20} color="#fff" />
+                        </StyledView>
+                        <StyledView className="flex-row flex-wrap w-full items-center justify-between mt-2">
+                            {times.map((time) => GenerateTimeSlotsButtons(time))}
+                        </StyledView>
                     </StyledView>
                 </StyledView>
-            </StyledView>
+            )}
 
             <StyledView className="flex-row w-full items-center">
                 <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
