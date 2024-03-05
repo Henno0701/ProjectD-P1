@@ -3,8 +3,12 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
+  // Create safe area space
+  const insets = useSafeAreaInsets();
+
   // place holder info
   const [accountName, setAccountName] = useState("Maruf Rodjan");
   const [selectedImage, setSelectedImage] = useState(null);
@@ -173,7 +177,7 @@ export default function ProfileScreen() {
 
 
   return (
-    <View className="flex-1 bg-main_bg_color ">
+    <View className={`flex-1 bg-main_bg_color`} style={{paddingTop: insets.top}}>
       {/* Hier begint eerst de View bedoeld voor de gehele pagina (body) */}
       <View className="items-center mt-10">
         {/*Hier heb je dan een view die de tekst van profile netjes in het midden zet en profile plaats */}
@@ -194,7 +198,7 @@ export default function ProfileScreen() {
           <Text className="text-wit text-base">Account</Text>
         </Pressable>
         <Modal visible={isAccountModalVisible} animationType="slide">
-          <View className="flex-1 bg-main_bg_color">
+          <View className="flex-1 bg-secondary_bg_color" style={{paddingTop: insets.top}}>
             <Text className="text-wit text-xl m-5">Edit Details</Text>
             <View className="rounded-md bg-secondary_bg_color p-6 m-2">
               <Text className="text-wit text-xl">Gebruikersnaam:</Text>
@@ -206,7 +210,7 @@ export default function ProfileScreen() {
                 className="text-wit text-base"
               />
               <Text className="text-wit text-xl">Foto:</Text>
-              <Pressable className="rounded-lg p-5" onPress={() => uploadimage("gallery")}>
+              <Pressable className="rounded-lg p-5" onPress={() => uploadimage()}>
                 <Text className="text-wit text-base">Pick Image</Text>
               </Pressable>
               {selectedImage && (
@@ -233,7 +237,7 @@ export default function ProfileScreen() {
         </Pressable>
         {/* nu komt de modal voor contact details */}
         <Modal visible={isContactDetailsModalVisible} animationType="slide">
-          <View className="flex-1 bg-main_bg_color">
+          <View className="flex-1 bg-main_bg_color" style={{paddingTop: insets.top}}>
             <Text className="text-wit text-xl m-5">Contact gegevens</Text>
             {/* View zodat je wat margin met de top kan geven */}
             <Pressable onPress={closeContactDetailsModal}>
@@ -252,7 +256,7 @@ export default function ProfileScreen() {
           <Text className="text-wit text-base">Security</Text>
         </Pressable>
         {/* nu komt de modal voor contact details */}
-        <Modal visible={isSecurityModalVisible} animationType="slide">
+        <Modal visible={isSecurityModalVisible} animationType="slide" style={{paddingTop: insets.top}}>
           <View className="flex-1 bg-main_bg_color">
             <Text className="text-wit text-xl m-5">Security</Text>
             {/* View zodat je wat margin met de top kan geven */}
