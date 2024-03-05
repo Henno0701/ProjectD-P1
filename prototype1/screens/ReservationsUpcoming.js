@@ -1,30 +1,55 @@
-import React, { useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Button, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { ListItem, Card } from 'react-native-elements';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, Button } from 'react-native';
+import { Card, Text } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
-
-
+const ReservationsExpired = ({ expiredReservations }) => {
+  return (
+    <View>
+      <Text>Expired Reservations:</Text>
+      <FlatList
+        data={expiredReservations}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <Card>
+            <Card.Title>{item.date}</Card.Title>
+            <Text>Time Slot: {item.timeSlot}</Text>
+            <Text>Location: {item.location}</Text>
+          </Card>
+        )}
+      />
+    </View>
+  );
+};
 
 const Reservations = () => {
-  // Sample data for the list of reservations
-  const reservationsData = [
+  const [reservationsData, setReservationsData] = useState([
     { id: 1, date: '2024-02-26', timeSlot: '10:00 AM - 12:00 PM', location: 'New York' },
     { id: 2, date: '2024-02-27', timeSlot: '2:00 PM - 4:00 PM', location: 'Los Angeles' },
     { id: 3, date: '2024-02-28', timeSlot: '9:00 AM - 11:00 AM', location: 'Chicago' },
     // Add more reservations as needed
-  ];
+  ]);
 
+  const [expiredReservations, setExpiredReservations] = useState([]);
+  const navigation = useNavigation();
 
-  // Function to render each reservation item
+  useEffect(() => {
+    checkExpiredReservations();
+  }, []);
+
+  const checkExpiredReservations = () => {
+    const currentDate = new Date().toISOString().split('T')[0];
+    const expiredReservations = reservationsData.filter(reservation => reservation.date < currentDate);
+    setExpiredReservations(expiredReservations);
+    setReservationsData(prevReservations => prevReservations.filter(reservation => reservation.date >= currentDate));
+  };
+
+  const handleExpiredPress = () => {
+    navigation.navigate('ReservationsExpired', { expiredReservations });
+  };
+
   const renderReservationItem = ({ item }) => (
     <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 220 }}>
       <FontAwesomeIcon icon={faCalendarDays} /><Card.Title style={{
@@ -39,18 +64,11 @@ const Reservations = () => {
     </Card>
   );
 
-  const navigation = useNavigation();
-
-  const handleExpiredPress = () => {
-    // Navigate to the "Expired" screen
-    navigation.navigate('ReservationsExpired');
-  };
-
   return (
     <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Button title="View Expired Reservations" onPress={handleExpiredPress} />
       </View>
-      {/* FlatList of Reservation Cards */}
       <FlatList
         data={reservationsData}
         keyExtractor={(item) => item.id.toString()}
