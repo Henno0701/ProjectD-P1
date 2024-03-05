@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
-// import FS from 'react-native-fs';
 
 import { faBarChart, faCalendar, faCalendarDays, faClock, faList, faRectangleList } from '@fortawesome/free-regular-svg-icons';
 
