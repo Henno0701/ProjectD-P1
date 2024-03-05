@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useRef, useState } from 'react';
 import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
+// import FS from 'react-native-fs';
 
 import { faBarChart, faCalendar, faCalendarDays, faClock, faList, faRectangleList } from '@fortawesome/free-regular-svg-icons';
 
@@ -21,7 +22,6 @@ const FormatDate = (date, short=true) => {
 
 function dates(date) {
     var week= new Array(); 
-    date.setDate((date.getDate() - date.getDay() +1));
 
     // Looping through the week and adding the dates to the array
     for (var i = 0; i < 7; i++) {

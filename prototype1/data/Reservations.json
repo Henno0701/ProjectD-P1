@@ -1,0 +1,30 @@
+{
+    "upcoming_reservations": [
+        {
+            "id": 1,
+            "date": "2024-03-10",
+            "timeslot": "10:00 - 12:00",
+            "location": "Meeting Room A"
+        },
+        {
+            "id": 2,
+            "date": "2024-03-15",
+            "timeslot": "14:00 - 16:00",
+            "location": "Conference Room B"
+        }
+    ],
+    "expired_reservations": [
+        {
+            "id": 1,
+            "date": "2024-02-28",
+            "timeslot": "09:00 - 11:00",
+            "location": "Training Room C"
+        },
+        {
+            "id": 2,
+            "date": "2024-03-02",
+            "timeslot": "13:00 - 15:00",
+            "location": "Boardroom"
+        }
+    ]
+}
