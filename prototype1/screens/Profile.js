@@ -121,6 +121,13 @@ export default function ProfileScreen() {
   };
   // !--- END ACCOUNT MODAL ---!
 
+  // !! FEEDBACK!!!
+  // safe earea context van stations.js overnemen en dan
+  // modal background moet secondary_bg_color zijn
+  // na kijken gpt heeft fouten ergens in de code achtergelaten
+  // margin top van profile weg halen
+  //  !! FEEDBACK!!!
+
   // !--- BEGIN CONTACT DETAILS MODAL ---!
   const [isContactDetailsModalVisible, setContactDetailsModalVisible] = useState(false);
   const handleContactDetailsPress = () => setContactDetailsModalVisible(true);
@@ -177,7 +184,7 @@ export default function ProfileScreen() {
 
 
   return (
-    <View className={`flex-1 bg-main_bg_color`} style={{paddingTop: insets.top}}>
+    <View className={`flex-1 bg-main_bg_color`} style={{ paddingTop: insets.top }}>
       {/* Hier begint eerst de View bedoeld voor de gehele pagina (body) */}
       <View className="items-center mt-10">
         {/*Hier heb je dan een view die de tekst van profile netjes in het midden zet en profile plaats */}
@@ -198,7 +205,7 @@ export default function ProfileScreen() {
           <Text className="text-wit text-base">Account</Text>
         </Pressable>
         <Modal visible={isAccountModalVisible} animationType="slide">
-          <View className="flex-1 bg-secondary_bg_color" style={{paddingTop: insets.top}}>
+          <View className="flex-1 bg-secondary_bg_color" style={{ paddingTop: insets.top }}>
             <Text className="text-wit text-xl m-5">Edit Details</Text>
             <View className="rounded-md bg-secondary_bg_color p-6 m-2">
               <Text className="text-wit text-xl">Gebruikersnaam:</Text>
@@ -237,7 +244,7 @@ export default function ProfileScreen() {
         </Pressable>
         {/* nu komt de modal voor contact details */}
         <Modal visible={isContactDetailsModalVisible} animationType="slide">
-          <View className="flex-1 bg-main_bg_color" style={{paddingTop: insets.top}}>
+          <View className="flex-1 bg-main_bg_color" style={{ paddingTop: insets.top }}>
             <Text className="text-wit text-xl m-5">Contact gegevens</Text>
             {/* View zodat je wat margin met de top kan geven */}
             <Pressable onPress={closeContactDetailsModal}>
@@ -256,7 +263,7 @@ export default function ProfileScreen() {
           <Text className="text-wit text-base">Security</Text>
         </Pressable>
         {/* nu komt de modal voor contact details */}
-        <Modal visible={isSecurityModalVisible} animationType="slide" style={{paddingTop: insets.top}}>
+        <Modal visible={isSecurityModalVisible} animationType="slide" style={{ paddingTop: insets.top }}>
           <View className="flex-1 bg-main_bg_color">
             <Text className="text-wit text-xl m-5">Security</Text>
             {/* View zodat je wat margin met de top kan geven */}
