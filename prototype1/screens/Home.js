@@ -5,13 +5,14 @@ import BatteryImage from '../assets/Battery.png'
 import ClockImage from '../assets/Clock.png'
 
 export default function HomeScreen({ navigation: { navigate } }) {
+    const date = new Date();
     var Name = "John";
     var reservation = false;
     var Battery = 10;
     var License = "XN-0A2-B2";
     var Station = "LP-01A";
     var Charge = 10;
-    var timeLeftSec = 60 * 10;
+    var startRes = (Date.now() / 1000) - 360;
 
     return (
       <View className="flex-1 bg-main_bg_color">
@@ -49,7 +50,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
                 />
                 <CountDown
                   className="mr-5"
-                  until={timeLeftSec}
+                  until={checkTimeLeft(startRes)}
                   size={12}
                   digitStyle={{backgroundColor: null, marginHorizontal: -2}}
                   digitTxtStyle={{color: '#FFF'}}
@@ -97,15 +98,52 @@ export default function HomeScreen({ navigation: { navigate } }) {
             onPress={() => navigate('Home')}>
             <Text className="text-[#686868] ml-10">Example</Text>
         </TouchableOpacity>
-
+          {chargerInfo()}
       </View>
     );
   }
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  });
+  function checkTimeLeft(startTime)
+  {
+    if (typeof startTime !== 'number') {
+      throw new Error('checkTimeLeft must get a number in seconds');
+    }
+    var timeNow = Date.now() / 1000;
+
+    var time = timeNow - startTime;
+    return time;
+  }
+
+  function APICall()
+  {
+      var url = "https://schubergphilis.workflows.okta-emea.com/api/flo/d71da429cdb215bef89ffe6448097dee/invoke?clientToken=";
+      var token = "01d762901510b3c7f422595fa18d8d7bd71c1f3e58ad860fd3ae2d0c87a80955";
+      var url1 = "&url=/poi/v1/locations&method=GET&locationsVisibilityScopes=ACCOUNTS_STATIONS";
+
+      fetch(url + token + url1, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const formattedData = JSON.stringify(data, null, 2);
+        console.log(formattedData);
+        return data;
+      })
+      .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+      });
+  }
+
+  function chargerInfo()
+  {
+    var data = APICall();
+    //console.log(data);
+  }
