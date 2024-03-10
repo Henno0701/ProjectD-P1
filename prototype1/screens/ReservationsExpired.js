@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -16,26 +17,52 @@ const StyledText = styled(Text);
 const ReservationsExpired = () => {
     // Sample data for the list of reservations
     const ExpiredReservationsData = [
-        { id: 1, date: '2024-02-26', timeSlot: '10:00 AM - 12:00 PM', location: 'Amsterdam' },
-        { id: 2, date: '2024-02-27', timeSlot: '2:00 PM - 4:00 PM', location: 'Rotterdam' },
-        { id: 3, date: '2024-02-28', timeSlot: '9:00 AM - 11:00 AM', location: 'Eindhoven' },
+        { id: 1, date: new Date('2024-03-03'), timeSlot: '10:00 AM - 11:00 PM', location: 'Schiphol-Rijk' },
+        { id: 2, date: new Date('2024-02-27'), timeSlot: '2:00 PM - 3:00 PM', location: 'Schiphol-Rijk' },
+        { id: 3, date: new Date('2024-02-26'), timeSlot: '9:00 AM - 10:00 AM', location: 'Schiphol-Rijk' },
         // Add more reservations as needed
     ];
 
+    const FormatDate = (date, short=true) => {
+        const nth = (d) => {
+            if (d > 3 && d < 21) return 'th';
+            switch (d % 10) {
+              case 1:  return "st";
+              case 2:  return "nd";
+              case 3:  return "rd";
+              default: return "th";
+            }
+          };
+
+        var month= ["January","February","March","April","May","June","July", "August","September","October","November","December"];
+        var monthS = ["Jan", "Feb", "Mrt", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+        if (!short) return month[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
+        else return monthS[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
+    }
 
     // Function to render each reservation item
     const renderReservationItem = ({ item }) => (
-        <Card containerStyle={{ backgroundColor: '#1e51de', borderRadius: 20, width: 390, height: 220 }}>
-            <FontAwesomeIcon icon={faCalendarDays} /><Card.Title style={{
-                color: 'white', paddingVertical: 15,
-                paddingHorizontal: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center"
-            }}>Date: {item.date}</Card.Title>
-            <FontAwesomeIcon icon={faClock} /><Text style={{ color: 'white', padding: 12 }}>Time Slot: {item.timeSlot}</Text>
-            <FontAwesomeIcon icon={faFlag} /><Text style={{ color: 'white', padding: 8 }}>Location: {item.location}</Text>
-        </Card>
+        <View className="bg-main_box_color w-full rounded-lg p-2.5 mb-3 opacity-70">
+            <StyledView className="flex-row items-center justify-between mb-1">
+                <Text className="text-lg text-wit font-light">{FormatDate(item.date)}</Text>
+                <FontAwesomeIcon icon={faCalendarDays} size={20} color="#7C7C7C" />
+            </StyledView>
+
+            <StyledView className="flex-row items-center mb-1">
+                <StyledView className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+                    <FontAwesomeIcon icon={faClock} size={20} color="#7C7C7C" />  
+                </StyledView>  
+                <Text className="text-lg text-wit">{item.timeSlot}</Text>
+            </StyledView>
+
+            <StyledView className="flex-row items-center">
+                <StyledView className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+                    <FontAwesomeIcon icon={faLocationDot} size={20} color="#7C7C7C" />  
+                </StyledView>  
+                <Text className="text-lg text-wit">{item.location}</Text>
+            </StyledView>
+        </View>
     );
     const navigation = useNavigation();
 
@@ -45,11 +72,9 @@ const ReservationsExpired = () => {
     };
 
     return (
-        <View style={{ flex: 1, justifyContent: 'flex-start', backgroundColor: '#000', alignItems: 'flex-start' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            </View>
+        <View className="flex-1 w-full justify-start bg-main_bg_color items-start p-2.5">
             {/* FlatList of Reservation Cards */}
-            <FlatList
+            <FlatList className="w-full"
                 data={ExpiredReservationsData}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderReservationItem}
