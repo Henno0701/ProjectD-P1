@@ -100,7 +100,7 @@ const GenerateTimeSlotsButtons = (time, selectedTime, setSelectedTime) => {
 
 const readDataFromFile = async (setData) => {
     try {
-      const jsonData = await AsyncStorage.getItem('Reservations');
+      const jsonData = await AsyncStorage.getItem('data');
       if (jsonData !== null) {
         setData(JSON.parse(jsonData));
       }
@@ -111,7 +111,7 @@ const readDataFromFile = async (setData) => {
 
   const writeDataToFile = async (newData) => {
     try {
-      await AsyncStorage.setItem('Reservations', JSON.stringify(newData));
+      await AsyncStorage.setItem('data', JSON.stringify(newData));
       console.log('Data written to AsyncStorage successfully');
     } catch (error) {
       console.error('Error writing data to AsyncStorage:', error);
