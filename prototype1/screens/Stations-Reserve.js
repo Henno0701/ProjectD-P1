@@ -124,17 +124,23 @@ export default function StationsReserveScreen() {
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        readDataFromFile(setData);
-        // console.log(data);
-
-        // const newRow = { upcoming_reservations: {
-        //     id: 3,
-        //     date: "2024-03-10",
-        //     timeslot: "10:00 - 12:00",
-        //     location: "Meeting Room A" }};
-        // const newData = [...data, newRow];
-        // writeDataToFile(newData);
+        const datas = readDataFromFile(setData);
+        console.log(datas);
     }, []);
+
+    const addReservation = async (date, time, urgency) => {
+        const newRow = { 
+            id: 3,
+            date: new Date(date),
+            timeslot: time,
+            urgency: urgency};
+        const newData = [...data, newRow];
+
+        // console.log(newData);
+        writeDataToFile(newData);
+        const datas = readDataFromFile(setData);
+        console.log(datas);
+    };
 
 
     // The selected date & time
@@ -250,7 +256,7 @@ export default function StationsReserveScreen() {
         
 
             <StyledView className='w-full'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center">
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
                     <StyledText className="text-wit text-xl font-semibold">Book</StyledText>
                 </Pressable>
             </StyledView>
