@@ -139,7 +139,7 @@ export default function StationsReserveScreen() {
         // console.log(newData);
         writeDataToFile(newData);
         const datas = readDataFromFile(setData);
-        console.log(datas);
+        console.log(selectedDate + " - " + selectedTime + " - " + selectedItemSelect);
     };
 
 
