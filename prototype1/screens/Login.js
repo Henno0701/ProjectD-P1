@@ -3,6 +3,7 @@ import { Button, View, Text, TextInput, TouchableOpacity, Image, StyleSheet } fr
 import React, { useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import Logo from '../images/SchubergPhilis_White.png'
 
 
 
@@ -24,9 +25,13 @@ export default function LoginScreen() {
   return (
     <View className="flex-1 bg-main_bg_color">
       <View className="mt-28 items-center mb-5">
-        <View className="bg-third_bg_color rounded-full mr-2 p-5">
+      <Image
+        source={Logo}
+        style={{width: 200, height: 55}}
+      />
+        {/* <View className="bg-third_bg_color rounded-full mr-2 p-5">
           <FontAwesome5 name="user" size={50} color="white"/>
-        </View>
+        </View> */}
       </View>
       <View className="mr-5 ml-5 w-auto h-48 justify-between flex flex-col bg-secondary_bg_color rounded-xl">
         <TextInput
