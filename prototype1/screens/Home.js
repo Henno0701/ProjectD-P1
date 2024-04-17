@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1 bg-main_bg_color p-2.5" style={{paddingTop: insets.top}}>
+    <View className="flex-1 bg-main_bg_color p-3" style={{paddingTop: insets.top}}>
       <Text className="text-schuberg_blue text-4xl mt-10" style={styles.font_thin}>Welcome</Text>
 
       {/* !needs function that checks the name of the user. */}
@@ -35,14 +35,14 @@ export default function HomeScreen({ navigation: { navigate } }) {
           {/* Here needs to be an if statement that shows info of reservation if there is one */}
           {/* !needs function that checks Battery */}
           <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Car Status</Text>
-          <View className="mr-5 w-full h-20 flex flex-row mt-1">
+          <View className="w-full h-20 flex flex-row mt-1">
             
             <View className="flex-row w-1/2 basis-[48] bg-secondary_bg_color rounded-xl justify-evenly items-center">
               <View className="w-12 h-12 bg-main_bg_color justify-center items-center -rotate-90 rounded-full">
                 <FontAwesomeIcon size={32} color="#db2525" icon={faBattery2} />
               </View>
               <View className="">
-                <Text className="mb-1 text-[#ffffff] text-base" style={styles.font_thin}>Battery</Text>
+                <Text className="text-[#ffffff] text-base" style={styles.font_thin}>Battery</Text>
                 <Text className="text-[#686868]" style={styles.font_regular}>Power: {Battery}%</Text>
               </View>
             </View>
@@ -108,7 +108,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
         <TouchableOpacity className="flex flex-row justify-between items-center bg-secondary_bg_color w-auto h-20 mt-3 rounded-xl px-8"
           onPress={() => navigate('Home')}>
           <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Example</Text>
-          <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
+          
         </TouchableOpacity>
       </View>
       {/* {chargerInfo()} */}
