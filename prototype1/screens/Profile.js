@@ -121,13 +121,6 @@ export default function ProfileScreen() {
   };
   // !--- END ACCOUNT MODAL ---!
 
-  // !! FEEDBACK!!!
-  // safe earea context van stations.js overnemen en dan
-  // modal background moet secondary_bg_color zijn
-  // na kijken gpt heeft fouten ergens in de code achtergelaten
-  // margin top van profile weg halen
-  //  !! FEEDBACK!!!
-
   // !--- BEGIN CONTACT DETAILS MODAL ---!
   const [isContactDetailsModalVisible, setContactDetailsModalVisible] = useState(false);
   const handleContactDetailsPress = () => setContactDetailsModalVisible(true);
