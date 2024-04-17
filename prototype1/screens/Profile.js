@@ -1,125 +1,51 @@
 import { Image, Text, View, Pressable, Modal, TextInput } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
-  // Create safe area space
   const insets = useSafeAreaInsets();
-
-  // place holder info
   const [accountName, setAccountName] = useState("Maruf Rodjan");
-  const [selectedImage, setSelectedImage] = useState(null);
-  // !--- BEGIN ACCOUNT MODAL ---!
   const [isAccountModalVisible, setAccountModalVisible] = useState(false);
   const [editedAccountName, setEditedAccountName] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null); // State for selected image
+
   const handleAccountPress = () => setAccountModalVisible(true);
   const closeAccountModal = () => setAccountModalVisible(false);
-  // upload image functie
-  const uploadimage = async (mode) => {
-    try {
-      let result = {};
-      if (mode === "gallery") {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission not granted for MEDIA_LIBRARY.');
-          return;
-        }
 
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
-      } else {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission not granted for CAMERA.');
-          return;
-        }
-
-        result = await ImagePicker.launchCameraAsync({
-          cameraType: ImagePicker.CameraType.Front,
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 1,
-        });
-      }
-
-      console.log('ImagePicker result:', result);
-
-      if (!result.cancelled && result.assets && result.assets.length > 0) {
-        // Update the state with the selected image URI
-        setSelectedImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
-  };
-  // opslaan van de account data
-  const saveAccountData = async (nameToSave, selectedImage) => {
-    try {
-      console.log('Saving account data...');
-
-      // Save the image to Expo's MediaLibrary
-      if (selectedImage) {
-        const { status } = await MediaLibrary.requestPermissionsAsync();
-        if (status !== 'granted') {
-          console.error('Permission not granted for MEDIA_LIBRARY.');
-          return;
-        }
-
-        const asset = await MediaLibrary.createAssetAsync(selectedImage);
-
-        // You can customize the album name here
-        const albumName = 'MyAppImages';
-
-        // Ensure the album exists
-        const album = await MediaLibrary.getAlbumAsync(albumName);
-        if (album === null) {
-          await MediaLibrary.createAlbumAsync(albumName, asset);
-        } else {
-          await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
-        }
-
-        console.log('Image saved to MediaLibrary:', asset);
-      } else {
-        console.error('No selected image to save.');
-      }
-
-      // Save other account data...
-    } catch (error) {
-      console.error('Error saving account data:', error);
-    }
-  };
-  // handle functie voor het opslaan van de account data
+  // Handle Account Save Functionality
   const handleAccountSave = async () => {
     try {
-      console.log('Entered handleAccountSave');
-      const nameToSave = editedAccountName.trim() !== '' ? editedAccountName : accountName;
-      console.log('nameToSave:', nameToSave);
-
-      // Update the accountName state if editedAccountName is not empty
-      if (editedAccountName.trim() !== '') {
-        setAccountName(editedAccountName.trim());
-      }
-
-      // Update the image if there is a selected image
-      if (selectedImage) {
-        // Save or update the image as needed
-        // Example: await saveOrUpdateImage(selectedImage);
-      }
-
+      const response = await fetch('http://192.168.178.123:8080/setName', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: editedAccountName }),
+      });
+      // Update the account name locally
+      setAccountName(editedAccountName);
       // Close the modal
       closeAccountModal();
     } catch (error) {
-      console.error('Error handling account save:', error);
+      console.error('Error setting account name:', error);
     }
   };
-  // !--- END ACCOUNT MODAL ---!
+  // Fetch account name from server when component mounts
+  useEffect(() => {
+    fetchAccountName();
+  }, []);
+
+  // Function to fetch account name from server
+  const fetchAccountName = async () => {
+    try {
+      const response = await fetch('http://192.168.178.123:8080/getName'); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+      const data = await response.json();
+      // Update the account name state
+      setAccountName(data.name);
+    } catch (error) {
+      console.error('Error fetching account name:', error);
+    }
+  };
 
   // !--- BEGIN CONTACT DETAILS MODAL ---!
   const [isContactDetailsModalVisible, setContactDetailsModalVisible] = useState(false);
@@ -142,51 +68,14 @@ export default function ProfileScreen() {
     closeSecurityModal();
   };
   // !--- END SECURITY MODAL ---!
-
-  // USE EFFECT
-  useEffect(() => {
-    // Load account data from AsyncStorage
-    loadAccountData();
-
-    // kijk of de user toestemming heeft gegeven voor de camera of luibrary
-    const requestPermission = async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        console.error('Permission to access the photo library denied');
-      }
-    };
-    requestPermission();
-  }, []);
-  // USE EFFECT
-
-  // !--- ASYNC METHODS ---!
-  const loadAccountData = async () => {
-    try {
-      // Laat de data via asyncstorage
-      const savedAccountName = await AsyncStorage.getItem('accountName');
-
-      // indien het niet null is laat het dan zien
-      if (savedAccountName !== null) {
-        setEditedAccountName(savedAccountName);
-      }
-    } catch (error) {
-      console.error('Error loading account data:', error);
-    }
-  };
-  // !--- END ASYNC METHODS ---!
-
-
   return (
     <View className={`flex-1 bg-main_bg_color`} style={{ paddingTop: insets.top }}>
-      {/* Hier begint eerst de View bedoeld voor de gehele pagina (body) */}
       <View className="items-center mt-10">
-        {/*Hier heb je dan een view die de tekst van profile netjes in het midden zet en profile plaats */}
         <Text className="text-wit mx-5 text-3xl">Profile</Text>
       </View>
       <View className="bg-secondary_bg_color flex flex-row my-8 mx-4 h-28 rounded-xl">
-        {/* Hier hebben we dan de div die de persoons gegevens lat zien */}
         <Image
-          source={selectedImage ? { uri: selectedImage } : require('../images/Profile.jpg')} // indien de image niet bestaat placeholder
+          source={selectedImage ? { uri: selectedImage } : require('../images/Profile.jpg')}
           className="m-3 w-20 h-20 rounded-full"
         />
         <Text className="text-wit m-5 text-base flex-2">{accountName}</Text>
@@ -210,14 +99,13 @@ export default function ProfileScreen() {
                 className="text-wit text-base"
               />
               <Text className="text-wit text-xl">Foto:</Text>
-              <Pressable className="rounded-lg p-5" onPress={() => uploadimage()}>
-                <Text className="text-wit text-base">Pick Image</Text>
+              <Pressable className="rounded-lg p-5">
+                <Text className="text-wit text-base">COMMING SOON!</Text>
               </Pressable>
               {selectedImage && (
                 <Image source={{ uri: selectedImage }} className="w-28 h-28" />
               )}
               <View className="my-10">
-                {/* View zodat je wat margin met de top kan geven */}
                 <Pressable onPress={handleAccountSave}>
                   <Text className="text-wit text-xl">Save</Text>
                 </Pressable>
@@ -269,7 +157,7 @@ export default function ProfileScreen() {
           </View>
         </Modal>
         {/*!--- END SECURITY MODAL ---!*/}
-      </View >
-    </View >
+      </View>
+    </View>
   );
 }
