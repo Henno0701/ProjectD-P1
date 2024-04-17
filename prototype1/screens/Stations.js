@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import StationsOverviewScreen from './Stations-Overview';
 import StationsReserveScreen from './Stations-Reserve';
+import StationsQuickReserveScreen from './Stations-Quick-Reserve';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -28,7 +29,7 @@ export default function StationsScreen() {
           })}>
           <Tab.Screen name="Overview" component={StationsOverviewScreen} />
           <Tab.Screen name="Reserve" component={StationsReserveScreen} />
-          <Tab.Screen name="Quick Reserve" component={StationsOverviewScreen} />
+          <Tab.Screen name="Quick Reserve" component={StationsQuickReserveScreen} />
         </Tab.Navigator>
     );
   }
