@@ -10,10 +10,6 @@ import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-i
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 
-const StyledView = styled(View);
-const StyledText = styled(Text);
-
-
 const ReservationsExpired = () => {
     // Sample data for the list of reservations
     const ExpiredReservationsData = [
@@ -44,24 +40,24 @@ const ReservationsExpired = () => {
     // Function to render each reservation item
     const renderReservationItem = ({ item }) => (
         <View className="bg-main_box_color w-full rounded-lg p-2.5 mb-3 opacity-70">
-            <StyledView className="flex-row items-center justify-between mb-1">
-                <Text className="text-lg text-wit font-light">{FormatDate(item.date)}</Text>
+            <View className="flex-row items-center justify-between mb-1">
+                <Text className="text-lg text-wit" style={styles.font_semibold}>{FormatDate(item.date)}</Text>
                 <FontAwesomeIcon icon={faCalendarDays} size={20} color="#7C7C7C" />
-            </StyledView>
+            </View>
 
-            <StyledView className="flex-row items-center mb-1">
-                <StyledView className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+            <View className="flex-row items-center mb-1">
+                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
                     <FontAwesomeIcon icon={faClock} size={20} color="#7C7C7C" />  
-                </StyledView>  
-                <Text className="text-lg text-wit">{item.timeSlot}</Text>
-            </StyledView>
+                </View>  
+                <Text className="text-lg text-wit" style={styles.font_regular}>{item.timeSlot}</Text>
+            </View>
 
-            <StyledView className="flex-row items-center">
-                <StyledView className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+            <View className="flex-row items-center">
+                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
                     <FontAwesomeIcon icon={faLocationDot} size={20} color="#7C7C7C" />  
-                </StyledView>  
-                <Text className="text-lg text-wit">{item.location}</Text>
-            </StyledView>
+                </View>  
+                <Text className="text-lg text-wit" style={styles.font_thin}>{item.location}</Text>
+            </View>
         </View>
     );
     const navigation = useNavigation();
@@ -72,7 +68,7 @@ const ReservationsExpired = () => {
     };
 
     return (
-        <View className="flex-1 w-full justify-start bg-main_bg_color items-start p-2.5">
+        <View className="flex-1 w-full justify-start bg-main_bg_color items-start p-3">
             {/* FlatList of Reservation Cards */}
             <FlatList className="w-full"
                 data={ExpiredReservationsData}
@@ -82,5 +78,24 @@ const ReservationsExpired = () => {
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    font_regular: {
+        fontFamily: 'Poppins_400Regular',
+    },
+    font_thin: {
+        fontFamily: 'Poppins_300Light',
+    },
+    font_medium: {
+        fontFamily: 'Poppins_500Medium',
+    },
+    font_semibold: {
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    font_bold: {
+        fontFamily: 'Poppins_700Bold',
+    },
+
+});
 
 export default ReservationsExpired;

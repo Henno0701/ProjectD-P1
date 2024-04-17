@@ -8,9 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { faBarChart, faCalendar, faCalendarDays, faClock, faList, faRectangleList } from '@fortawesome/free-regular-svg-icons';
 
-const StyledView = styled(View)
-const StyledText = styled(Text)
-
 // Returning the correct form of the dates in a string
 const FormatDate = (date, short=true) => {
     var month= ["January","February","March","April","May","June","July", "August","September","October","November","December"];
@@ -81,7 +78,7 @@ const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
             onPress={isPressed} 
             underlayColor="transparent" 
             >
-            <Text className="text-lg text-[#fff]">{date.getDate()}</Text>
+            <Text className="text-lg text-[#fff]" style={styles.font_regular}>{date.getDate()}</Text>
         </Pressable>
     );
 }
@@ -93,55 +90,15 @@ const GenerateTimeSlotsButtons = (time, selectedTime, setSelectedTime) => {
 
     return (
         <Pressable key={time} className={`bg-secondary_box_color w-[30%] mb-2.5 h-10 justify-center items-center rounded-lg`} onPress={isPressed}>
-            <Text className="text-lg text-[#fff]">{time}:00</Text>
+            <Text className="text-lg text-[#fff]" style={styles.font_regular}>{time}:00</Text>
         </Pressable>
     );
 }
-
-const readDataFromFile = async (setData) => {
-    try {
-      const jsonData = await AsyncStorage.getItem('data');
-      if (jsonData !== null) {
-        setData(JSON.parse(jsonData));
-      }
-    } catch (error) {
-      console.error('Error reading data from file:', error);
-    }
-  };
-
-  const writeDataToFile = async (newData) => {
-    try {
-      await AsyncStorage.setItem('data', JSON.stringify(newData));
-      console.log('Data written to AsyncStorage successfully');
-    } catch (error) {
-      console.error('Error writing data to AsyncStorage:', error);
-    }
-  };
 
 
 
 export default function StationsReserveScreen() {
     const [data, setData] = useState([]);
-
-    useEffect(() => {
-        const datas = readDataFromFile(setData);
-        console.log(datas);
-    }, []);
-
-    const addReservation = async (date, time, urgency) => {
-        const newRow = { 
-            id: 3,
-            date: new Date(date),
-            timeslot: time,
-            urgency: urgency};
-        const newData = [...data, newRow];
-
-        // console.log(newData);
-        writeDataToFile(newData);
-        const datas = readDataFromFile(setData);
-        console.log(selectedDate + " - " + selectedTime + " - " + selectedItemSelect);
-    };
-
 
     // The selected date & time
     const [ selectedDate, setSelectedDate ] = useState(null);
@@ -174,94 +131,117 @@ export default function StationsReserveScreen() {
     //In the code below we are getting the timeslots of the day by every date change
     useEffect(() => {
         setTimes(timesSlots(selectedDate));
-        console.log(times);
     }, [selectedDate]);
 
     return (
-      <StyledView className="flex-1  bg-main_bg_color items-center p-2.5">
+      <View className="flex-1 bg-main_bg_color items-center">
 
-        <StyledView className='flex-col w-full h-full items-center justify-between'>
+        <View className='flex-col w-full h-full items-center justify-between'>
             <ScrollView>
-                <StyledView className="flex-row w-full items-center mb-3">
-                    <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
-                        <StyledView className="flex flex-row items-center justify-between">
-                            <Text className="text-lg text-[#fff] font-semibold">{firstday} - {lastday}</Text>
-                            <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
-                        </StyledView>
-                        <StyledView className="flex-row w-full items-center justify-between mt-2">
-                            {week.map((date) => GenerateDateButtons(date, selectedButton, handleDateSelectorButton))}
-                        </StyledView>
-                    </StyledView>
-                </StyledView>
+                <View className="flex p-3">
+                    <View className="flex-row w-full items-center mb-3">
+                        <View className="bg-main_box_color w-full rounded-lg p-2.5">
+                            <View className="flex flex-row items-center justify-between">
+                                <Text className="text-lg text-[#fff]" style={styles.font_semibold}>{firstday} - {lastday}</Text>
+                                <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
+                            </View>
+                            <View className="flex-row w-full items-center justify-between mt-2">
+                                {week.map((date) => GenerateDateButtons(date, selectedButton, handleDateSelectorButton))}
+                            </View>
+                        </View>
+                    </View>
 
-                {/* If the date is selected, show the time slots */}
-                {selectedDate && (
-                    <StyledView className="flex-row w-full items-center mb-3">
-                        <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
-                            <StyledView className="flex flex-row items-center justify-between">
-                                <Text className="text-lg text-[#fff] font-semibold">Select Time slot</Text>
-                                <FontAwesomeIcon icon={faClock} size={20} color="#fff" />
-                            </StyledView>
-                            <StyledView className="flex-row flex-wrap w-full items-center justify-between mt-2">
-                                {times.map((time) => GenerateTimeSlotsButtons(time, selectedTime, handleTimeSelectorButton))}
-                            </StyledView>
-                        </StyledView>
-                    </StyledView>
-                )}
-
-                {selectedTime && (
-                    <StyledView className="flex-row w-full items-center mb-10">
-                        <StyledView className="bg-main_box_color w-full rounded-lg p-2.5">
-                            <StyledView className="flex flex-row items-center justify-between">
-                                <Text className="text-lg text-[#fff] font-semibold">Urgency</Text>
-                                <FontAwesomeIcon icon={faBarChart} size={20} color="#fff" />
-                            </StyledView>
-                            <StyledView className="flex-row w-full items-center justify-between mt-2">
-                                <SelectDropdown
-                                    style={{
-                                    inputIOS: {
-                                        width: 350,
-                                        height: 50,
-                                        fontSize: 18,
-                                        color: "white",
-                                        backgroundColor: "#121212",
-                                        borderRadius: 8,
-                                        padding: 10,
-                                    },
-                                    inputAndroid: {
-                                        width: 350,
-                                        height: 50,
-                                        fontSize: 18,
-                                        color: "white",
-                                        backgroundColor: "#121212",
-                                        borderRadius: 8,
-                                        padding: 10,
-                                    },
-                                    }}
-                                    value={selectedItemSelect}
-                                    onValueChange={(value) => setSelectedItemSelect(value)}
-                                    items={[
-                                        { label: 'None', value: '0' },
-                                        { label: 'I need it but someone can go first.', value: '1' },
-                                        { label: 'I need it.', value: '2' },
-                                        { label: 'I realy need it.', value: '3' },
-                                        { label: "I need it or i’m not be able to go.", value: '4' },
-                                    ]}
-                                />
-                                </StyledView>
-                        </StyledView>
-                    </StyledView>
+                    {/* If the date is selected, show the time slots */}
+                    {selectedDate && (
+                        <View className="flex-row w-full items-center mb-3">
+                            <View className="bg-main_box_color w-full rounded-lg p-2.5">
+                                <View className="flex flex-row items-center justify-between">
+                                    <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Select Time slot</Text>
+                                    <FontAwesomeIcon icon={faClock} size={20} color="#fff" />
+                                </View>
+                                <View className="flex-row flex-wrap w-full items-center justify-between mt-2">
+                                    {times.map((time) => GenerateTimeSlotsButtons(time, selectedTime, handleTimeSelectorButton))}
+                                </View>
+                            </View>
+                        </View>
                     )}
+
+                    {selectedTime && (
+                        <View className="flex-row w-full items-center mb-10">
+                            <View className="bg-main_box_color w-full rounded-lg p-2.5">
+                                <View className="flex flex-row items-center justify-between">
+                                    <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Urgency</Text>
+                                    <FontAwesomeIcon icon={faBarChart} size={20} color="#fff" />
+                                </View>
+                                <View className="flex-row w-full items-center justify-between mt-2">
+                                    <SelectDropdown
+                                        style={{
+                                        inputIOS: {
+                                            width: 350,
+                                            height: 50,
+                                            fontSize: 16,
+                                            color: "white",
+                                            backgroundColor: "#121212",
+                                            borderRadius: 8,
+                                            padding: 10,
+                                            fontFamily: 'Poppins_400Regular',
+                                        },
+                                        inputAndroid: {
+                                            width: 350,
+                                            height: 50,
+                                            fontSize: 16,
+                                            color: "white",
+                                            backgroundColor: "#121212",
+                                            borderRadius: 8,
+                                            padding: 10,
+                                            fontFamily: 'Poppins_400Regular',
+                                        },
+                                        }}
+                                        value={selectedItemSelect}
+                                        onValueChange={(value) => setSelectedItemSelect(value)}
+                                        items={[
+                                            { label: 'None', value: '0' },
+                                            { label: 'I need it but someone can go first.', value: '1' },
+                                            { label: 'I need it.', value: '2' },
+                                            { label: 'I realy need it.', value: '3' },
+                                            { label: "I need it or i’m not be able to go.", value: '4' },
+                                        ]}
+                                    />
+                                    </View>
+                            </View>
+                        </View>
+                    )}
+                </View>
             </ScrollView>
+            
         
 
-            <StyledView className='w-full'>
+            <View className='w-full p-3'>
                 <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
-                    <StyledText className="text-wit text-xl font-semibold">Book</StyledText>
+                    <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                 </Pressable>
-            </StyledView>
+            </View>
 
-        </StyledView>
-      </StyledView>
+        </View>
+      </View>
     );
-  }
+}
+
+const styles = StyleSheet.create({
+    font_regular: {
+        fontFamily: 'Poppins_400Regular',
+    },
+    font_thin: {
+        fontFamily: 'Poppins_300Light',
+    },
+    font_medium: {
+        fontFamily: 'Poppins_500Medium',
+    },
+    font_semibold: {
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    font_bold: {
+        fontFamily: 'Poppins_700Bold',
+    },
+
+});
