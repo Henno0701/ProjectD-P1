@@ -3,6 +3,7 @@ import { Button, View, Text, TouchableOpacity, Image, StyleSheet } from 'react-n
 import { CountDown } from 'react-native-countdown-component';
 import BatteryImage from '../assets/Battery.png'
 import ClockImage from '../assets/Clock.png'
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen({ navigation: { navigate } }) {
   const date = new Date();
@@ -14,12 +15,14 @@ export default function HomeScreen({ navigation: { navigate } }) {
   var Charge = 10;
   var startRes = (Date.now() / 1000) - 360;
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <View className="flex-1 bg-main_bg_color">
-      <Text className="text-schuberg_blue text-4xl ml-5 mt-28">Welcome</Text>
+    <View className="flex-1 bg-main_bg_color" style={{paddingTop: insets.top}}>
+      <Text className="text-schuberg_blue text-4xl" style={styles.font_thin}>Welcome</Text>
 
       {/* !needs function that checks the name of the user. */}
-      <Text className="text-[#ffffff] text-xl ml-5">{Name}</Text>
+      <Text className="text-[#ffffff] text-xl ml-5" style={styles.font_thin}>{Name}</Text>
 
       {/* If there is a reservation show information about it. */}
       {/* !needs function that checks if there is a reservation. */}
@@ -27,7 +30,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
         <View>
           {/* Here needs to be an if statement that shows info of reservation if there is one */}
           {/* !needs function that checks Battery */}
-          <Text className="ml-5 mt-3 text-[#686868] text-sm">Car Status</Text>
+          <Text className="ml-5 mt-3 text-[#686868] text-sm" >Car Status</Text>
           <View className="mr-5 ml-5 w-auto h-20 flex flex-row">
             <View className="h-auto mr-5 bg-secondary_bg_color rounded-xl justify-center items-center flex flex-row">
               <Image
@@ -145,3 +148,22 @@ function checkTimeLeft(startTime) {
 //   var data = APICall();
 //   console.log(data);
 // }
+
+const styles = StyleSheet.create({
+  font_regular: {
+    fontFamily: 'Poppins_400Regular',
+  },
+  font_thin: {
+    fontFamily: 'Poppins_300Light',
+  },
+  font_medium: {
+    fontFamily: 'Poppins_500Medium',
+  },
+  font_semibold: {
+    fontFamily: 'Poppins_600SemiBold',
+  },
+  font_bold: {
+    fontFamily: 'Poppins_700Bold',
+  },
+
+});
