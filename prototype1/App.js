@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { Text } from 'react-native';
 import Layout from './components/Layout';
-import {  Poppins_300Light, Poppins_400Regular, Poppins_500Medium, Poppins_600SemiBold, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
+import {  Montserrat_300Light, Montserrat_400Regular, Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_700Bold, useFonts } from '@expo-google-fonts/montserrat';
 
 function App() {
   let [fontsLoaded] = useFonts ({
-    Poppins_400Regular,
-    Poppins_300Light,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold
+    Montserrat_300Light,
+    Montserrat_400Regular,
+    Montserrat_500Medium,
+    Montserrat_600SemiBold,
+    Montserrat_700Bold,
   });
 
   if (!fontsLoaded) {

@@ -81,21 +81,20 @@ const ReservationsExpired = () => {
 
 const styles = StyleSheet.create({
     font_regular: {
-        fontFamily: 'Poppins_400Regular',
+        fontFamily: 'Montserrat_400Regular',
     },
     font_thin: {
-        fontFamily: 'Poppins_300Light',
+        fontFamily: 'Montserrat_300Light',
     },
     font_medium: {
-        fontFamily: 'Poppins_500Medium',
+        fontFamily: 'Montserrat_500Medium',
     },
     font_semibold: {
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: 'Montserrat_600SemiBold',
     },
     font_bold: {
-        fontFamily: 'Poppins_700Bold',
-    },
-
-});
+        fontFamily: 'Montserrat_700Bold',
+    }
+  });
 
 export default ReservationsExpired;
