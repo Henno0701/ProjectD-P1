@@ -31,7 +31,7 @@ function MainContainer() {
             inactiveTintColor: '#686868',
 
             // styles for the label
-            tabBarLabelStyle: { fontSize: 12, color: "#fff", fontWeight: "300", fontFamily: "Poppins_400Regular"},
+            tabBarLabelStyle: { fontSize: 12, color: "#fff", fontWeight: "300", fontFamily: "Montserrat_300Light" },
 
             tabBarIcon: ({ color }) => {
                 let iconName;

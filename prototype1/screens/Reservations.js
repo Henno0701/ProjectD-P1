@@ -17,7 +17,8 @@ export default function ReservationsScreen() {
                 tabBarLabelStyle: {
                     fontSize: 14,
                     textTransform: 'none',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    fontFamily: 'Montserrat_400Regular'
                 },
                 tabBarStyle: {
                     paddingTop: insets.top,
