@@ -1,11 +1,11 @@
-import { Image, Text, View, Pressable, Modal, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
+import { Image, Text, View, Pressable, Modal, TextInput, Button, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 
 import ButtonList from '../components/Button-List';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard, faCircleHalfStroke, faBell } from '@fortawesome/free-solid-svg-icons';
 
 export default function ProfileOverviewScreen({ navigation }) {
     const insets = useSafeAreaInsets();
@@ -13,6 +13,8 @@ export default function ProfileOverviewScreen({ navigation }) {
     const [isAccountModalVisible, setAccountModalVisible] = useState(false);
     const [editedAccountName, setEditedAccountName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null); // State for selected image
+
+    const [isEnabled, setIsEnabled] = useState(false);
   
     // Fetch account name from server when component mounts
     useEffect(() => {
@@ -30,6 +32,12 @@ export default function ProfileOverviewScreen({ navigation }) {
         console.error('Error fetching account name:', error);
       }
     };
+
+
+
+    const toggleSwitch = () => {
+      setIsEnabled(previousState => !previousState);
+    }
 
     return (
         <View className="flex-1 bg-main_bg_color items-center" style={{ paddingTop: insets.top }}>
@@ -84,6 +92,37 @@ export default function ProfileOverviewScreen({ navigation }) {
                     </View>
                     <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFF" />
                 </TouchableOpacity>
+              </ButtonList>
+
+              <Text className="text-profile-grijs text-base mt-5" style={styles.font_thin}>App settings</Text>
+              <ButtonList>
+                {/*!--- Button voor Notifications Modal ---!*/}
+                <View className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Notifications')}>
+                    <View className="flex flex-row items-center">
+                        <FontAwesomeIcon icon={faBell} size={20} color="#FFF"/>
+                        <Text className="ml-2 text-base text-[#fff]" style={styles.font_regular}>Notifications</Text>
+                    </View>
+                    <Switch
+                      trackColor={{false: '#767577', true: '#1E80ED'}}
+                      ios_backgroundColor="#3e3e3e"
+                      onValueChange={toggleSwitch}
+                      value={isEnabled}
+                    />
+                </View>
+
+                {/*!--- Button voor Notifications Modal ---!*/}
+                <View className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Notifications')}>
+                    <View className="flex flex-row items-center">
+                        <FontAwesomeIcon icon={faCircleHalfStroke} size={20} color="#FFF"/>
+                        <Text className="ml-2 text-base text-[#fff]" style={styles.font_regular}>Dark Mode</Text>
+                    </View>
+                    <Switch
+                      trackColor={{false: '#767577', true: '#1E80ED'}}
+                      ios_backgroundColor="#3e3e3e"
+                      onValueChange={toggleSwitch}
+                      value={isEnabled}
+                    />
+                </View>
               </ButtonList>
             </View>
           </ScrollView>
