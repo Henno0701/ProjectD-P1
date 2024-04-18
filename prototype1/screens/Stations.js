@@ -18,8 +18,7 @@ export default function StationsScreen() {
             tabBarLabelStyle: { 
               fontSize: 14, 
               textTransform: 'none', 
-              fontWeight: '500',
-              fontFamily: 'Poppins_400Regular',
+              fontFamily: 'Montserrat_400Regular',
             },
             tabBarStyle: {
               paddingTop: insets.top, 
