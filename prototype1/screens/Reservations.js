@@ -18,7 +18,7 @@ export default function ReservationsScreen() {
                     fontSize: 14,
                     textTransform: 'none',
                     fontWeight: '500',
-                    fontFamily: 'Poppins_400Regular'
+                    fontFamily: 'Montserrat_400Regular'
                 },
                 tabBarStyle: {
                     paddingTop: insets.top,
