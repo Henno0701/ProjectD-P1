@@ -22,7 +22,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View className="flex-1 bg-main_bg_color p-2.5" style={{paddingTop: insets.top}}>
+    <View className="flex-1 bg-main_bg_color p-3" style={{paddingTop: insets.top}}>
       <Text className="text-schuberg_blue text-4xl mt-10" style={styles.font_thin}>Welcome</Text>
 
       {/* !needs function that checks the name of the user. */}
@@ -35,14 +35,14 @@ export default function HomeScreen({ navigation: { navigate } }) {
           {/* Here needs to be an if statement that shows info of reservation if there is one */}
           {/* !needs function that checks Battery */}
           <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Car Status</Text>
-          <View className="mr-5 w-full h-20 flex flex-row mt-1">
+          <View className="w-full h-20 flex flex-row mt-1">
             
-            <View className="flex-row w-1/2 basis-[48] bg-secondary_bg_color rounded-xl justify-evenly items-center">
+            <View className="flex-row w-1/2 basis-[48] bg-main_box_color rounded-xl justify-evenly items-center">
               <View className="w-12 h-12 bg-main_bg_color justify-center items-center -rotate-90 rounded-full">
                 <FontAwesomeIcon size={32} color="#db2525" icon={faBattery2} />
               </View>
               <View className="">
-                <Text className="mb-1 text-[#ffffff] text-base" style={styles.font_thin}>Battery</Text>
+                <Text className="text-[#ffffff] text-base" style={styles.font_thin}>Battery</Text>
                 <Text className="text-[#686868]" style={styles.font_regular}>Power: {Battery}%</Text>
               </View>
             </View>
@@ -51,7 +51,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
           
             {/* Here needs to be an if statement that shows info of reservation if there is one */}
             {/* !needs function that checks time left */}
-            <View className="w-1/2 basis-[48] bg-secondary_bg_color justify-center rounded-xl">
+            <View className="w-1/2 basis-[48] bg-main_box_color justify-center rounded-xl">
               <View className="justify-evenly items-center flex flex-row ">
                 <View className="w-12 h-12 bg-main_bg_color justify-center items-center rounded-full">
                   <FontAwesomeIcon size={32} color="#56db21" icon={faClock} />
@@ -60,7 +60,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
                   until={checkTimeLeft(startRes)}
                   size={16}
                   digitStyle={{ backgroundColor: null, marginHorizontal: -2}}
-                  digitTxtStyle={{ color: '#FFF', fontFamily: 'Poppins_500Medium' }}
+                  digitTxtStyle={{ color: '#FFF', fontFamily: 'Montserrat_400Regular' }}
                   timeToShow={['H', 'M', 'S']}
                   timeLabels={{ h: null, m: null, s: null }}
                   showSeparator
@@ -72,14 +72,14 @@ export default function HomeScreen({ navigation: { navigate } }) {
 
           {/* Here needs to be an if statement that shows info of reservation if there is one */}
           {/* !needs function that checks information about the charging station */}
-          <View className="w-full h-auto mt-3 bg-secondary_bg_color rounded-xl">
-            <Text className="mt-5 ml-5 text-[#686868]" style={styles.font_thin}>info:</Text>
+          <View className="w-full h-auto mt-3 bg-main_box_color rounded-xl">
+            <Text className="mt-5 ml-5 text-box-information-text" style={styles.font_thin}>info:</Text>
             <View className="ml-5 mr-5 mt-1 mb-5 flex flex-row ">
               <View className="mr-10">
-                <Text className=" text-[#686868]" style={styles.font_thin}>Charging Station:</Text>
-                <Text className="text-[#686868]" style={styles.font_thin}>Charging KW:</Text>
-                <Text className="text-[#686868]" style={styles.font_thin}>Session Time:</Text>
-                <Text className="text-[#686868]" style={styles.font_thin}>License Plate:</Text>
+                <Text className=" text-box-information-text" style={styles.font_thin}>Charging Station:</Text>
+                <Text className="text-box-information-text" style={styles.font_thin}>Charging KW:</Text>
+                <Text className="text-box-information-text" style={styles.font_thin}>Session Time:</Text>
+                <Text className="text-box-information-text" style={styles.font_thin}>License Plate:</Text>
               </View>
 
               <View className="mr-5">
@@ -96,19 +96,19 @@ export default function HomeScreen({ navigation: { navigate } }) {
 
 
       {/* Button that leads to Reservations */}
-      <Text className="text-[#686868] text-sm mt-3" style={styles.font_thin}>Quick Access</Text>
+      <Text className="text-box-information-text text-sm mt-3" style={styles.font_thin}>Quick Access</Text>
       <View className="mt-1">
-        <TouchableOpacity className="flex flex-row justify-between items-center bg-secondary_bg_color w-full h-20 rounded-xl px-8"
+        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-full h-20 rounded-xl px-8"
           onPress={() => navigate('Reservations')}>
           <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Make Reservation</Text>
           <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
 
         {/* example button */}
-        <TouchableOpacity className="flex flex-row justify-between items-center bg-secondary_bg_color w-auto h-20 mt-3 rounded-xl px-8"
+        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
           onPress={() => navigate('Home')}>
           <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Example</Text>
-          <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
+          
         </TouchableOpacity>
       </View>
       {/* {chargerInfo()} */}
@@ -160,20 +160,19 @@ function checkTimeLeft(startTime) {
 // }
 
 const styles = StyleSheet.create({
-  font_regular: {
-    fontFamily: 'Poppins_400Regular',
-  },
-  font_thin: {
-    fontFamily: 'Poppins_300Light',
-  },
-  font_medium: {
-    fontFamily: 'Poppins_500Medium',
-  },
-  font_semibold: {
-    fontFamily: 'Poppins_600SemiBold',
-  },
-  font_bold: {
-    fontFamily: 'Poppins_700Bold',
-  },
-
+    font_regular: {
+        fontFamily: 'Montserrat_400Regular',
+    },
+    font_thin: {
+        fontFamily: 'Montserrat_300Light',
+    },
+    font_medium: {
+        fontFamily: 'Montserrat_500Medium',
+    },
+    font_semibold: {
+        fontFamily: 'Montserrat_600SemiBold',
+    },
+    font_bold: {
+        fontFamily: 'Montserrat_700Bold',
+    }
 });
