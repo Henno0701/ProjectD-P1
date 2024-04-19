@@ -17,27 +17,18 @@ export default function LoginScreen({OnLogin}) {
 
   const handleLogin = async (email, password) => {
     //handle login
-    console.log();
-    console.log('Attempting Login');
-
-    console.log(email);
-    console.log(password);
     correct = false;
     const accounts = await fetchAccounts();
     accounts.forEach(account => {
-      console.log(account.email);
-      console.log(account.password);
       if (account.email == email && account.password == password) {
         correct = true;
       }
     });
     if (correct) {
-      console.log('Valid Login');
       OnLogin();
     }
     else
     {
-      console.log('InValid Login');
       setError("Email or Password is invalid.");
     }
     
@@ -45,9 +36,8 @@ export default function LoginScreen({OnLogin}) {
 
   const fetchAccounts = async() => {
     try {
-      const response = await fetch('http://192.168.2.22:8080/readAccounts');
+      const response = await fetch('http://192.168.2.22:8080/readAccounts'); //IP moet misschien verandert worden op andere apparaten
       const data = await response.json();
-      console.log(data);
       return data;
     } catch (error) {
       console.error('Error fetching accounts:', error);

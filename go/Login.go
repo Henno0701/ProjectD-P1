@@ -7,16 +7,13 @@ import (
 	"net/http"
 )
 
-// Account represents the structure of each account in the JSON file
 type Account struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
-	// Add more fields as needed
 }
 
-// AccountsResponse represents the structure of the JSON response
 type AccountsResponse struct {
 	Accounts []Account `json:"accounts"`
 }
@@ -28,12 +25,10 @@ func readAccountsFromFile(filePath string) ([]Account, error) {
 		log.Println("Error reading file:", err)
 		return nil, err
 	}
-	log.Println("JSON data:", string(data))
 
-	// Define a variable of type AccountsResponse to store the JSON data
 	var response AccountsResponse
 
-	// Unmarshal the JSON data into the response variable
+	// Unmarshal the JSON data
 	err = json.Unmarshal(data, &response)
 	if err != nil {
 		return nil, err
@@ -44,20 +39,18 @@ func readAccountsFromFile(filePath string) ([]Account, error) {
 
 func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	// Read accounts from JSON file
-	accounts, err := readAccountsFromFile("Accounts.json")
+	accounts, err := readAccountsFromFile("../prototype1/data/Accounts.json")
 	if err != nil {
 		http.Error(w, "Error reading accounts", http.StatusInternalServerError)
 		return
 	}
 
-	// Convert accounts slice to JSON
 	jsonData, err := json.Marshal(accounts)
 	if err != nil {
 		http.Error(w, "Error encoding accounts to JSON", http.StatusInternalServerError)
 		return
 	}
 
-	// Set response content type
 	w.Header().Set("Content-Type", "application/json")
 
 	// Write JSON response
