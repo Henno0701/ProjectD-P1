@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./App.{js,jsx,ts,tsx}", "./screens/**/*.{js,jsx,ts,tsx}"],
+    content: ["./App.{js,jsx,ts,tsx}", "./screens/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
     theme: {
         extend: {},
         colors: {
@@ -14,6 +14,8 @@ module.exports = {
             "profile-grijs": '#7C7C7C',
             "rood": "#FA8072",
             "box-information-text": "#7C7C7C",
+
+            "Confirmation": "#1E80ED",
         },
     },
     plugins: [],
