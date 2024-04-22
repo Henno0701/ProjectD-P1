@@ -1,6 +1,7 @@
 package main
 
 import (
+
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -18,6 +19,7 @@ var (
 )
 
 func main() {
+
 	// maak de endpoints zodat de client gegevens kan ophalen en versutren
 	http.HandleFunc("/getName", getNameHandler)
 	http.HandleFunc("/setName", setNameHandler)
@@ -55,6 +57,12 @@ func main() {
 	fmt.Println("Server is running...")
 
 	// start de server of 8080 en voeg CORS headers toe
+
+	http.HandleFunc("/readAccounts", GetAccounts)
+	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
+	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+	fmt.Println("Server is running...")
+
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
@@ -111,6 +119,7 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 }
+
 func Maketables(db *sql.DB) error {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255))")
 	_, err = db.Exec(
@@ -177,3 +186,4 @@ func InsertDummyData(db *sql.DB) error {
 	}
 	return nil
 }
+
