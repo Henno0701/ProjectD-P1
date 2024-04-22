@@ -1,12 +1,10 @@
 import React from 'react';
-import { Button, View, Text } from 'react-native';
+import { View } from 'react-native';
 
-function ButtonList({ navigation, children }) {
+export default function ButtonList({ children }) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: "#121212" }}>
-        {children}
-      </View>
+        <View className="flex-col w-full items-center bg-main_box_color rounded-lg px-5 divide-y-[1px] divide-[#363636]">
+            {children}
+        </View>
     );
 }
-
-export default ButtonList;

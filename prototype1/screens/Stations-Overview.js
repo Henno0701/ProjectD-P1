@@ -1,9 +1,10 @@
 import { Button, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { styled } from 'nativewind';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBolt, faCalendarTimes, faCalendarWeek, faCar, faChargingStation, faChevronRight, faExclamation, faPlugCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+
+import ButtonList from '../components/Button-List';
 
 export default function StationsOverviewScreen() {
     return (
@@ -38,7 +39,7 @@ export default function StationsOverviewScreen() {
             
                 <View className="w-full mt-3">
                     <Text className="text-sm text-box-information-text font-light mb-1" style={styles.font_thin}>Quick Access</Text>
-                    <View className="flex-col w-full items-center bg-main_box_color rounded-lg px-5 divide-y-[1px] divide-[#363636]">
+                    <ButtonList className="">
                         <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4">
                             <View className="flex flex-row items-center">
                                 <FontAwesomeIcon icon={faCar} size={20} color="#FFFFFF"/>
@@ -62,7 +63,7 @@ export default function StationsOverviewScreen() {
                             </View>
                             <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
                         </TouchableOpacity>
-                    </View>
+                    </ButtonList>
                 </View>
             </View>
         </ScrollView>
