@@ -19,11 +19,6 @@ var (
 )
 
 func main() {
-
-	// maak de endpoints zodat de client gegevens kan ophalen en versutren
-	http.HandleFunc("/getName", getNameHandler)
-	http.HandleFunc("/setName", setNameHandler)
-
 	// stuff voor db
 	// Open database connection
 	database, err := sql.Open("sqlite3", "./database.db")
