@@ -61,14 +61,16 @@ func GetApiData(link string, token string, gegevens string) {
 		fmt.Println("Error decoding JSON:", err)
 		return
 	}
-	
+	var i = 0
 	// Print EVSEs
 	for _, station := range stationList.StationList {
 		fmt.Printf("Station ID: %s, Location ID: %s, Status: %s\n", station.ID, station.LocationId, station.Status)
 		fmt.Println("EVSEs:")
 		for _, evse := range station.Evses {
+			i++
 			fmt.Printf("  EVSE ID: %s, Status: %s\n", evse.ID, evse.Status)
 		}
 		fmt.Println()
 	}
+	fmt.Println("Aantal EVSEs:", i)
 }
