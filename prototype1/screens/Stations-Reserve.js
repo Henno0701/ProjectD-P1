@@ -102,6 +102,28 @@ export default function StationsReserveScreen() {
         setTimes(EveryHour);
     }, [selectedDate]);
 
+    // Function to  account name from server
+    const AddToDatabase = async () => {
+        try {
+            const response = await fetch('http://192.168.1.39:8080/getName', {
+                method: "POST",
+                body: JSON.stringify({
+                    userID: 1,
+                    userID: 1,
+                    userID: 1,
+                }),
+                headers: {
+                "Content-type": "application/json; charset=UTF-8"
+                }
+            }); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+          const data = await response.json();
+          // Update the account name state
+          setAccountName(data.name);
+        } catch (error) {
+          console.error('Error fetching account name:', error);
+        }
+      };
+
     const addReservation = async (date, time, urgency) => {
         // Save the reservation to the database
         console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
