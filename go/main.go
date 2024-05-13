@@ -48,15 +48,15 @@ func main() {
 	// Insert dummy data
 	InsertDummyData(database)
 
-	// message in de console zodat je weet dat de server runt
-	fmt.Println("Server is running...")
-
 	// start de server of 8080 en voeg CORS headers toe
 
 	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
+	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+        // Call the actual handler function with the argument
+        AddReservationHandler(w, r, database)
+    })
 	fmt.Println("Server is running...")
 
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
@@ -109,6 +109,41 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Print the received name to the console
 	fmt.Println("Received name:", requestData.Name)
+
+	// Send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{}"))
+}
+
+func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		UserID     int    `json:"userID"`
+		LaadpaalID int    `json:"laadpaalID"`
+		Date       string `json:"date"`
+		Priority   int    `json:"priority"`
+		Opgeladen  bool   `json:"opgeladen"`
+		Opgehaald  bool   `json:"opgehaald"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Parse the date string into a time.Time object
+	date, err := time.Parse("02-01-2006", requestData.Date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Insert the reservation into the database
+	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Send a response back to the client
 	w.Header().Set("Content-Type", "application/json")

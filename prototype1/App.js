@@ -24,7 +24,7 @@ function App() {
   }
   
   return (
-      isLoggedIn? <Layout /> : <LoginScreen OnLogin={handleLogin}/>
+      !isLoggedIn? <Layout /> : <LoginScreen OnLogin={handleLogin}/>
   );
 }
 
