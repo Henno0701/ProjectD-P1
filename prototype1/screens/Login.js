@@ -140,7 +140,7 @@ export default function LoginScreen({onLogin}) {
           <View className="flex-1 h-0.5 bg-wit" />
         </View>
         <View className="flex-row justify-center" >
-          <TouchableOpacity onPress={() => handleMakeAccount}>
+          <TouchableOpacity onPress={() => handleMakeAccount()}>
             <Text className="text-wit font-bold text-lg underline">Create Account</Text>
           </TouchableOpacity>
         </View>
