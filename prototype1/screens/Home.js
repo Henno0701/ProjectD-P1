@@ -1,8 +1,5 @@
-import { text } from '@fortawesome/fontawesome-svg-core';
 import { Button, View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { CountDown } from 'react-native-countdown-component';
-import BatteryImage from '../assets/Battery.png'
-import ClockImage from '../assets/Clock.png'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBattery2, faChevronRight } from '@fortawesome/free-solid-svg-icons';
