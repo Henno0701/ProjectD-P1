@@ -1,11 +1,11 @@
-import {View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
 import React, { useState } from 'react';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function LoginScreen({OnLogin}) {
+export default function LoginScreen({ OnLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -24,13 +24,13 @@ export default function LoginScreen({OnLogin}) {
         OnLogin();
       }
     });
-      setError("Email or Password is invalid.");
-    
+    setError("Email or Password is invalid.");
+
   };
 
-  const fetchAccounts = async() => {
+  const fetchAccounts = async () => {
     try {
-      const response = await fetch('http://192.168.2.22:8080/readAccounts'); //IP moet misschien verandert worden op andere apparaten
+      const response = await fetch('http://192.168.2.22:8081/readAccounts'); //IP moet misschien verandert worden op andere apparaten
       const data = await response.json();
       return data;
     } catch (error) {
@@ -52,18 +52,18 @@ export default function LoginScreen({OnLogin}) {
   return (
     <View className="flex-1 bg-main_bg_color">
       <ImageBackground
-      className="flex-1"
-      source={Pant}
-      imageStyle={{opacity:0.3, width: '200%', height: Dimensions.get('window').height,}}
+        className="flex-1"
+        source={Pant}
+        imageStyle={{ opacity: 0.3, width: '200%', height: Dimensions.get('window').height, }}
       >
         <View className="items-center mb-14 mt-44">
-        <Image
-          source={Logo}
-          style={{width: 225, height: 61}}
-        />
+          <Image
+            source={Logo}
+            style={{ width: 225, height: 61 }}
+          />
         </View>
         <View className="p-5 ml-5 mr-5 w-auto h-auto justify-between flex flex-col bg-secondary_bg_color rounded-xl">
-          <View className="items-center">{errorMessage != '' ? <Text className="text-[#fc0303] mb-1">{errorMessage}</Text>: null}</View>
+          <View className="items-center">{errorMessage != '' ? <Text className="text-[#fc0303] mb-1">{errorMessage}</Text> : null}</View>
           <TextInput
             placeholder="Email"
             value={email}
@@ -100,9 +100,9 @@ export default function LoginScreen({OnLogin}) {
 
 
         <LinearGradient
-            colors={['#1E80ED', '#5FA6F4']}
-            start={{ x: 0, y: 0 }} // Gradient start point (left)
-            end={{ x: 1, y: 0 }}   // Gradient end point (right)
+          colors={['#1E80ED', '#5FA6F4']}
+          start={{ x: 0, y: 0 }} // Gradient start point (left)
+          end={{ x: 1, y: 0 }}   // Gradient end point (right)
           className="p-3 m-5 rounded-md"
         >
           <TouchableOpacity onPress={() => handleLogin(email, password)} className="align-middle">
