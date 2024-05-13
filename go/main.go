@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -53,7 +52,7 @@ func main() {
 
 	// start de server of 8080 en voeg CORS headers toe
 
-	http.HandleFunc("/readAccounts", GetAccounts)
+	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	fmt.Println("Server is running...")
@@ -181,4 +180,3 @@ func InsertDummyData(db *sql.DB) error {
 	}
 	return nil
 }
-
