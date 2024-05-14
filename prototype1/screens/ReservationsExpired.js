@@ -9,57 +9,44 @@ import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 const ReservationsExpired = () => {
-    // Sample data for the list of reservations
-    const ExpiredReservationsData = [
-        { id: 1, date: new Date('2024-03-03'), timeSlot: '10:00 AM - 11:00 PM', location: 'Schiphol-Rijk' },
-        { id: 2, date: new Date('2024-02-27'), timeSlot: '2:00 PM - 3:00 PM', location: 'Schiphol-Rijk' },
-        { id: 3, date: new Date('2024-02-26'), timeSlot: '9:00 AM - 10:00 AM', location: 'Schiphol-Rijk' },
-        // Add more reservations as needed
-    ];
+    const [reservations, setReservations] = useState([]);
 
-    const FormatDate = (date, short=true) => {
+    useEffect(() => {
+        axios.get('http://localhost:8080/reservations')
+            .then(response => {
+                setReservations(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
+
+    const formatDate = (date, short = true) => {
         const nth = (d) => {
             if (d > 3 && d < 21) return 'th';
             switch (d % 10) {
-              case 1:  return "st";
-              case 2:  return "nd";
-              case 3:  return "rd";
-              default: return "th";
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
             }
-          };
+        };
 
-        var month= ["January","February","March","April","May","June","July", "August","September","October","November","December"];
-        var monthS = ["Jan", "Feb", "Mrt", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"];
-    
+        var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var monthS = ["Jan", "Feb", "Mrt", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
         if (!short) return month[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
         else return monthS[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
     }
 
-    // Function to render each reservation item
-    const renderReservationItem = ({ item }) => (
-        <View className="bg-main_box_color w-full rounded-lg p-2.5 mb-3 opacity-70">
-            <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-lg text-wit" style={styles.font_semibold}>{FormatDate(item.date)}</Text>
-                <FontAwesomeIcon icon={faCalendarDays} size={20} color="#7C7C7C" />
-            </View>
+    // Check if the reservation is expired and show only the expired ones
+    const expiredReservations = reservations.filter((reservation) => {
+        return new Date(reservation.date) < new Date();
+    });
 
-            <View className="flex-row items-center mb-1">
-                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
-                    <FontAwesomeIcon icon={faClock} size={20} color="#7C7C7C" />  
-                </View>  
-                <Text className="text-lg text-wit" style={styles.font_regular}>{item.timeSlot}</Text>
-            </View>
-
-            <View className="flex-row items-center">
-                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
-                    <FontAwesomeIcon icon={faLocationDot} size={20} color="#7C7C7C" />  
-                </View>  
-                <Text className="text-lg text-wit" style={styles.font_thin}>{item.location}</Text>
-            </View>
-        </View>
-    );
     const navigation = useNavigation();
 
     const handleReservationPress = () => {
@@ -67,17 +54,61 @@ const ReservationsExpired = () => {
         navigation.navigate('Reservations');
     };
 
+    // Function to render each reservation item
+    const renderReservationItem = ({ item }) => (
+        <View style={stylesbox.reservationContainer}>
+            <View style={stylesbox.row}>
+                <Text style={stylesbox.text}>{item.id}</Text>
+                <Text style={stylesbox.text}>{item.UserID}</Text>
+                <Text style={stylesbox.text}>{item.LaadpaalID}</Text>
+                <Text style={stylesbox.text}>{formatDate(new Date(item.Date))}</Text>
+                <Text style={stylesbox.text}>{item.Priority}</Text>
+                <Text style={stylesbox.text}>{item.Opgeladen ? 'Yes' : 'No'}</Text>
+                <Text style={stylesbox.text}>{item.Opgehaald ? 'Yes' : 'No'}</Text>
+            </View>
+        </View>
+    );
+
     return (
-        <View className="flex-1 w-full justify-start bg-main_bg_color items-start p-3">
-            {/* FlatList of Reservation Cards */}
-            <FlatList className="w-full"
-                data={ExpiredReservationsData}
+        <View style={stylesbox.container}>
+            <Text style={stylesbox.header}>Expired Reservations</Text>
+            <FlatList
+                data={expiredReservations}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderReservationItem}
             />
         </View>
     );
 };
+
+const stylesbox = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+        padding: 20,
+    },
+    header: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+    },
+    reservationContainer: {
+        marginBottom: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        borderRadius: 5,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    text: {
+        fontSize: 16,
+    },
+});
+
 
 const styles = StyleSheet.create({
     font_regular: {
@@ -95,6 +126,6 @@ const styles = StyleSheet.create({
     font_bold: {
         fontFamily: 'Montserrat_700Bold',
     }
-  });
+});
 
 export default ReservationsExpired;

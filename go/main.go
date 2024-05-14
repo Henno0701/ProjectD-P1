@@ -4,20 +4,41 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
 
+	"github.com/gorilla/mux"
+
+	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Item struct {
+	ID         int    `json:"id"`
+	UserID     string `json:"UserID"`
+	LaadpaalID int    `json:"LaadpaalID"`
+	Date       string `json:"Date"`
+	Priority   int    `json:"Priority"`
+	Opgeladen  bool   `json:"Opgeladen"`
+	Opgehaald  bool   `json:"Opgehaald"`
+}
+
+var db *sql.DB
 var (
 	nameStore string
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
 )
 
 func main() {
+
+	r := mux.NewRouter()
+	r.HandleFunc("/items", getItems).Methods("GET")
+
+	http.Handle("/", r)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 	// stuff voor db
 	// Open database connection
 	database, err := sql.Open("sqlite3", "./database.db")
@@ -58,6 +79,28 @@ func main() {
 	fmt.Println("Server is running...")
 
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
+}
+
+func getItems(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("SELECT id, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var items []Item
+	for rows.Next() {
+		var item Item
+		if err := rows.Scan(&item.ID, &item.UserID, &item.Date, &item.Priority, &item.Opgeladen, &item.Opgehaald); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		items = append(items, item)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(items)
 }
 
 func addCorsHeaders(handler http.Handler) http.Handler {
