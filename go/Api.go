@@ -5,13 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
+	database, err := sql.Open("sqlite3", "./database.db")
+	if err != nil {
+		fmt.Println("Error opening database:", err)
+		return
+	}
+	defer database.Close() 
 	link := "https://schubergphilis.workflows.okta-emea.com/api/flo/d71da429cdb215bef89ffe6448097dee/invoke?clientToken="
 	token := "01d762901510b3c7f422595fa18d8d7bd71c1f3e58ad860fd3ae2d0c87a80955"
 	gegevens := "&url=/poi/v1/locations&method=GET&locationsVisibilityScopes=ACCOUNTS_STATIONS"
-	GetApiData(link, token, gegevens)
+	GetApiData(database, link, token, gegevens)
 }
 
 // hier komen de stations dan in
@@ -61,16 +69,16 @@ func GetApiData(link string, token string, gegevens string) {
 		fmt.Println("Error decoding JSON:", err)
 		return
 	}
-	var i = 0
-	// Print EVSEs
 	for _, station := range stationList.StationList {
-		fmt.Printf("Station ID: %s, Location ID: %s, Status: %s\n", station.ID, station.LocationId, station.Status)
-		fmt.Println("EVSEs:")
 		for _, evse := range station.Evses {
-			i++
-			fmt.Printf("  EVSE ID: %s, Status: %s\n", evse.ID, evse.Status)
+			// for each roep je dan de method die toevoegt aan de database
+			AddLaadpaalToDB(evse.ID, evse.Status)
+			fmt.Printf("added laadpaal met id\n", evse.ID, evse.Status)
 		}
-		fmt.Println()
 	}
-	fmt.Println("Aantal EVSEs:", i)
+}
+
+func AddLaadpaalToDB(db *sql.DB, string id, bool status) error{
+	_, err := db.Exec("INSERT INTO Laadpalen (ID, Status) VALUES (?, ?)", id, status)
+	return err
 }

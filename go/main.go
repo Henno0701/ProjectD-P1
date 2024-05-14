@@ -45,8 +45,6 @@ func main() {
 		fmt.Println("Error printing users:", err)
 		return
 	}
-	// Insert dummy data
-	InsertDummyData(database)
 
 	// message in de console zodat je weet dat de server runt
 	fmt.Println("Server is running...")
@@ -157,27 +155,6 @@ func PrintUsers(db *sql.DB) error {
 			return err
 		}
 		fmt.Println(strconv.Itoa(id) + ": " + username + " " + email)
-	}
-	return nil
-}
-
-func InsertDummyData(db *sql.DB) error {
-	// Add a user
-	if err := AddUser(db, "Jullian", "1037131@hr.nl", "Test1234"); err != nil {
-		return err
-	}
-	// Add a reservation
-	date, _ := time.Parse("02-01-2006", "10-10-2010")
-	if err := AddReservation(db, 1, 1, date, 1, false, false); err != nil {
-		return err
-	}
-	// Add a medewerker
-	if err := AddMedewerker(db, "Jullian", "Goncalves", "1037131@hr.nl", "Wijnhaven 107", "0612345678", "1234AB", "Zuid-Holland", "Volkswagen Passat", "5000"); err != nil {
-		return err
-	}
-	// Add a laadpaal
-	if err := AddLaadpaal(db, false); err != nil {
-		return err
 	}
 	return nil
 }
