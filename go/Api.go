@@ -38,7 +38,7 @@ type Station struct {
 	} `json:"evses"`
 }
 
-func GetApiData(link string, token string, gegevens string) {
+func GetApiData(db *sql.DB, link string, token string, gegevens string) {
 	fullURL := link + token + gegevens
 	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
@@ -72,13 +72,13 @@ func GetApiData(link string, token string, gegevens string) {
 	for _, station := range stationList.StationList {
 		for _, evse := range station.Evses {
 			// for each roep je dan de method die toevoegt aan de database
-			AddLaadpaalToDB(evse.ID, evse.Status)
+			UpdateLaadpalenDB(db, evse.ID, evse.Status)
 			fmt.Printf("added laadpaal met id\n", evse.ID, evse.Status)
 		}
 	}
 }
 
-func AddLaadpaalToDB(db *sql.DB, string id, bool status) error{
-	_, err := db.Exec("INSERT INTO Laadpalen (ID, Status) VALUES (?, ?)", id, status)
+func UpdateLaadpalenDB(db *sql.DB, id string, status string) error {
+	_, err := db.Exec("UPDATE Laadpalen SET Status = ? WHERE ID = ?", status, id)
 	return err
 }

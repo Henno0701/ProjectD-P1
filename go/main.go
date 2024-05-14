@@ -34,28 +34,14 @@ func main() {
 		return
 	}
 
-	// Add a user
-	if err := AddUser(database, "Henno", "Passchier", "faggie"); err != nil {
-		fmt.Println("Error adding user:", err)
-		return
-	}
-
-	// Print users
-	if err := PrintUsers(database); err != nil {
-		fmt.Println("Error printing users:", err)
-		return
-	}
-
 	// message in de console zodat je weet dat de server runt
 	fmt.Println("Server is running...")
 
 	// start de server of 8080 en voeg CORS headers toe
-
 	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	fmt.Println("Server is running...")
-
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
