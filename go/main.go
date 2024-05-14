@@ -56,6 +56,7 @@ func main() {
 	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
 	fmt.Println("Server is running...")
 
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
