@@ -29,16 +29,16 @@ func main() {
 		fmt.Println("Error creating tables:", err)
 		return
 	}
-
+  // zorg dat de db up to date is
+	UpdateDB()
+  
 	// start de server of 8080 en voeg CORS headers toe
-
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
   http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
 	fmt.Println("Server is running...")
-	// nu luistert de server naar requests
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
