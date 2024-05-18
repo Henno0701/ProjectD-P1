@@ -14,6 +14,8 @@ module.exports = {
             "profile-grijs": '#7C7C7C',
             "rood": "#FA8072",
             "box-information-text": "#7C7C7C",
+
+            "Confirmation": "#1E80ED",
         },
     },
     plugins: [],

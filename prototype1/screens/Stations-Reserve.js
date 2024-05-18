@@ -1,4 +1,6 @@
-import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView } from 'react-native';
+import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { styled } from 'nativewind';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useRef, useState } from 'react';
@@ -6,7 +8,10 @@ import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { faBarChart, faCalendar, faCalendarDays, faClock, faList, faRectangleList } from '@fortawesome/free-regular-svg-icons';
+import GenerateDateButtons from '../components/Buttons-Date';
+
+import { faBarChart, faCalendar, faCalendarDays, faCircleCheck, faClock, faList, faRectangleList } from '@fortawesome/free-regular-svg-icons';
+import GenerateTimeSlotsButtons from '../components/Buttons-Time';
 
 // Returning the correct form of the dates in a string
 const FormatDate = (date, short=true) => {
@@ -34,71 +39,36 @@ function dates(date) {
 function timesSlots(date) {
     var times = [];
 
-    if (date === null) return times;
+    if (!date) return times; // Return empty array if date is null or undefined
 
-    var current = date;
-    var nowHour = current.getHours();  // Get current hour of the day
+    var current = new Date(date);
+    var nowHour = current.getHours(); // Get current hour of the given day
 
-    // If it's not the current day, start from the beginning of the day
-    if (current.getHours() !== 0 || current.getMinutes() !== 0 || current.getSeconds() !== 0) {
-        current.setHours(0, 0, 0, 0); // Set time to beginning of the day
-    }
+    // Start from the beginning of the day
+    current.setHours(0, 0, 0, 0);
 
-    // Loop from current hour number to 23 if it's the current day,
-    // otherwise loop from 0 to 23
-    for (var hour = nowHour == 0 ? nowHour : nowHour + 1 ; hour <= 23; hour++) {
-        if (current.getHours() === nowHour) {
-            // If it's the current day, add only upcoming hours
-            if (hour >= nowHour) {
-                times.push(hour);
-            }
-        } else {
-            // If it's not the current day, add all hours
-            times.push(hour);
+    // Loop from 0 to 23
+    for (var hour = 0; hour <= 23; hour++) {
+        // If it's the current day, add only upcoming hours
+        if (current.getDate() === new Date().getDate() && hour < nowHour) {
+            continue;
         }
+        times.push(hour); // Add hour to times array
     }
 
     return times;
-
 }
-
-// Generate the buttons of the week
-const GenerateDateButtons = (date, selectedButton, handleButtonPress) => {
-    const isPressed = () => {
-        handleButtonPress(date);
-    }
-
-    return (
-        <Pressable 
-            key={date} // Every button has a unique key
-            style={{
-                backgroundColor: '#2E2E2E',
-            }}             
-            className={`w-10 h-10 justify-center items-center rounded-lg`} 
-            onPress={isPressed} 
-            underlayColor="transparent" 
-            >
-            <Text className="text-lg text-[#fff]" style={styles.font_regular}>{date.getDate()}</Text>
-        </Pressable>
-    );
-}
-
-const GenerateTimeSlotsButtons = (time, selectedTime, setSelectedTime) => {
-    const isPressed = () => {
-        setSelectedTime(time);
-    }
-
-    return (
-        <Pressable key={time} className={`bg-secondary_box_color w-[30%] mb-2.5 h-10 justify-center items-center rounded-lg`} onPress={isPressed}>
-            <Text className="text-lg text-[#fff]" style={styles.font_regular}>{time}:00</Text>
-        </Pressable>
-    );
-}
-
-
 
 export default function StationsReserveScreen() {
-    const [data, setData] = useState([]);
+    const insets = useSafeAreaInsets();
+    const [data, setData] = useState(
+        {
+            "station_id": null,
+            "date": null,
+            "time": null,
+            "urgency": null
+        }
+    );
 
     // The selected date & time
     const [ selectedDate, setSelectedDate ] = useState(null);
@@ -106,10 +76,12 @@ export default function StationsReserveScreen() {
 
     // The timeslots of the day
     const [times, setTimes] = useState([]);
-    const [selectedButton, setSelectedButton] = useState(null);
 
     // The selected item of the urgency dropdown
     const [selectedItemSelect, setSelectedItemSelect] = useState("0");
+
+    // The modal visibility
+    const [indicator, setIndicator] = useState(false);
 
     var curr = new Date; // get current date
     var first = curr.getDate(); // First day is the day of the month - the day of the week + 1
@@ -119,23 +91,53 @@ export default function StationsReserveScreen() {
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
-    const handleDateSelectorButton = async (buttonIndex) => {
-        await setSelectedButton(buttonIndex);
-        await setSelectedDate(buttonIndex);
-    };
 
-    const handleTimeSelectorButton = async (buttonIndex) => {
-        await setSelectedTime(buttonIndex);
-    };
-
-    //In the code below we are getting the timeslots of the day by every date change
+    // In the code below we are getting the timeslots of the day by every date change
     useEffect(() => {
-        setTimes(timesSlots(selectedDate));
+        // first reset the time state to null
+        setSelectedTime(null);
+
+        // generate every upcoming hour of the given day
+        var EveryHour = timesSlots(selectedDate);
+        setTimes(EveryHour);
     }, [selectedDate]);
 
-    return (
-      <View className="flex-1 bg-main_bg_color items-center">
+    // Function to  account name from server
+    const AddToDatabase = async () => {
+        try {
+            const response = await fetch('http://192.168.1.39:8080/getName', {
+                method: "POST",
+                body: JSON.stringify({
+                    userID: 1,
+                    userID: 1,
+                    userID: 1,
+                }),
+                headers: {
+                "Content-type": "application/json; charset=UTF-8"
+                }
+            }); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+          const data = await response.json();
+          // Update the account name state
+          setAccountName(data.name);
+        } catch (error) {
+          console.error('Error fetching account name:', error);
+        }
+      };
 
+    const addReservation = async (date, time, urgency) => {
+        // Save the reservation to the database
+        console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
+
+        setIndicator(true);
+
+        setInterval(() => {
+            setIndicator(false);
+        }, 5000);
+    }
+
+    return (
+      <View className="flex-1 relative bg-main_bg_color items-center">
+        
         <View className='flex-col w-full h-full items-center justify-between'>
             <ScrollView>
                 <View className="flex p-3">
@@ -146,7 +148,7 @@ export default function StationsReserveScreen() {
                                 <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
                             </View>
                             <View className="flex-row w-full items-center justify-between mt-2">
-                                {week.map((date) => GenerateDateButtons(date, selectedButton, handleDateSelectorButton))}
+                                <GenerateDateButtons week={week} setSelectedDate={setSelectedDate} />
                             </View>
                         </View>
                     </View>
@@ -159,9 +161,7 @@ export default function StationsReserveScreen() {
                                     <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Select Time slot</Text>
                                     <FontAwesomeIcon icon={faClock} size={20} color="#fff" />
                                 </View>
-                                <View className="flex-row flex-wrap w-full items-center justify-between mt-2">
-                                    {times.map((time) => GenerateTimeSlotsButtons(time, selectedTime, handleTimeSelectorButton))}
-                                </View>
+                                <GenerateTimeSlotsButtons times={times} selectedDate={selectedDate} setSelectedTime={setSelectedTime} />
                             </View>
                         </View>
                     )}
@@ -215,12 +215,14 @@ export default function StationsReserveScreen() {
             </ScrollView>
             
         
-
+            {selectedTime && (
             <View className='w-full p-3'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
                     <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
+                    {/* <ActivityIndicator color="#fff" className="ml-2" /> */}
                 </Pressable>
             </View>
+            )}
 
         </View>
       </View>

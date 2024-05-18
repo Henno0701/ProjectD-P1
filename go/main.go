@@ -15,7 +15,6 @@ var (
 )
 
 func main() {
-
 	// stuff voor db
 	// Open database connection
 	database, err := sql.Open("sqlite3", "./database.db")
@@ -32,10 +31,12 @@ func main() {
 	}
 
 	// start de server of 8080 en voeg CORS headers toe
-	// maak een endpoint aan om de naam op te halen
-	http.HandleFunc("/readAccounts", GetAccounts)
-	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name (zullen verwijderd worden in de toekomst)
-	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name (zullen verwijderd worden in de toekomst)
+
+	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
+  http.HandleFunc("/readAccounts", GetAccounts)
+	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
+	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
 	fmt.Println("Server is running...")
 	// nu luistert de server naar requests
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
@@ -94,5 +95,3 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 }
-
-
