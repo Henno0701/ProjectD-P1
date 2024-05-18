@@ -9,7 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func main() {
+func UpdateDB(){
 	database, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
 		fmt.Println("Error opening database:", err)

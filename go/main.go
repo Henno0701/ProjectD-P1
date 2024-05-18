@@ -33,7 +33,8 @@ func main() {
 		fmt.Println("Error creating tables:", err)
 		return
 	}
-
+	// zorg dat de db up to date is
+	UpdateDB()
 	// message in de console zodat je weet dat de server runt
 	fmt.Println("Server is running...")
 
