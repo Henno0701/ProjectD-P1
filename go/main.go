@@ -34,12 +34,6 @@ func main() {
 		return
 	}
 
-	// Add a user
-	if err := AddUser(database, "Henno", "Passchier", "faggie"); err != nil {
-		fmt.Println("Error adding user:", err)
-		return
-	}
-
 	// Print users
 	if err := PrintUsers(database); err != nil {
 		fmt.Println("Error printing users:", err)
@@ -119,12 +113,12 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	// Decode the JSON request body into a struct
 	var requestData struct {
-		UserID     int    `json:"userID"`
-		LaadpaalID int    `json:"laadpaalID"`
-		Date       string `json:"date"`
-		Priority   int    `json:"priority"`
-		Opgeladen  bool   `json:"opgeladen"`
-		Opgehaald  bool   `json:"opgehaald"`
+		UserID     int    `json:"UserID"`
+		LaadpaalID int    `json:"LaadpaalID"`
+		Date       string `json:"Date"`
+		Priority   int    `json:"Priority"`
+		Opgeladen  bool   `json:"Opgeladen"`
+		Opgehaald  bool   `json:"Opgehaald"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
@@ -133,11 +127,13 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 	}
 
 	// Parse the date string into a time.Time object
-	date, err := time.Parse("02-01-2006", requestData.Date)
+	date, err := time.Parse(time.RFC3339, requestData.Date)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	// fmt.Println("Received reservation:", requestData)
 
 	// Insert the reservation into the database
 	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
@@ -198,23 +194,23 @@ func PrintUsers(db *sql.DB) error {
 }
 
 func InsertDummyData(db *sql.DB) error {
-	// Add a user
-	if err := AddUser(db, "Jullian", "1037131@hr.nl", "Test1234"); err != nil {
-		return err
-	}
-	// Add a reservation
-	date, _ := time.Parse("02-01-2006", "10-10-2010")
-	if err := AddReservation(db, 1, 1, date, 1, false, false); err != nil {
-		return err
-	}
-	// Add a medewerker
-	if err := AddMedewerker(db, "Jullian", "Goncalves", "1037131@hr.nl", "Wijnhaven 107", "0612345678", "1234AB", "Zuid-Holland", "Volkswagen Passat", "5000"); err != nil {
-		return err
-	}
-	// Add a laadpaal
-	if err := AddLaadpaal(db, false); err != nil {
-		return err
-	}
+	// // Add a user
+	// if err := AddUser(db, "Jullian", "1037131@hr.nl", "Test1234"); err != nil {
+	// 	return err
+	// }
+	// // Add a reservation
+	// date, _ := time.Parse("02-01-2006", "10-10-2010")
+	// if err := AddReservation(db, 1, 1, date, 1, false, false); err != nil {
+	// 	return err
+	// }
+	// // Add a medewerker
+	// if err := AddMedewerker(db, "Jullian", "Goncalves", "1037131@hr.nl", "Wijnhaven 107", "0612345678", "1234AB", "Zuid-Holland", "Volkswagen Passat", "5000"); err != nil {
+	// 	return err
+	// }
+	// // Add a laadpaal
+	// if err := AddLaadpaal(db, false); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
