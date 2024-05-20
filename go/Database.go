@@ -5,7 +5,15 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"log"
+	"net/http"
+	"encoding/json"
 )
+
+type Laadpaal struct {
+	ID     int `json:"id"`
+	Status string `json:"status"`
+}
 
 // alle methods/functies die te maken hebben met de database
 func Maketables(db *sql.DB) error {
@@ -52,4 +60,107 @@ func PrintUsers(db *sql.DB) error {
 		fmt.Println(strconv.Itoa(id) + ": " + username + " " + email)
 	}
 	return nil
+}
+
+func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
+	// krijg alle laadpalen die beschikbaar zijn
+	laadpalen, err := GetAllLaadpalen(db)
+	if err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+	// nu je alle laadpalen hebt, zorg dat je nu op basis van datum en tijd kijkt of er een reservatie is en beschikbaar zijn
+	// Decode the JSON request body into a struct (genomen van henno is meer monkey code hieronder, wil het graag testen op school met henno)
+	var requestData struct {
+		Date       string `json:"Date"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Parse the date string into a time.Time object
+	date, err := time.Parse(time.RFC3339, requestData.Date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	
+	var filtered []Laadpaal
+	reservationId, err := CheckforReservation(db, date)
+	if err != nil {
+		panic(err) // Handle errors appropriately
+	}
+
+	if reservationId > 0 {
+		// gevonden niks doen
+		// fmt.Println("Laadpaal is gereserveerd", reservationId)
+
+	} else {
+		// niks gevonden, voeg toe aan nieuwe lijst
+		for _, laadpaal := range laadpalen {
+			if laadpaal.ID != reservationId {
+			  filtered = append(filtered, laadpaal)
+			}
+		  }
+	}
+	// Encode filtered laadpalen into JSON and write to response (gemini code)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(filtered)
+}
+
+func GetAllLaadpalen(db *sql.DB) ([]Laadpaal, error) {
+	// Get all laadpalen
+	rows, err := db.Query("SELECT ID, Status FROM Laadpalen")
+	if err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+	defer rows.Close()
+
+	// Check if the laadpalen are not null
+	var laadpalen []Laadpaal
+	for rows.Next() {
+		var laadpaal Laadpaal
+		if err := rows.Scan(&laadpaal.ID, &laadpaal.Status); err != nil {
+			log.Fatal(err) // log.Fatal will log the error and stop the program
+		}
+		laadpalen = append(laadpalen, laadpaal)
+	}
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+
+	return laadpalen, nil
+}
+func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
+	// Prepare the SQL query
+	query := `SELECT LaadpaalID FROM reservations WHERE date = ?`
+
+	// Execute the query with the provided date
+	row := db.QueryRow(query, datum)
+
+	// Check for errors
+	err := row.Err()
+	if err != nil {
+		return 0, err
+	}
+
+	// Scan for the reservation ID (if any)
+	var id int
+	err = row.Scan(&id)
+
+	// Handle the case where no reservation is found
+	if err == sql.ErrNoRows {
+		return 0, nil // No reservation found (not an error)
+	}
+
+	// Check for other potential errors
+	if err != nil {
+		return 0, err
+	}
+
+	// Return the reservation ID
+	return id, nil
 }
