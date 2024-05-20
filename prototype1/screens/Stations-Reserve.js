@@ -105,7 +105,7 @@ export default function StationsReserveScreen() {
     // Function to  account name from server
     const AddToDatabase = async (date) => {
         try {
-            fetch('http://145.137.52.196:8080/addReservation', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+            fetch('http://192.168.1.40:8080/addReservation', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
@@ -125,7 +125,6 @@ export default function StationsReserveScreen() {
                 }
                 return response.json(); // Assuming response is JSON, use appropriate method accordingly
               })
-            .then((json) => console.log(json)); 
         } catch (error) {
           console.error('Error:', error);
         }
