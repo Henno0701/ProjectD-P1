@@ -70,7 +70,7 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 	if err != nil {
 		log.Fatal(err) // log.Fatal will log the error and stop the program
 	}
-	log.Println("Laadpalen fetched from the database")
+	log.Println("Laadpalen fetched from the database ", laadpalen)
 	// nu je alle laadpalen hebt, zorg dat je nu op basis van datum en tijd kijkt of er een reservatie is en beschikbaar zijn
 	// Decode the JSON request body into a struct (genomen van henno is meer monkey code hieronder, wil het graag testen op school met henno)
 	var requestData struct {
@@ -102,11 +102,14 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 	} else {
 		// niks gevonden, voeg toe aan nieuwe lijst
 		for _, laadpaal := range laadpalen {
+			fmt.Println("Laadpaal ID:", laadpaal.ID)
+			fmt.Println("Laadpaal Status:", reservationId)
 			if laadpaal.ID != reservationId {
-			  filtered = append(filtered, laadpaal)
+			  	filtered = append(filtered, laadpaal)
 			}
 		  }
 	}
+
 	// Encode filtered laadpalen into JSON and write to response (gemini code)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

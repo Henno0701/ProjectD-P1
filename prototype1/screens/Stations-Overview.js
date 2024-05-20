@@ -9,8 +9,7 @@ import ButtonList from '../components/Button-List';
 
 const GetAvailableStations = async (date) => {
     try {
-        console.log("Sending data to server:", { Date: date });
-        fetch('http://192.168.178.123:8080/getAvailableStations', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+        const response = await fetch('http://192.168.1.40:8080/getAvailableStations', {
             method: "POST",
             body: JSON.stringify({
                 Date: date,
@@ -18,14 +17,15 @@ const GetAvailableStations = async (date) => {
             headers: {
                 "Content-type": "application/json; charset=UTF-8"
             }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json(); // Assuming response is JSON, use appropriate method accordingly
-            })
-            .then((json) => console.log(json));
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+        console.log(json);
+        return json;
     } catch (error) {
         console.error('Error:', error);
     }
@@ -36,9 +36,11 @@ export default function StationsOverviewScreen() {
 
     // When the page gets loaded, the available stations will be fetched from the server
     useEffect(() => {
-        const NumberAvailable = GetAvailableStations(); // Convert the response to a number
-        console.log(NumberAvailable);
-        setAvailableStations(1); // Set the available stations to the number
+        (async () => {
+            const NumberAvailable = await GetAvailableStations(new Date); // Convert the response to a number
+            console.log("List:" + NumberAvailable);
+            setAvailableStations(1); // Set the available stations to the number
+        })();
     }, []);
 
     return (
