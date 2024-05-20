@@ -29,15 +29,21 @@ func main() {
 		fmt.Println("Error creating tables:", err)
 		return
 	}
-  // zorg dat de db up to date is
+  	// // zorg dat de db up to date is
 	UpdateDB()
   
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
-  http.HandleFunc("/readAccounts", GetAccounts)
+  	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
+
+	// http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
+	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
+	    // Call the actual handler function with the argument
+	    GetAvailableStations(w, r, database)
+	}) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
+
 	fmt.Println("Server is running...")
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
