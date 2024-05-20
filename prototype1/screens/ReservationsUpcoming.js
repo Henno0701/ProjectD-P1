@@ -6,19 +6,16 @@ import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-i
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { StyleSheet } from 'react-native';
-import axios from 'axios';
+
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/reservations')
-      .then(response => {
-        setReservations(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
+    fetch('http://localhost:8080/items')
+      .then(response => response.json())
+      .then(data => setReservations(data))
+      .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   const formatDate = (date, short = true) => {

@@ -6,11 +6,9 @@ import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 import App from '../App';
 
-export default function LoginScreen({ OnLogin }) {
-
+export default function LoginScreen({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -19,7 +17,6 @@ export default function LoginScreen({ OnLogin }) {
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
-
 
   const saveData = async (key, value) => {
     try {
@@ -40,26 +37,6 @@ export default function LoginScreen({ OnLogin }) {
         console.log('No data found for the given key');
         return null;
       }
-      
-  const handleLogin = async (email, password) => {
-    //handle login
-    correct = false;
-    const accounts = await fetchAccounts();
-    accounts.forEach(account => {
-      if (account.email == email && account.password == password) {
-        OnLogin();
-      }
-    });
-    setError("Email or Password is invalid.");
-
-  };
-
-  const fetchAccounts = async () => {
-    try {
-      const response = await fetch('http://192.168.2.22:8081/readAccounts'); //IP moet misschien verandert worden op andere apparaten
-      const data = await response.json();
-      return data;
-
     } catch (error) {
       console.log('Error retrieving data:', error);
       return null;
@@ -72,16 +49,15 @@ export default function LoginScreen({ OnLogin }) {
     //getData('LoggedIn')
 
     correct = await handleSubmit(email, password)
-    
-    if (correct) 
-    {
-        setError("")
-        await saveData("LoggedIn", email);
-        onLogin()
+
+    if (correct) {
+      setError("")
+      await saveData("LoggedIn", email);
+      onLogin()
     }
 
     setError("Email or Password is invalid.");
-    
+
   };
 
   const handleMakeAccount = () => {
@@ -145,11 +121,9 @@ export default function LoginScreen({ OnLogin }) {
 
 
         <LinearGradient
-
-            colors={['#1E80ED', '#5FA6F4']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }} 
-
+          colors={['#1E80ED', '#5FA6F4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           className="p-3 m-5 rounded-md"
         >
           <TouchableOpacity onPress={() => handleLogin(email, password)} className="align-middle">
@@ -165,7 +139,7 @@ export default function LoginScreen({ OnLogin }) {
           <View className="flex-1 h-0.5 bg-wit" />
         </View>
         <View className="flex-row justify-center" >
-          <TouchableOpacity onPress={() => handleMakeAccount()}>
+          <TouchableOpacity onPress={() => handleMakeAccount}>
             <Text className="text-wit font-bold text-lg underline">Create Account</Text>
           </TouchableOpacity>
         </View>
@@ -175,9 +149,9 @@ export default function LoginScreen({ OnLogin }) {
   );
 }
 
-const handleSubmit = async (email, password)  => {
+const handleSubmit = async (email, password) => {
   const Email = email;
-  const Password = password; 
+  const Password = password;
 
   try {
     const response = await fetch('http://192.168.2.22:8080/checkAccounts', {
@@ -200,4 +174,3 @@ const handleSubmit = async (email, password)  => {
     return false
   }
 };
-

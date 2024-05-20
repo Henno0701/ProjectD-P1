@@ -9,19 +9,16 @@ import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
-import axios from 'axios';
+
 
 const ReservationsExpired = () => {
     const [reservations, setReservations] = useState([]);
 
     useEffect(() => {
-        axios.get('http://localhost:8080/reservations')
-            .then(response => {
-                setReservations(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-            });
+        fetch('http://localhost:8080/items')
+            .then(response => response.json())
+            .then(data => setReservations(data))
+            .catch(error => console.error('Error fetching data:', error));
     }, []);
 
     const formatDate = (date, short = true) => {

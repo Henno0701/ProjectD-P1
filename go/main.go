@@ -10,9 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/mux"
-
-	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -26,63 +23,28 @@ type Item struct {
 	Opgehaald  bool   `json:"Opgehaald"`
 }
 
-var db *sql.DB
 var (
 	nameStore string
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
 )
 
-func main() {
-
-	r := mux.NewRouter()
-	r.HandleFunc("/items", getItems).Methods("GET")
-
-	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-	// stuff voor db
-	// Open database connection
-	database, err := sql.Open("sqlite3", "./database.db")
+func dbConn() (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
-		fmt.Println("Error opening database:", err)
-		return
+		return nil, err
 	}
-	defer database.Close() // Close the database connection when main function exits
-
-	// Create tables
-	if err := Maketables(database); err != nil {
-		fmt.Println("Error creating tables:", err)
-		return
-	}
-
-	// Add a user
-	if err := AddUser(database, "Henno", "Passchier", "faggie"); err != nil {
-		fmt.Println("Error adding user:", err)
-		return
-	}
-
-	// Print users
-	if err := PrintUsers(database); err != nil {
-		fmt.Println("Error printing users:", err)
-		return
-	}
-	// Insert dummy data
-	InsertDummyData(database)
-
-	// message in de console zodat je weet dat de server runt
-	fmt.Println("Server is running...")
-
-	// start de server of 8080 en voeg CORS headers toe
-
-	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
-	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
-	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-	fmt.Println("Server is running...")
-
-	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
+	return db, nil
 }
 
 func getItems(w http.ResponseWriter, r *http.Request) {
-	rows, err := db.Query("SELECT id, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
+	db, err := dbConn()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM items")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -92,7 +54,8 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 	var items []Item
 	for rows.Next() {
 		var item Item
-		if err := rows.Scan(&item.ID, &item.UserID, &item.Date, &item.Priority, &item.Opgeladen, &item.Opgehaald); err != nil {
+		err := rows.Scan(&item.ID, &item.UserID, &item.LaadpaalID, &item.Date, &item.Priority, &item.Opgeladen, &item.Opgehaald)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -101,6 +64,47 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
+}
+
+func main() {
+	// Open database connection
+	database, err := dbConn()
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+	defer database.Close()
+
+	// Create tables
+	if err := Maketables(database); err != nil {
+		log.Fatalf("Error creating tables: %v", err)
+	}
+
+	// Add a user
+	if err := AddUser(database, "Henno", "Passchier", "faggie"); err != nil {
+		log.Fatalf("Error adding user: %v", err)
+	}
+
+	// Print users
+	if err := PrintUsers(database); err != nil {
+		log.Fatalf("Error printing users: %v", err)
+	}
+
+	// Insert dummy data
+	if err := InsertDummyData(database); err != nil {
+		log.Fatalf("Error inserting dummy data: %v", err)
+	}
+
+	// message in the console so you know the server is running
+	fmt.Println("Server is running...")
+
+	// Setup routes
+	http.HandleFunc("/items", getItems)
+	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
+	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
+	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+
+	// Start the server with CORS headers
+	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
 func addCorsHeaders(handler http.Handler) http.Handler {
@@ -159,12 +163,22 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 
 func Maketables(db *sql.DB) error {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255))")
+	if err != nil {
+		return err
+	}
 	_, err = db.Exec(
 		"CREATE TABLE IF NOT EXISTS Reservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, LaadpaalID INTEGER, Date DATETIME, Priority INTEGER, Opgeladen BOOLEAN, Opgehaald BOOLEAN)")
+	if err != nil {
+		return err
+	}
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
+	if err != nil {
+		return err
+	}
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Laadpalen (id INTEGER PRIMARY KEY AUTOINCREMENT, status BOOLEAN)")
 	return err
 }
+
 func AddUser(db *sql.DB, username string, email string, password string) error {
 	_, err := db.Exec("INSERT INTO Users (Username, Email, Password) VALUES (?, ?, ?)", username, email, password)
 	return err
