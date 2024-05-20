@@ -64,10 +64,13 @@ func PrintUsers(db *sql.DB) error {
 
 func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
 	// krijg alle laadpalen die beschikbaar zijn
+	// Log that the request has been received
+	log.Println("Request received at /getAvailableStations")
 	laadpalen, err := GetAllLaadpalen(db)
 	if err != nil {
 		log.Fatal(err) // log.Fatal will log the error and stop the program
 	}
+	log.Println("Laadpalen fetched from the database")
 	// nu je alle laadpalen hebt, zorg dat je nu op basis van datum en tijd kijkt of er een reservatie is en beschikbaar zijn
 	// Decode the JSON request body into a struct (genomen van henno is meer monkey code hieronder, wil het graag testen op school met henno)
 	var requestData struct {
@@ -78,6 +81,7 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	log.Println("Received date:", requestData.Date)
 	// Parse the date string into a time.Time object
 	date, err := time.Parse(time.RFC3339, requestData.Date)
 	if err != nil {
@@ -111,6 +115,7 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 
 func GetAllLaadpalen(db *sql.DB) ([]Laadpaal, error) {
 	// Get all laadpalen
+	log.Println("Fetching all laadpalen from the database")
 	rows, err := db.Query("SELECT ID, Status FROM Laadpalen")
 	if err != nil {
 		log.Fatal(err) // log.Fatal will log the error and stop the program
@@ -131,10 +136,11 @@ func GetAllLaadpalen(db *sql.DB) ([]Laadpaal, error) {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err) // log.Fatal will log the error and stop the program
 	}
-
+	log.Println("stuur lijst terug")
 	return laadpalen, nil
 }
 func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
+	log.Println("Checking for reservation in the database")
 	// Prepare the SQL query
 	query := `SELECT LaadpaalID FROM reservations WHERE date = ?`
 
