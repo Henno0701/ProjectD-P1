@@ -1,10 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Account struct {
@@ -55,4 +59,36 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 
 	// Write JSON response
 	w.Write(jsonData)
+}
+
+func checkAccounts(db *sql.DB, email string, password string) bool {
+	row := db.QueryRow("SELECT * FROM Users WHERE Email = ? AND Password = ?", email, password)
+
+	var Id int
+	var Username string
+	var Email string
+	var Password string
+
+	err := row.Scan(&Id, &Username, &Email, &Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		}
+		fmt.Println("Error:", err)
+		return false
+	}
+	return true
+}
+
+func checkAccountsHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+		if checkAccounts(db, email, password) {
+
+			w.WriteHeader(http.StatusOK)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
 }
