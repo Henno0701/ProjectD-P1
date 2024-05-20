@@ -5,7 +5,15 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+	"log"
+	"net/http"
+	"encoding/json"
 )
+
+type Laadpaal struct {
+	ID     int `json:"id"`
+	Status string `json:"status"`
+}
 
 // alle methods/functies die te maken hebben met de database
 func Maketables(db *sql.DB) error {
