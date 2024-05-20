@@ -39,18 +39,10 @@ func main() {
   	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-  
-	// http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
-	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
-	    // Call the actual handler function with the argument
-	    GetAvailableStations(w, r, database)
-    
-	}) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
         AddReservationHandler(w, r, database)
     })
-
 	fmt.Println("Server is running...")
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
