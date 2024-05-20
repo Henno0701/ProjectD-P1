@@ -78,7 +78,7 @@ export default function StationsReserveScreen() {
     const [times, setTimes] = useState([]);
 
     // The selected item of the urgency dropdown
-    const [selectedItemSelect, setSelectedItemSelect] = useState("0");
+    const [selectedItemSelect, setSelectedItemSelect] = useState(0);
 
     // The modal visibility
     const [indicator, setIndicator] = useState(false);
@@ -103,30 +103,46 @@ export default function StationsReserveScreen() {
     }, [selectedDate]);
 
     // Function to  account name from server
-    const AddToDatabase = async () => {
+    const AddToDatabase = async (date) => {
         try {
-            const response = await fetch('http://192.168.1.39:8080/getName', {
+            fetch('http://145.137.52.196:8080/addReservation', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
-                    userID: 1,
-                    userID: 1,
-                    userID: 1,
+                    UserID: 1,
+                    LaadpaalID: 1,
+                    Date: date,
+                    Priority: selectedItemSelect,
+                    Opgeladen: false,
+                    Opgehaald: false,
                 }),
                 headers: {
                 "Content-type": "application/json; charset=UTF-8"
                 }
-            }); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
-          const data = await response.json();
-          // Update the account name state
-          setAccountName(data.name);
+            })
+            .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json(); // Assuming response is JSON, use appropriate method accordingly
+              })
+            .then((json) => console.log(json)); 
         } catch (error) {
-          console.error('Error fetching account name:', error);
+          console.error('Error:', error);
         }
       };
 
     const addReservation = async (date, time, urgency) => {
         // Save the reservation to the database
         console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
+        
+        // Create a new date object with the selected date and time 
+        date.setHours(time + 2); // Adding 2 hours to the time because of the timezone difference
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+
+        // Add the reservation to the database
+        AddToDatabase(date);
 
         setIndicator(true);
 
@@ -200,11 +216,11 @@ export default function StationsReserveScreen() {
                                         value={selectedItemSelect}
                                         onValueChange={(value) => setSelectedItemSelect(value)}
                                         items={[
-                                            { label: 'None', value: '0' },
-                                            { label: 'I need it but someone can go first.', value: '1' },
-                                            { label: 'I need it.', value: '2' },
-                                            { label: 'I realy need it.', value: '3' },
-                                            { label: "I need it or i’m not be able to go.", value: '4' },
+                                            { label: 'None', value: 0 },
+                                            { label: 'I need it but someone can go first.', value: 1 },
+                                            { label: 'I need it.', value: 2 },
+                                            { label: 'I realy need it.', value: 3 },
+                                            { label: "I need it or i’m not be able to go.", value: 4 },
                                         ]}
                                     />
                                     </View>
