@@ -11,12 +11,24 @@ import { StyleSheet } from 'react-native';
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
 
-  useEffect(() => {
-    fetch('http://localhost:8080/items')
-      .then(response => response.json())
-      .then(data => setReservations(data))
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
+  const getData = async () => {
+    try {
+        const response = await fetch('http://145.137.52.189:8080/items');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        console.log(data);
+        setReservations(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+};
+
+useEffect(() => {
+    getData();
+    console.log(reservations);
+}, []);
 
   const formatDate = (date, short = true) => {
     const nth = (d) => {

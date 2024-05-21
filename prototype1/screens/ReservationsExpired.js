@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Button, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
@@ -14,11 +14,21 @@ import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 const ReservationsExpired = () => {
     const [reservations, setReservations] = useState([]);
 
+    const getData = async () => {
+        try {
+            const response = await fetch('http://145.137.52.189:8080/items');
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            setReservations(data);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     useEffect(() => {
-        fetch('http://localhost:8080/items')
-            .then(response => response.json())
-            .then(data => setReservations(data))
-            .catch(error => console.error('Error fetching data:', error));
+        getData();
     }, []);
 
     const formatDate = (date, short = true) => {
@@ -69,8 +79,9 @@ const ReservationsExpired = () => {
     return (
         <View style={stylesbox.container}>
             <Text style={stylesbox.header}>Expired Reservations</Text>
+            <Text></Text>
             <FlatList
-                data={expiredReservations}
+                data={reservations}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderReservationItem}
             />

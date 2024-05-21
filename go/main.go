@@ -28,23 +28,8 @@ var (
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
 )
 
-func dbConn() (*sql.DB, error) {
-	db, err := sql.Open("sqlite3", "./database.db")
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
-func getItems(w http.ResponseWriter, r *http.Request) {
-	db, err := dbConn()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM items")
+func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,15 +47,17 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 		items = append(items, item)
 	}
 
+	fmt.Println("Items:", items)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
 }
 
 func main() {
 	// Open database connection
-	database, err := dbConn()
+	database, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
+		return
 	}
 	defer database.Close()
 
@@ -98,7 +85,9 @@ func main() {
 	fmt.Println("Server is running...")
 
 	// Setup routes
-	http.HandleFunc("/items", getItems)
+	http.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
+		getItems(w, r, database)
+	})
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name

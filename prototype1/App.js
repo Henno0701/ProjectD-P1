@@ -49,7 +49,7 @@ function App() {
 
   //removeData('LoggedIn')
   getData('LoggedIn')
-  return isLoggedIn ? <Layout /> : <LoginScreen onLogin={() => getData('LoggedIn')} />;
+  return !isLoggedIn ? <Layout /> : <LoginScreen onLogin={() => getData('LoggedIn')} />;
 
 }
 
