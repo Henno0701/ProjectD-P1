@@ -5,8 +5,8 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
+import CryptoJS from 'crypto-js';
 
-import App from '../App';
 
 export default function LoginScreen({onLogin}) {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +48,8 @@ export default function LoginScreen({onLogin}) {
     correct = false;
     //getData('LoggedIn')
 
-    correct = await handleSubmit(email, password)
+    //ConvertPassword(password)
+    correct = await handleSubmit(email, ConvertPassword(password))
     
     if (correct) 
     {
@@ -176,3 +177,8 @@ const handleSubmit = async (email, password)  => {
   }
 };
 
+const ConvertPassword = (password) =>
+  {
+    const hash = CryptoJS.SHA1(password).toString();
+    return hash
+  }
