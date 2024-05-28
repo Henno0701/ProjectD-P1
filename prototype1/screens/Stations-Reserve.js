@@ -53,7 +53,9 @@ function timesSlots(date) {
         if (current.getDate() === new Date().getDate() && hour < nowHour) {
             continue;
         }
-        times.push(hour); // Add hour to times array
+
+        // If the current hour is between 6 and 22, add the hour to the times array
+        if (hour >= 6 && hour <= 20) times.push(hour); // Add hour to times array
     }
 
     return times;
@@ -84,7 +86,7 @@ export default function StationsReserveScreen() {
     const [indicator, setIndicator] = useState(false);
 
     var curr = new Date; // get current date
-    var first = curr.getDate(); // First day is the day of the month - the day of the week + 1
+    var first = curr.getDate() + 2; // First day is the day of the month - the day of the week + 1, Add 2 days to the current date
     var last = first + 6; // last day is the first day + 6
     var week = dates(new Date(curr.setDate(first))); // get the dates of the week
 

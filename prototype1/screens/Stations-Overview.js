@@ -9,7 +9,7 @@ import ButtonList from '../components/Button-List';
 
 const GetAvailableStations = async (date) => {
     try {
-        const response = await fetch('http://192.168.1.40:8080/getAvailableStations', {
+        const response = await fetch('http://145.137.52.132:8080/getAvailableStations', {
             method: "POST",
             body: JSON.stringify({
                 Date: date,
