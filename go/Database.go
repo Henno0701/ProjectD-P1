@@ -15,6 +15,16 @@ type Laadpaal struct {
 	Status string `json:"status"`
 }
 
+type Reservation struct {
+	ID     int `json:"id"`
+	UserID int `json:"userID"`
+	LaadpaalID int `json:"laadpaalID"`
+	Date time.Time `json:"date"`
+	Priority int `json:"priority"`
+	Opgeladen bool `json:"opgeladen"`
+	Opgehaald bool `json:"opgehaald"`
+}
+
 // alle methods/functies die te maken hebben met de database
 func Maketables(db *sql.DB) error {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255))")
@@ -172,4 +182,37 @@ func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
 
 	// Return the reservation ID
 	return id, nil
+}
+
+func GetAllReservationOfDate(db *sql.DB, datum time.Time) (int, error) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		Date string `json:"date"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Get all reservation of a specific date
+	rows, err := db.Query("SELECT * FROM reservations WHERE Date = ?", datum)
+	if err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+	defer rows.Close()
+
+	// Check if the laadpalen are not null
+	var reservations []Reservation
+	for rows.Next() {
+		var reservation Reservation
+		reservations = append(reservations, reservation)
+	}
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+	
+	// Return the reservations
+	return reservations, nil
 }

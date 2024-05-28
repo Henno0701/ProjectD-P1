@@ -45,6 +45,11 @@ func main() {
         AddReservationHandler(w, r, database)
     })
 
+	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+        // Call the actual handler function with the argument
+        GetAllReservationOfDate(w, r, database)
+    })
+
 	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
         // Call the actual handler function with the argument
         GetAvailableStations(w, r, database)

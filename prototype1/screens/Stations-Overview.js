@@ -9,7 +9,7 @@ import ButtonList from '../components/Button-List';
 
 const GetAvailableStations = async (date) => {
     try {
-        const response = await fetch('http://145.137.52.132:8080/getAvailableStations', {
+        const response = await fetch('http://145.137.53.163:8080/getAvailableStations', {
             method: "POST",
             body: JSON.stringify({
                 Date: date,
@@ -24,7 +24,7 @@ const GetAvailableStations = async (date) => {
         }
 
         const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
-        console.log(json);
+        // console.log(json);
         return json;
     } catch (error) {
         console.error('Error:', error);
@@ -38,8 +38,7 @@ export default function StationsOverviewScreen() {
     useEffect(() => {
         (async () => {
             const NumberAvailable = await GetAvailableStations(new Date); // Convert the response to a number
-            console.log("List:" + NumberAvailable);
-            setAvailableStations(1); // Set the available stations to the number
+            setAvailableStations(NumberAvailable.length); // Set the available stations to the number
         })();
     }, []);
 
