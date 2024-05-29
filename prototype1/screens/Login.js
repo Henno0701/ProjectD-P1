@@ -6,19 +6,35 @@ import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
 import CryptoJS from 'crypto-js';
-import {
-  createConfig,
-  signInWithBrowser,
-  signOut,
-  getAccessToken,
-  isAuthenticated,
-  getUser,
-  getUserFromIdToken,
-  refreshTokens,
-  EventEmitter,
-} from '@okta/okta-react-native';
+// import {
+//   createConfig,
+//   signInWithBrowser,
+//   signOut,
+//   getAccessToken,
+//   isAuthenticated,
+//   getUser,
+//   getUserFromIdToken,
+//   refreshTokens,
+//   EventEmitter,
+// } from '@okta/okta-react-native';
 
-import {oktaConfig}  from '../oktaConfig';
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
+
+const oktaConfig = {
+    //ypur application id from okta
+    clientId: "[your okta clientId]",
+    //yout domain from okta
+    domain: "https://dev-50508157.okta.com",
+    // yout domain + /oauth2/default
+    issuerUrl: "https://dev-50508157.okta.com/oauth2/default",
+    //callback configured in okta signin url
+    callbackUrl: "com.dev-50508157.okta.ProjectTest2://callback",
+};
+
+//import {oktaConfig}  from '../oktaConfig';
 
 
 export default function LoginScreen({onLogin}) {
@@ -27,37 +43,93 @@ export default function LoginScreen({onLogin}) {
   const [email, setEmail] = useState('');
   const [errorMessage, setError] = useState('');
 
-  useEffect(() => {
-    const okta = async () => {
-      try{
-        await createConfig({
-          clientId: '0oahc8kyygutGBIWk5d7',
-          redirectUri: 'com.okta.dev-50508157:/callback', // Customize your redirect URI
-          endSessionRedirectUri: 'com.okta.dev-50508157:/', // Customize your end session redirect URI
-          discoveryUri: 'https://dev-50508157.okta.com/oauth2/default', // Your Okta domain
-          scopes: ['openid', 'profile', 'offline_access'], // Customize your scopes
-          requireHardwareBackedKeyStore: false,
-        });
-        console.log('OktaAuth initialized successfully');
-      }catch (error)
-      {
-        console.error('Failed to initialize Okta', error);
-      }
-    }
-    okta();
-    }, []);
+  const [authState, setAuthState] = useState(null);
 
-  const handleOktaLogin = async () => {
+  const discovery = AuthSession.useAutoDiscovery(oktaConfig.issuerUrl);
+  const redirectUri = AuthSession.makeRedirectUri({
+    // For usage inbare and standalone
+    path: "callback",
+  });
+
+  const loginWithOkta = async () => {
     try {
-      await signInWithBrowser(); // Attempt Okta sign-in
-      const userInfo = await getUser(); // Get user info after successful login
-      console.log('User Info:', userInfo);
-      // Optionally, perform additional actions after successful login
+      const request = new AuthSession.AuthRequest({
+        clientId: oktaConfig.clientId,
+        redirectUri: oktaConfig.callbackUrl,
+        prompt: AuthSession.Prompt.SelectAccount,
+        scopes: ["openid", "profile"],
+        usePKCE: true,
+        extraParams: {},
+      });
+
+      const result = await request.promptAsync(discovery);
+
+      const code = JSON.parse(JSON.stringify(result)).params.code;
+      setAuthState(result);
+
+      console.log(code);
+
+      const tokenRequestParams = {
+        code,
+        clientId: oktaConfig.clientId,
+        redirectUri: redirectUri,
+        extraParams: {
+          code_verifier: String(request?.codeVerifier),
+        },
+      };
+      const tokenResult = await AuthSession.exchangeCodeAsync(
+        tokenRequestParams,
+        discovery
+      );
+
+      const accessToken = tokenResult.accessToken;
+
+      // make an HTTP direct call to the Okta User Info endpoint of our domain
+      const usersRequest = `${oktaConfig.issuerUrl}/v1/userinfo`;
+      const userPromise = await axios.get(usersRequest, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      console.log("\n\nUser data:", userPromise.data);
+      console.log("\n\nOkta Token: ", accessToken);
     } catch (error) {
-      console.error('Error during login:', error); // Log any errors during login
-      setError('Error during login. Please try again.'); // Set error message state
+      console.log("Error:", error);
     }
   };
+
+  // useEffect(() => {
+  //   const okta = async () => {
+  //     try{
+  //       await createConfig({
+  //         clientId: '0oahc8kyygutGBIWk5d7',
+  //         redirectUri: 'com.okta.dev-50508157:/callback', // Customize your redirect URI
+  //         endSessionRedirectUri: 'com.okta.dev-50508157:/', // Customize your end session redirect URI
+  //         discoveryUri: 'https://dev-50508157.okta.com/oauth2/default', // Your Okta domain
+  //         scopes: ['openid', 'profile', 'offline_access'], // Customize your scopes
+  //         requireHardwareBackedKeyStore: false,
+  //       });
+  //       console.log('OktaAuth initialized successfully');
+  //     }catch (error)
+  //     {
+  //       console.error('Failed to initialize Okta', error);
+  //     }
+  //   }
+  //   okta();
+  //   }, []);
+
+  // const handleOktaLogin = async () => {
+  //   try {
+  //     await signInWithBrowser(); // Attempt Okta sign-in
+  //     const userInfo = await getUser(); // Get user info after successful login
+  //     console.log('User Info:', userInfo);
+  //     // Optionally, perform additional actions after successful login
+  //   } catch (error) {
+  //     console.error('Error during login:', error); // Log any errors during login
+  //     setError('Error during login. Please try again.'); // Set error message state
+  //   }
+  // };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -188,7 +260,7 @@ export default function LoginScreen({onLogin}) {
             end={{ x: 1, y: 0 }} 
           className="p-3 m-5 rounded-md"
         >
-          <TouchableOpacity onPress={() => handleOktaLogin()} className="align-middle">
+          <TouchableOpacity onPress={() => loginWithOkta()} className="align-middle">
             <Text className="text-wit text-center font-bold text-lg">Okta Login</Text>
           </TouchableOpacity>
         </LinearGradient>
