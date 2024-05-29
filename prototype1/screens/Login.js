@@ -1,11 +1,24 @@
 import {View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
 import CryptoJS from 'crypto-js';
+import {
+  createConfig,
+  signInWithBrowser,
+  signOut,
+  getAccessToken,
+  isAuthenticated,
+  getUser,
+  getUserFromIdToken,
+  refreshTokens,
+  EventEmitter,
+} from '@okta/okta-react-native';
+
+import {oktaConfig}  from '../oktaConfig';
 
 
 export default function LoginScreen({onLogin}) {
@@ -13,6 +26,38 @@ export default function LoginScreen({onLogin}) {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [errorMessage, setError] = useState('');
+
+  useEffect(() => {
+    const okta = async () => {
+      try{
+        await createConfig({
+          clientId: '0oahc8kyygutGBIWk5d7',
+          redirectUri: 'com.okta.dev-50508157:/callback', // Customize your redirect URI
+          endSessionRedirectUri: 'com.okta.dev-50508157:/', // Customize your end session redirect URI
+          discoveryUri: 'https://dev-50508157.okta.com/oauth2/default', // Your Okta domain
+          scopes: ['openid', 'profile', 'offline_access'], // Customize your scopes
+          requireHardwareBackedKeyStore: false,
+        });
+        console.log('OktaAuth initialized successfully');
+      }catch (error)
+      {
+        console.error('Failed to initialize Okta', error);
+      }
+    }
+    okta();
+    }, []);
+
+  const handleOktaLogin = async () => {
+    try {
+      await signInWithBrowser(); // Attempt Okta sign-in
+      const userInfo = await getUser(); // Get user info after successful login
+      console.log('User Info:', userInfo);
+      // Optionally, perform additional actions after successful login
+    } catch (error) {
+      console.error('Error during login:', error); // Log any errors during login
+      setError('Error during login. Please try again.'); // Set error message state
+    }
+  };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -60,11 +105,6 @@ export default function LoginScreen({onLogin}) {
 
     setError("Email or Password is invalid.");
     
-  };
-
-  const handleMakeAccount = () => {
-    //handle Make Account
-    console.log('Make Account');
   };
 
   const handleForgotPassword = () => {
@@ -133,17 +173,25 @@ export default function LoginScreen({onLogin}) {
           </TouchableOpacity>
         </LinearGradient>
 
-        <View className="flex-row items-center ml-5 mr-5 mb-5">
+        <View className="flex-row items-center ml-5 mr-5">
           <View className="flex-1 h-0.5 bg-wit" />
           <View>
             <Text className="w-10 text-center text-wit" >Or</Text>
           </View>
           <View className="flex-1 h-0.5 bg-wit" />
         </View>
-        <View className="flex-row justify-center" >
-          <TouchableOpacity onPress={() => handleMakeAccount}>
-            <Text className="text-wit font-bold text-lg underline">Create Account</Text>
+
+        <View className="justify-center" >
+        <LinearGradient
+            colors={['#6f39db', '#5FA6F4']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }} 
+          className="p-3 m-5 rounded-md"
+        >
+          <TouchableOpacity onPress={() => handleOktaLogin()} className="align-middle">
+            <Text className="text-wit text-center font-bold text-lg">Okta Login</Text>
           </TouchableOpacity>
+        </LinearGradient>
         </View>
 
       </ImageBackground>
