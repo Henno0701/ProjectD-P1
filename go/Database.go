@@ -184,33 +184,29 @@ func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
 	return id, nil
 }
 
-func GetAllReservationOfDate(db *sql.DB, datum time.Time) (int, error) {
-	// Decode the JSON request body into a struct
-	var requestData struct {
-		Date string `json:"date"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Get all reservation of a specific date
+func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error) {
+	// Get all reservations of a specific date
 	rows, err := db.Query("SELECT * FROM reservations WHERE Date = ?", datum)
 	if err != nil {
-		log.Fatal(err) // log.Fatal will log the error and stop the program
+		return nil, fmt.Errorf("query error: %v", err) // return the error
 	}
 	defer rows.Close()
 
-	// Check if the laadpalen are not null
 	var reservations []Reservation
+
+	// Iterate through the result set
 	for rows.Next() {
 		var reservation Reservation
+		// Scan the row into the reservation object
+		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
+			return nil, fmt.Errorf("scan error: %v", err) // return the error
+		}
 		reservations = append(reservations, reservation)
 	}
 
 	// Check for errors from iterating over rows
 	if err := rows.Err(); err != nil {
-		log.Fatal(err) // log.Fatal will log the error and stop the program
+		return nil, fmt.Errorf("rows iteration error: %v", err) // return the error
 	}
 	
 	// Return the reservations

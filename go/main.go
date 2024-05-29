@@ -47,7 +47,7 @@ func main() {
 
 	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
-        GetAllReservationOfDate(w, r, database)
+        GetAllReservationOfDateHandler(w, r, database)
     })
 
 	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
@@ -112,6 +112,42 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 
+}
+
+func GetAllReservationOfDateHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		Date string `json:"Date"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Parse the date string into a time.Time object
+	date, err := time.Parse(time.RFC3339, requestData.Date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Handle the return values from GetAllReservationOfDate
+	reservations, err := GetAllReservationOfDate(database, date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the reservations to JSON
+	reservationsJSON, err := json.Marshal(reservations)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(reservationsJSON)
 }
 
 func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {

@@ -73,7 +73,7 @@ func GetApiData(db *sql.DB, link string, token string, gegevens string) {
 		for _, evse := range station.Evses {
 			// for each roep je dan de method die toevoegt aan de database
 			UpdateLaadpalenDB(db, evse.ID, evse.Status)
-			fmt.Printf("added laadpaal met id\n", evse.ID, evse.Status)
+			// fmt.Printf("added laadpaal met id\n", evse.ID, evse.Status)
 		}
 	}
 }
