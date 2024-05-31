@@ -186,7 +186,7 @@ func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
 
 func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error) {
 	// Get all reservations of a specific date
-	rows, err := db.Query("SELECT * FROM reservations WHERE Date = ?", datum)
+	rows, err := db.Query("SELECT * FROM reservations WHERE DATE(Date) = DATE(?)", datum) // Converting both dates to DATE to ignore the time part
 	if err != nil {
 		return nil, fmt.Errorf("query error: %v", err) // return the error
 	}
@@ -201,8 +201,6 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
 			return nil, fmt.Errorf("scan error: %v", err) // return the error
 		}
-
-		fmt.Println("Reservation ID:", reservation.ID)
 		
 		reservations = append(reservations, reservation)
 	}

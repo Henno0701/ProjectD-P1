@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IP } from '@env';
 
 import GenerateDateButtons from '../components/Buttons-Date';
 
@@ -107,7 +108,7 @@ export default function StationsReserveScreen() {
     // Function to  account name from server
     const AddToDatabase = async (date) => {
         try {
-            fetch('http://192.168.1.30:8080/addReservation', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+            fetch(`http://${IP}:8080/addReservation`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
@@ -137,7 +138,7 @@ export default function StationsReserveScreen() {
         console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
         
         // Create a new date object with the selected date and time 
-        date.setHours(time + 2); // Adding 2 hours to the time because of the timezone difference
+        date.setHours(time);
         date.setMinutes(0);
         date.setSeconds(0);
         date.setMilliseconds(0);

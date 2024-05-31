@@ -4,12 +4,13 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBolt, faCalendarTimes, faCalendarWeek, faCar, faChargingStation, faChevronRight, faExclamation, faPlugCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { IP } from '@env';
 
 import ButtonList from '../components/Button-List';
 
 const GetAvailableStations = async (date) => {
     try {
-        const response = await fetch('http://192.168.1.30:8080/getAvailableStations', {
+        const response = await fetch(`http://${IP}:8080/getAvailableStations`, {
             method: "POST",
             body: JSON.stringify({
                 Date: date,

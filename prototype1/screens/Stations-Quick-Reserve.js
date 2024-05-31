@@ -1,15 +1,19 @@
 import { Button, Text, View, Pressable, ScrollView } from 'react-native';
 import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import QuickReserveItem from '../components/Quick-Reserve-Item';
+import { IP } from '@env';
+
+
 
 
 export default function StationsQuickReserveScreen() {
+    const [NumberAvailableStations, setNumberAvailableStations] = useState([]);
     const GetAllReservationsOfDate = async (date) => {
         try {
-            const response = await fetch('http://192.168.1.30:8080/getAllReservationsOfDate', {
+            const response = await fetch(`http://${IP}:8080/getAllReservationsOfDate`, {
                 method: "POST",
                 body: JSON.stringify({
                     Date: date,
@@ -24,8 +28,8 @@ export default function StationsQuickReserveScreen() {
             }
     
             const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
-            // console.log(json);
-            return json;
+            console.log(json);
+            setNumberAvailableStations(json);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -33,8 +37,7 @@ export default function StationsQuickReserveScreen() {
 
     useEffect(() => {
         (async () => {
-            const NumberAvailable = await GetAllReservationsOfDate(new Date("2024-05-21")); // Convert the response to a number
-            console.log(NumberAvailable + " stations are available");
+            await GetAllReservationsOfDate(new Date("2024-06-03")); // Convert the response to a number
         })();
     }, []);
 
@@ -43,7 +46,7 @@ export default function StationsQuickReserveScreen() {
       <View className="flex-1 bg-main_bg_color items-center">
         <ScrollView>
             <View className="p-3">
-                <QuickReserveItem timeSlots={[9, 10, 11, 12, 13, 14, 15, 16, 17, 18]} />
+                <QuickReserveItem timeSlots={NumberAvailableStations} />
             </View>
         </ScrollView>
 

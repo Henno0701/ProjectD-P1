@@ -8,7 +8,10 @@ const QuickReserveItem = ({ timeSlots, setPressedTimeSlot }) => {
     const [clickedID, setClickedID] = useState(null);
 
     const FormatTime = (time) => {
-        var timeString = time.toString() + ":00" + " - " + (time + 1).toString() + ":00";
+        var date = new Date(time);
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var timeString = hours.toString() + ":" + minutes.toString().padStart(2, '0') + " - " + (hours + 1).toString() + ":" + minutes.toString().padStart(2, '0');
         return timeString;
     }
 
@@ -18,17 +21,17 @@ const QuickReserveItem = ({ timeSlots, setPressedTimeSlot }) => {
     };
 
     return (
-        timeSlots.map((timeSlot, index) => (
-            <TouchableOpacity key={index} className="flex-row w-full items-center mb-3" onPress={() => handleClick(index, timeSlot)}>
-                <View className="bg-main_box_color w-full rounded-lg p-2.5" style={{backgroundColor: index === clickedID ? '#1E80ED' :  '#1E1E1E'}}>
+        timeSlots.map((timeSlot) => (
+            <TouchableOpacity key={timeSlot.laadpaalID} className="flex-row w-full items-center mb-3" onPress={() => handleClick(timeSlot.laadpaalID, timeSlot)}>
+                <View className="bg-main_box_color w-full rounded-lg p-2.5" style={{backgroundColor: timeSlot.laadpaalID === clickedID ? '#1E80ED' :  '#1E1E1E'}}>
                     <View className="flex flex-row items-center justify-between">
                         <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Available Slot</Text>
                         <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
                     </View>
                     <View className="flex-row w-full items-center justify-between mt-2">
-                        <View className="flex-row items-center justify-between w-3/5 rounded-lg">
-                            <Text className={`text-lg ${index === clickedID ? "text-[#fff]" : "text-profile-grijs"}`} style={styles.font_thin}>Today</Text>
-                            <Text className="text-lg text-[#fff]" style={styles.font_semibold}>{FormatTime(timeSlot)}</Text>
+                        <View className="flex-row items-center justify-between w-full rounded-lg">
+                            <Text className={`text-lg basis-1/3 ${timeSlot.laadpaalID === clickedID ? "text-[#fff]" : "text-profile-grijs"}`} style={styles.font_thin}>Today</Text>
+                            <Text className="text-lg basis-2/3 text-[#fff]" style={styles.font_semibold}>{FormatTime(timeSlot.date)}</Text>
                         </View>
                     </View>
                 </View>
