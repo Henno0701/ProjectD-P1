@@ -93,12 +93,12 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 	}
 	log.Println("Received date:", requestData.Date)
 	// Parse the date string into a time.Time object
-	date, err := time.Parse(time.RFC3339, requestData.Date)
+	date, err := ParseDate(requestData.Date)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid date format: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+	log.Println("Parsed date:", date)
 	var filtered []Laadpaal
 	reservationId, err := CheckforReservation(db, date)
 	if err != nil {

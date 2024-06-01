@@ -22,11 +22,11 @@ export default function StationsQuickReserveScreen() {
                     "Content-type": "application/json; charset=UTF-8"
                 }
             });
-    
+
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-    
+
             const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
             console.log(json);
             setNumberAvailableStations(json);
@@ -43,19 +43,19 @@ export default function StationsQuickReserveScreen() {
 
 
     return (
-      <View className="flex-1 bg-main_bg_color items-center">
-        <ScrollView>
-            <View className="p-3">
-                <QuickReserveItem timeSlots={NumberAvailableStations} />
-            </View>
-        </ScrollView>
+        <View className="flex-1 bg-main_bg_color items-center">
+            <ScrollView>
+                <View className="p-3">
+                    <QuickReserveItem timeSlots={NumberAvailableStations} />
+                </View>
+            </ScrollView>
 
-        <View className='w-full p-3'>
-            <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center">
-                <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
-            </Pressable>
+            <View className='w-full p-3'>
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center">
+                    <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
+                </Pressable>
+            </View>
         </View>
-      </View>
     );
 }
 
@@ -75,4 +75,4 @@ const styles = StyleSheet.create({
     font_bold: {
         fontFamily: 'Montserrat_700Bold',
     }
-  });
+});
