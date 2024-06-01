@@ -54,6 +54,11 @@ func main() {
         // Call the actual handler function with the argument
         GetAvailableStations(w, r, database)
     }) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
+
+	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request){
+        // Call the actual handler function with the argument
+        PriorityScheduler(w, r, database)
+    }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
 	
 	fmt.Println("Server is running...")
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
@@ -123,10 +128,10 @@ func GetAllReservationOfDateHandler(w http.ResponseWriter, r *http.Request, data
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// Parse the date string into a time.Time object
-	date, err := time.Parse(time.RFC3339, requestData.Date)
+	// Parse the date string into a time.Time object nu met reuseable method
+	date, err := ParseDate(requestData.Date)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "Invalid date format: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -185,4 +190,13 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
+}
+
+func ParseDate(dateStr string) (time.Time, error) {
+	const format = time.RFC3339
+	date, err := time.Parse(format, dateStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid date format: %s", dateStr)
+	}
+	return date, nil
 }
