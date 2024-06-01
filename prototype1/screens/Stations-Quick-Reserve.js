@@ -6,11 +6,10 @@ import { StyleSheet } from 'react-native';
 import QuickReserveItem from '../components/Quick-Reserve-Item';
 import { IP } from '@env';
 
-
-
-
 export default function StationsQuickReserveScreen() {
-    const [NumberAvailableStations, setNumberAvailableStations] = useState([]);
+    const [ ReservedStations, setReservedStations ] = useState([])
+    const [ StandardTimeslots, setStandardTimeslots ] = useState([])
+    const [ NumberAvailableStations, setNumberAvailableStations ] = useState([]);
     const GetAllReservationsOfDate = async (date) => {
         try {
             const response = await fetch(`http://${IP}:8080/getAllReservationsOfDate`, {
