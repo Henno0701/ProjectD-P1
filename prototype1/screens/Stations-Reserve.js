@@ -94,15 +94,55 @@ export default function StationsReserveScreen() {
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
+    const getAllReservationsOfDate = async (date) => {
+        try {
+            const response = await fetch(`http://${IP}:8080/getAllReservationsOfDate`, {
+                method: "POST",
+                body: JSON.stringify({ Date: date }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json || [];
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    };
+
+    const filterUnavailableReservation = (timeslots, reservedStations) => {
+        const filteredTimeslots = timeslots.filter(timeslot => 
+            !reservedStations.some(unavailable => 
+                new Date(unavailable.date).getHours() === timeslot
+            )
+        );
+
+        console.log(filteredTimeslots);
+        return filteredTimeslots;
+    };
 
     // In the code below we are getting the timeslots of the day by every date change
     useEffect(() => {
-        // first reset the time state to null
-        setSelectedTime(null);
+        const fetchReservations = async () => {
+            // first reset the time state to null
+            setSelectedTime(null);
 
-        // generate every upcoming hour of the given day
-        var EveryHour = timesSlots(selectedDate);
-        setTimes(EveryHour);
+            // generate every upcoming hour of the given day
+            var EveryHour = timesSlots(selectedDate);
+            const Reservations = await getAllReservationsOfDate(selectedDate);
+            console.log(Reservations);
+            var FilteredTimes = filterUnavailableReservation(EveryHour, Reservations);
+            setTimes(FilteredTimes);
+        };
+
+        fetchReservations();
+
     }, [selectedDate]);
 
     // Function to  account name from server
