@@ -62,10 +62,13 @@ func main() {
 
 	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request){
         // Call the actual handler function with the argument
-        PriorityScheduler(w, r, database)
+        GetLaadpalenQRhandeler(w, r, database)
     }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
 	
 	fmt.Println("Server is running...")
+	// roep priority scheduler aan die altijd runt
+	fmt.Println("Starting priority scheduler...")
+	go PriorityScheduler(database)
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
