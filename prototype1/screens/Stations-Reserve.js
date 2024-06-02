@@ -1,4 +1,4 @@
-import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView, Modal, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { styled } from 'nativewind';
@@ -95,6 +95,7 @@ export default function StationsReserveScreen() {
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
     const getAllReservationsOfDate = async (date) => {
+        if (!date) return []; // Return empty array if date is null or undefined
         try {
             const response = await fetch(`http://${IP}:8080/getAllReservationsOfDate`, {
                 method: "POST",
@@ -123,11 +124,9 @@ export default function StationsReserveScreen() {
             )
         );
 
-        console.log(filteredTimeslots);
         return filteredTimeslots;
     };
 
-    // In the code below we are getting the timeslots of the day by every date change
     useEffect(() => {
         const fetchReservations = async () => {
             // first reset the time state to null
@@ -135,15 +134,15 @@ export default function StationsReserveScreen() {
 
             // generate every upcoming hour of the given day
             var EveryHour = timesSlots(selectedDate);
-            const Reservations = await getAllReservationsOfDate(selectedDate);
-            console.log(Reservations);
-            var FilteredTimes = filterUnavailableReservation(EveryHour, Reservations);
-            setTimes(FilteredTimes);
+            const Reservations = await getAllReservationsOfDate(selectedDate); // Await every reservation of the selected date
+            var FilteredTimes = filterUnavailableReservation(EveryHour, Reservations); // Filter out every unavailable reservation
+
+            setTimes(FilteredTimes); // Set the timeslots of the day
         };
 
         fetchReservations();
 
-    }, [selectedDate]);
+    }, [selectedDate]); // Run the effect when the selected date changes
 
     // Function to  account name from server
     const AddToDatabase = async (date) => {
@@ -164,9 +163,11 @@ export default function StationsReserveScreen() {
             })
             .then(response => {
                 if (!response.ok) {
-                  throw new Error('Network response was not ok');
+                    // when the response is not ok return an not ok status
+                    return false;
                 }
-                return response.json(); // Assuming response is JSON, use appropriate method accordingly
+                
+                return true;
               })
         } catch (error) {
           console.error('Error:', error);
@@ -183,15 +184,34 @@ export default function StationsReserveScreen() {
         date.setSeconds(0);
         date.setMilliseconds(0);
 
-        // Add the reservation to the database
-        AddToDatabase(date);
+        // Add to the database
+        const result = AddToDatabase(date);
 
-        setIndicator(true);
-
-        setInterval(() => {
-            setIndicator(false);
-        }, 5000);
+        if (result) {
+            createConfirmationAlert();
+        } else {
+            createBadRequestAlert();
+        }
+        
     }
+
+    const resetForm = () => {
+        setSelectedDate(null);
+        setSelectedTime(null);
+        setSelectedItemSelect(0);
+    }
+
+    const createConfirmationAlert = () =>
+        Alert.alert('Reservation Confirmed', 'Your reservation has been placed in the system.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+          }]);
+
+    const createBadRequestAlert = () =>
+        Alert.alert('Reservation Canceled', 'There seems to be a mixup. Try it again.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+            }]);
 
     return (
       <View className="flex-1 relative bg-main_bg_color items-center">
@@ -275,7 +295,7 @@ export default function StationsReserveScreen() {
         
             {selectedTime && (
             <View className='w-full p-3'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect) + resetForm()}>
                     <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                     {/* <ActivityIndicator color="#fff" className="ml-2" /> */}
                 </Pressable>
