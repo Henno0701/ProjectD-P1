@@ -29,8 +29,10 @@ var (
 )
 
 func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	log.Println("Received request for /items")
 	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
 	if err != nil {
+		log.Println("Error querying database:", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -41,13 +43,14 @@ func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		var item Item
 		err := rows.Scan(&item.ID, &item.UserID, &item.LaadpaalID, &item.Date, &item.Priority, &item.Opgeladen, &item.Opgehaald)
 		if err != nil {
+			log.Println("Error scanning row:", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		items = append(items, item)
 	}
 
-	fmt.Println("Items:", items)
+	log.Println("Returning items:", items)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(items)
@@ -57,7 +60,7 @@ func main() {
 	// Open database connection
 	database, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
-		return
+		log.Fatalf("Error opening database: %v", err)
 	}
 	defer database.Close()
 
@@ -82,26 +85,26 @@ func main() {
 	}
 
 	// message in the console so you know the server is running
-	fmt.Println("Server is running...")
+	log.Println("Server is running...")
 
-	// Setup routes
 	http.HandleFunc("/items", func(w http.ResponseWriter, r *http.Request) {
 		getItems(w, r, database)
 	})
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
-	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
+	http.HandleFunc("/getName", getNameHandler) // Endpoint to set the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 
-	// Start the server with CORS headers
-	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
+	log.Fatal(http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux)))
 }
 
+// Start the server with CORS headers
 func addCorsHeaders(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 		handler.ServeHTTP(w, r)
@@ -121,6 +124,7 @@ func getNameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set response headers and write the response
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
@@ -212,11 +216,11 @@ func InsertDummyData(db *sql.DB) error {
 		return err
 	}
 	// Add a reservation
-	date, _ := time.Parse("02-01-2006", "10-10-2010")
+	date, _ := time.Parse("2006-01-02", "2025-06-01")
 	if err := AddReservation(db, 1, 1, date, 1, false, false); err != nil {
 		return err
 	}
-	// Add a medewerker
+	// Add a worker
 	if err := AddMedewerker(db, "Jullian", "Goncalves", "1037131@hr.nl", "Wijnhaven 107", "0612345678", "1234AB", "Zuid-Holland", "Volkswagen Passat", "5000"); err != nil {
 		return err
 	}

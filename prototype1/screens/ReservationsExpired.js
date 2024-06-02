@@ -47,26 +47,18 @@ const ReservationsExpired = () => {
             }
         };
 
-        var month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        var monthS = ["Jan", "Feb", "Mrt", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const monthS = ["Jan", "Feb", "Mrt", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
         if (!short) return month[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
         else return monthS[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
-    }
+    };
 
     // Check if the reservation is expired and show only the expired ones
     const expiredReservations = reservations.filter((reservation) => {
-        return new Date(reservation.date) < new Date();
+        return new Date(reservation.Date) < new Date();
     });
 
-    const navigation = useNavigation();
-
-    const handleReservationPress = () => {
-        // Navigate to the "Expired" screen
-        navigation.navigate('Reservations');
-    };
-
-    // Function to render each reservation item
     const renderReservationItem = ({ item }) => (
         <View className={`${item.Date == new Date() ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
             <View className="flex-row items-center justify-between mb-1">
@@ -96,7 +88,7 @@ const ReservationsExpired = () => {
     return (
         <View className="flex-1 bg-main_bg_color p-3">
             <FlatList
-                data={reservations}
+                data={expiredReservations}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderReservationItem}
             />
@@ -119,26 +111,9 @@ const stylesbox = StyleSheet.create({
     },
     text: {
         fontSize: 16,
+        flex: 1,
+        textAlign: 'center',
     },
-});
-
-
-const styles = StyleSheet.create({
-    font_regular: {
-        fontFamily: 'Montserrat_400Regular',
-    },
-    font_thin: {
-        fontFamily: 'Montserrat_300Light',
-    },
-    font_medium: {
-        fontFamily: 'Montserrat_500Medium',
-    },
-    font_semibold: {
-        fontFamily: 'Montserrat_600SemiBold',
-    },
-    font_bold: {
-        fontFamily: 'Montserrat_700Bold',
-    }
 });
 
 export default ReservationsExpired;
