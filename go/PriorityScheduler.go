@@ -14,7 +14,8 @@ func PriorityScheduler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	var requestData struct {
 		Date       string `json:"Date"`
 	}
-
+    
+    // eigenlijk zou je hier al moeten kijken in de api 1-5 minuten kunnen er tussen zijn, kijken welke nog steeds occupied zijn en tbh idk krijg brain lagg nu
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
