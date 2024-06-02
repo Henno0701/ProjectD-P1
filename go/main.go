@@ -25,12 +25,6 @@ func main() {
 	}
 	defer database.Close() // Close the database connection when main function exits
 
-	// drop QuickReservations table
-	if err := DropQuickReservations(database); err != nil {
-		fmt.Println("Error dropping QuickReservations table:", err)
-		return
-	}
-
 	// Create tables
 	if err := Maketables(database); err != nil {
 		fmt.Println("Error creating tables:", err)
@@ -46,6 +40,7 @@ func main() {
   	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
 
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
@@ -132,6 +127,29 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 
+}
+
+func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get all laadpalen
+		laadpalen, err := GetAllLaadpalen(database)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the laadpalen to JSON
+		laadpalenJSON, err := json.Marshal(laadpalen)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Send the response back to the client
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(laadpalenJSON)
+	}
 }
 
 func GetAllReservationOfDateHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {

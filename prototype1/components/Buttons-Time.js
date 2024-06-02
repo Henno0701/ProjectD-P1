@@ -18,7 +18,7 @@ const GenerateTimeSlotsButtons = ({ times, setSelectedTime }) => {
 
     return (
         <View style={{ width: '100%', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10 }}>
-            {times.map((time, index) => (
+            {Object.entries(times).map(([time, value], index) => (
                 <TouchableOpacity 
                     key={index} 
                     style={{
@@ -30,7 +30,7 @@ const GenerateTimeSlotsButtons = ({ times, setSelectedTime }) => {
                         alignItems: 'center',
                     }}
                     onPress={() => isPressed(time, index)}>
-                    <Text style={{ color: '#fff', fontSize: 18, lineHeight: 28, fontFamily: 'Montserrat_400Regular'}} >{time}:00</Text>
+                    <Text style={{ color: '#fff', fontSize: 18, lineHeight: 28, fontFamily: 'Montserrat_400Regular'}}>{time}:00</Text>
                 </TouchableOpacity>
             ))}
         </View>
