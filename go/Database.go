@@ -45,8 +45,8 @@ func AddReservation(db *sql.DB, userID int, laadpaalID int, date time.Time, prio
 	return err
 }
 
-func AddQuickReservation(db *sql.DB, userID int, laadpaalID int, date time.Time, priority int) error {
-	_, err := db.Exec("INSERT INTO QuickReserveReservations (UserID, LaadpaalID, Date, Priority) VALUES (?, ?, ?, ?)", userID, laadpaalID, date, priority)
+func AddQuickReservation(db *sql.DB, userID int, date time.Time, priority int) error {
+	_, err := db.Exec("INSERT INTO QuickReserveReservations (UserID, Date, Priority) VALUES (?, ?, ?)", userID, date, priority)
 	return err
 }
 

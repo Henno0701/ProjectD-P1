@@ -8,7 +8,6 @@ import SelectDropdown from 'react-native-picker-select';
 import { IP } from '@env';
 
 export default function StationsQuickReserveScreen() {
-    const [PressedLaadpaalID, setPressedLaadpaalID] = useState(null); // The selected charging station
     const [PressedTimeSlot, setPressedTimeSlot] = useState(null); // The selected timeslot
     const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
 
@@ -16,7 +15,27 @@ export default function StationsQuickReserveScreen() {
     const [StandardTimeslots, setStandardTimeslots] = useState({});
     const [NumberAvailableStations, setNumberAvailableStations] = useState([]);
 
-    const generateTimeslots = (AmountOfChargingStations = 1, CurrentDate = new Date("2024-06-03")) => {
+    const getLaadpalen = async () => {
+        try {
+            const response = await fetch(`http://${IP}:8080/getLaadpalen`, {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const generateTimeslots = (AmountOfChargingStations = 1, CurrentDate = new Date()) => {
         const MinTimeHour = 6; // Minimum time slot hour
         const MaxTimeHour = 20; // Maximum time slot hour
 
@@ -89,13 +108,12 @@ export default function StationsQuickReserveScreen() {
         fetchData();
     }, []);
 
-    const AddQuickReservation = async (laadpaalID, date, priority) => {
+    const AddQuickReservation = async (date, priority) => {
         try {
             const response = await fetch(`http://${IP}:8080/addQuickReservation`, {
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
-                    LaadpaalID: laadpaalID, 
                     Date: date,
                     Priority: priority
                 }),
@@ -116,15 +134,14 @@ export default function StationsQuickReserveScreen() {
     }
 
     const handleSubmit = async () => {
-        if (PressedTimeSlot !== null && PressedLaadpaalID !== null) {
-            // console.log(PressedTimeSlot, PressedLaadpaalID, selectedItemSelect)
-            await AddQuickReservation(PressedLaadpaalID, PressedTimeSlot, selectedItemSelect);
+        if (PressedTimeSlot !== null) {
+            // console.log(PressedTimeSlot, selectedItemSelect)
+            await AddQuickReservation(PressedTimeSlot, selectedItemSelect);
         }
     };
 
     const resetForm = () => {
         setPressedTimeSlot(null);
-        setPressedLaadpaalID(null);
         setSelectedItemSelect(0);
     };
 
@@ -133,7 +150,7 @@ export default function StationsQuickReserveScreen() {
         <View className="flex-1 bg-main_bg_color items-center">
             <ScrollView>
                 <View className="p-3">
-                    <QuickReserveItem timeSlots={NumberAvailableStations} setPressedTimeSlot={setPressedTimeSlot} setPressedLaadpaalID={setPressedLaadpaalID} />
+                    <QuickReserveItem timeSlots={NumberAvailableStations} setPressedTimeSlot={setPressedTimeSlot} />
                     
                     {PressedTimeSlot && (
                         <View className="flex-row w-full items-center mb-10">

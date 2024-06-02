@@ -25,11 +25,18 @@ func main() {
 	}
 	defer database.Close() // Close the database connection when main function exits
 
+	// drop QuickReservations table
+	if err := DropQuickReservations(database); err != nil {
+		fmt.Println("Error dropping QuickReservations table:", err)
+		return
+	}
+
 	// Create tables
 	if err := Maketables(database); err != nil {
 		fmt.Println("Error creating tables:", err)
 		return
 	}
+
 
   	// zorg dat de db up to date is
 	UpdateDB()
@@ -202,7 +209,6 @@ func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database
 	// Decode the JSON request body into a struct
 	var requestData struct {
 		UserID     int    `json:"UserID"`
-		LaadpaalID int    `json:"LaadpaalID"`
 		Date       string `json:"Date"`
 		Priority   int    `json:"Priority"`
 	}
@@ -220,7 +226,7 @@ func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database
 	}
 
 	// Insert the reservation into the database
-	if err := AddQuickReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority); err != nil {
+	if err := AddQuickReservation(database, requestData.UserID, date, requestData.Priority); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

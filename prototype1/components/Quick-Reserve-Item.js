@@ -4,7 +4,7 @@ import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StyleSheet } from 'react-native';
 
-const QuickReserveItem = ({ timeSlots, setPressedTimeSlot, setPressedLaadpaalID }) => {
+const QuickReserveItem = ({ timeSlots, setPressedTimeSlot }) => {
     const [clickedID, setClickedID] = useState(null);
 
     const FormatTime = (time) => {
@@ -14,16 +14,15 @@ const QuickReserveItem = ({ timeSlots, setPressedTimeSlot, setPressedLaadpaalID 
         return timeString;
     }
 
-    const handleClick = async (LaadpaalID, time) => {
+    const handleClick = async (time) => {
         setClickedID(time);
         await setPressedTimeSlot(time);
-        await setPressedLaadpaalID(LaadpaalID);
     };
 
     return (
         Object.entries(timeSlots).map(([Laadpaal, timeSlots]) => (
             timeSlots.map((timeSlot) => (
-                <TouchableOpacity key={timeSlot} className="flex-row w-full items-center mb-3" onPress={() => handleClick(parseInt(Laadpaal), timeSlot)}>
+                <TouchableOpacity key={timeSlot} className="flex-row w-full items-center mb-3" onPress={() => handleClick(timeSlot)}>
                     <View className="bg-main_box_color w-full rounded-lg p-2.5" style={{backgroundColor: timeSlot === clickedID ? '#1E80ED' :  '#1E1E1E'}}>
                         <View className="flex flex-row items-center justify-between">
                             <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Available Slot</Text>
