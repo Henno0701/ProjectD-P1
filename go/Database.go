@@ -158,6 +158,7 @@ func GetAllLaadpalen(db *sql.DB) ([]Laadpaal, error) {
 	log.Println("stuur lijst terug")
 	return laadpalen, nil
 }
+
 func CheckforReservation(db *sql.DB, datum time.Time) (int, error) {
 	log.Println("Checking for reservation in the database")
 	// Prepare the SQL query

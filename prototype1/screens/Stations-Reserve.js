@@ -90,6 +90,26 @@ export default function StationsReserveScreen() {
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
+    const getAllChargingStations = async () => {
+        try {
+            const response = await fetch(`http://${IP}:8080/getAllLaadpalen`, {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
     const getAllReservationsOfDate = async (date) => {
         if (!date) return []; // Return empty array if date is null or undefined
         try {
@@ -113,13 +133,32 @@ export default function StationsReserveScreen() {
         }
     };
 
-    const filterUnavailableReservation = (timeslots, reservedStations) => {
-        const filteredTimeslots = timeslots.filter(timeslot => 
-            !reservedStations.some(unavailable => 
-                new Date(unavailable.date).getHours() === timeslot
-            )
-        );
-
+    const filterUnavailableReservation = (timeslots, reservedStations, AllLaadpalen) => {
+        const filteredTimeslots = {};
+    
+        // First initialize the filteredTimeslots object with empty arrays
+        timeslots.forEach(hour => {
+            filteredTimeslots[hour] = [];
+        });
+    
+        // Iterate over each station in AllLaadpalen
+        AllLaadpalen.forEach(station => {
+            const stationID = station.id;
+    
+            // Iterate over each hour in timeslots
+            timeslots.forEach(hour => {
+                // Check if this station is reserved at this hour
+                const isReserved = reservedStations.some(reservation => {
+                    return new Date(reservation.date).getHours() === hour && reservation.laadpaalID === stationID;
+                });
+    
+                // If the station is not reserved at this hour, add it to the filteredTimeslots
+                if (!isReserved) {
+                    filteredTimeslots[hour].push(stationID);
+                }
+            });
+        });
+    
         return filteredTimeslots;
     };
 
@@ -131,7 +170,10 @@ export default function StationsReserveScreen() {
             // generate every upcoming hour of the given day
             var EveryHour = timesSlots(selectedDate);
             const Reservations = await getAllReservationsOfDate(selectedDate); // Await every reservation of the selected date
-            var FilteredTimes = filterUnavailableReservation(EveryHour, Reservations); // Filter out every unavailable reservation
+            const AllChargingStations = await getAllChargingStations(); // Get all charging stations
+            const FilteredTimes = filterUnavailableReservation(EveryHour, Reservations, AllChargingStations);
+            console.log(FilteredTimes);
+            
 
             setTimes(FilteredTimes); // Set the timeslots of the day
         };
@@ -141,13 +183,13 @@ export default function StationsReserveScreen() {
     }, [selectedDate]); // Run the effect when the selected date changes
 
     // Function to  account name from server
-    const AddToDatabase = async (date) => {
+    const AddToDatabase = async (date, laadpaalID) => {
         try {
             fetch(`http://${IP}:8080/addReservation`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
-                    LaadpaalID: 1,
+                    LaadpaalID: laadpaalID,
                     Date: date,
                     Opgeladen: false,
                     Opgehaald: false,
@@ -167,20 +209,29 @@ export default function StationsReserveScreen() {
         } catch (error) {
           console.error('Error:', error);
         }
-      };
+    };
+
+    const getChargingStationID = async (date) => {
+        const hour = date.getHours(); // Get the hour of the given date
+        const foundTime = Object.entries(times).find(([time, value]) => parseInt(time, 10) === hour); // Find the time slot in the times array
+        return foundTime ? foundTime[1][0] : null; // Return the first ID in the list for the found time slot
+    };
+            
+        
 
     const addReservation = async (date, time) => {
         // Save the reservation to the database
-        // console.log("date: " + date + ", time: " + time + ");
-        
         // Create a new date object with the selected date and time 
         date.setHours(time);
         date.setMinutes(0);
         date.setSeconds(0);
         date.setMilliseconds(0);
 
+        // Get the first stationID of a given date time
+        const stationID = await getChargingStationID(date)
+
         // Add to the database
-        const result = AddToDatabase(date);
+        const result = AddToDatabase(date, stationID);
 
         if (result) {
             createConfirmationAlert();
