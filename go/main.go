@@ -31,8 +31,9 @@ func main() {
 		return
 	}
 
-  // zorg dat de db up to date is
+  	// zorg dat de db up to date is
 	UpdateDB()
+	
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
   	http.HandleFunc("/readAccounts", GetAccounts)
@@ -42,6 +43,11 @@ func main() {
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
         AddReservationHandler(w, r, database)
+    })
+
+	http.HandleFunc("/addQuickReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+        // Call the actual handler function with the argument
+        AddQuickReservationHandler(w, r, database)
     })
 
 	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
@@ -177,10 +183,41 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 		return
 	}
 
-	// fmt.Println("Received reservation:", requestData)
-
 	// Insert the reservation into the database
 	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{}"))
+}
+
+func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		UserID     int    `json:"UserID"`
+		LaadpaalID int    `json:"LaadpaalID"`
+		Date       string `json:"Date"`
+		Priority   int    `json:"Priority"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Parse the date string into a time.Time object
+	date, err := time.Parse(time.RFC3339, requestData.Date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Insert the reservation into the database
+	if err := AddQuickReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

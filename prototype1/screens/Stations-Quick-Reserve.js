@@ -1,12 +1,17 @@
 import { Button, Text, View, Pressable, ScrollView } from 'react-native';
-import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
+import { faCalendarDays, faBarChart } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import QuickReserveItem from '../components/Quick-Reserve-Item';
+import SelectDropdown from 'react-native-picker-select';
 import { IP } from '@env';
 
 export default function StationsQuickReserveScreen() {
+    const [PressedLaadpaalID, setPressedLaadpaalID] = useState(null); // The selected charging station
+    const [PressedTimeSlot, setPressedTimeSlot] = useState(null); // The selected timeslot
+    const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
+
     const [ReservedStations, setReservedStations] = useState([]);
     const [StandardTimeslots, setStandardTimeslots] = useState({});
     const [NumberAvailableStations, setNumberAvailableStations] = useState([]);
@@ -84,20 +89,107 @@ export default function StationsQuickReserveScreen() {
         fetchData();
     }, []);
 
+    const AddQuickReservation = async (laadpaalID, date, priority) => {
+        try {
+            const response = await fetch(`http://${IP}:8080/addQuickReservation`, {
+                method: "POST",
+                body: JSON.stringify({
+                    UserID: 1,
+                    LaadpaalID: laadpaalID, 
+                    Date: date,
+                    Priority: priority
+                }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const handleSubmit = async () => {
+        if (PressedTimeSlot !== null && PressedLaadpaalID !== null) {
+            // console.log(PressedTimeSlot, PressedLaadpaalID, selectedItemSelect)
+            await AddQuickReservation(PressedLaadpaalID, PressedTimeSlot, selectedItemSelect);
+        }
+    };
+
+    const resetForm = () => {
+        setPressedTimeSlot(null);
+        setPressedLaadpaalID(null);
+        setSelectedItemSelect(0);
+    };
+
 
     return (
         <View className="flex-1 bg-main_bg_color items-center">
             <ScrollView>
                 <View className="p-3">
-                    <QuickReserveItem timeSlots={NumberAvailableStations} />
+                    <QuickReserveItem timeSlots={NumberAvailableStations} setPressedTimeSlot={setPressedTimeSlot} setPressedLaadpaalID={setPressedLaadpaalID} />
+                    
+                    {PressedTimeSlot && (
+                        <View className="flex-row w-full items-center mb-10">
+                            <View className="bg-main_box_color w-full rounded-lg p-2.5">
+                                <View className="flex flex-row items-center justify-between">
+                                    <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Urgency</Text>
+                                    <FontAwesomeIcon icon={faBarChart} size={20} color="#fff" />
+                                </View>
+                                <View className="flex-row w-full items-center justify-between mt-2">
+                                    <SelectDropdown
+                                        style={{
+                                        inputIOS: {
+                                            width: 350,
+                                            height: 50,
+                                            fontSize: 16,
+                                            color: "white",
+                                            backgroundColor: "#121212",
+                                            borderRadius: 8,
+                                            padding: 10,
+                                            fontFamily: 'Montserrat_400Regular',
+                                        },
+                                        inputAndroid: {
+                                            width: 350,
+                                            height: 50,
+                                            fontSize: 16,
+                                            color: "white",
+                                            backgroundColor: "#121212",
+                                            borderRadius: 8,
+                                            padding: 10,
+                                            fontFamily: 'Montserrat_400Regular',
+                                        },
+                                        }}
+                                        value={selectedItemSelect}
+                                        onValueChange={(value) => setSelectedItemSelect(value)}
+                                        items={[
+                                            { label: 'None', value: 0 },
+                                            { label: 'I need it but someone can go first.', value: 1 },
+                                            { label: 'I need it.', value: 2 },
+                                            { label: 'I realy need it.', value: 3 },
+                                            { label: "I need it or i’m not be able to go.", value: 4 },
+                                        ]}
+                                    />
+                                    </View>
+                            </View>
+                        </View>
+                    )}
                 </View>
             </ScrollView>
 
-            <View className='w-full p-3'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center">
-                    <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
-                </Pressable>
-            </View>
+            {PressedTimeSlot && (
+                <View className='w-full p-3'>
+                    <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => handleSubmit() + resetForm()}>
+                        <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
+                    </Pressable>
+                </View>
+            )}
         </View>
     );
 }

@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useRef, useState } from 'react';
-import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IP } from '@env';
@@ -80,9 +79,6 @@ export default function StationsReserveScreen() {
     // The timeslots of the day
     const [times, setTimes] = useState([]);
 
-    // The selected item of the urgency dropdown
-    const [selectedItemSelect, setSelectedItemSelect] = useState(0);
-
     // The modal visibility
     const [indicator, setIndicator] = useState(false);
 
@@ -153,7 +149,6 @@ export default function StationsReserveScreen() {
                     UserID: 1,
                     LaadpaalID: 1,
                     Date: date,
-                    Priority: selectedItemSelect,
                     Opgeladen: false,
                     Opgehaald: false,
                 }),
@@ -174,9 +169,9 @@ export default function StationsReserveScreen() {
         }
       };
 
-    const addReservation = async (date, time, urgency) => {
+    const addReservation = async (date, time) => {
         // Save the reservation to the database
-        console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
+        // console.log("date: " + date + ", time: " + time + ");
         
         // Create a new date object with the selected date and time 
         date.setHours(time);
@@ -198,7 +193,6 @@ export default function StationsReserveScreen() {
     const resetForm = () => {
         setSelectedDate(null);
         setSelectedTime(null);
-        setSelectedItemSelect(0);
     }
 
     const createConfirmationAlert = () =>
@@ -243,59 +237,13 @@ export default function StationsReserveScreen() {
                             </View>
                         </View>
                     )}
-
-                    {selectedTime && (
-                        <View className="flex-row w-full items-center mb-10">
-                            <View className="bg-main_box_color w-full rounded-lg p-2.5">
-                                <View className="flex flex-row items-center justify-between">
-                                    <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Urgency</Text>
-                                    <FontAwesomeIcon icon={faBarChart} size={20} color="#fff" />
-                                </View>
-                                <View className="flex-row w-full items-center justify-between mt-2">
-                                    <SelectDropdown
-                                        style={{
-                                        inputIOS: {
-                                            width: 350,
-                                            height: 50,
-                                            fontSize: 16,
-                                            color: "white",
-                                            backgroundColor: "#121212",
-                                            borderRadius: 8,
-                                            padding: 10,
-                                            fontFamily: 'Montserrat_400Regular',
-                                        },
-                                        inputAndroid: {
-                                            width: 350,
-                                            height: 50,
-                                            fontSize: 16,
-                                            color: "white",
-                                            backgroundColor: "#121212",
-                                            borderRadius: 8,
-                                            padding: 10,
-                                            fontFamily: 'Montserrat_400Regular',
-                                        },
-                                        }}
-                                        value={selectedItemSelect}
-                                        onValueChange={(value) => setSelectedItemSelect(value)}
-                                        items={[
-                                            { label: 'None', value: 0 },
-                                            { label: 'I need it but someone can go first.', value: 1 },
-                                            { label: 'I need it.', value: 2 },
-                                            { label: 'I realy need it.', value: 3 },
-                                            { label: "I need it or i’m not be able to go.", value: 4 },
-                                        ]}
-                                    />
-                                    </View>
-                            </View>
-                        </View>
-                    )}
                 </View>
             </ScrollView>
             
         
             {selectedTime && (
             <View className='w-full p-3'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect) + resetForm()}>
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime) + resetForm()}>
                     <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                     {/* <ActivityIndicator color="#fff" className="ml-2" /> */}
                 </Pressable>
