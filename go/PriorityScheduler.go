@@ -8,9 +8,8 @@ import (
 )
 
 type Reservering struct {
-    ID         int
+    id         int
     UserID     int
-    LaadpaalID int
     Date       time.Time
     Priority   int // Assuming Priority is an integer
 }
@@ -25,7 +24,7 @@ func PriorityScheduler(db *sql.DB) {
             fmt.Println("It's closing time, check manually if there is any car occupied.")
             fmt.Println("Current date and time (RFC3339):", now.Format(time.RFC3339))
         }
-        time.Sleep(10 * time.Second)
+        time.Sleep(20 * time.Second)
     }
 }
 
@@ -37,27 +36,38 @@ func Indelen(db *sql.DB, date time.Time) {
         log.Println("Error retrieving laadpalen: " + err.Error())
         return
     }
+    // var i = 0
+    // for _, laadpaal := range laadpalen {
+    //     fmt.Println("Laadpaal ID:", laadpaal.ID, "Status:", laadpaal.Status)
+    //     i++
+    // }
+    // log.Println("Aantal laadpalen: ", i)
 
-    query := "SELECT * FROM QuickReserveReservations WHERE Date BETWEEN ? AND ?"
-    rows, err := db.Query(query, date, dateNextHour)
+    query := "SELECT * FROM QuickReserveReservations WHERE Date >= ? AND Date < ?"
+    rows, err := db.Query(query, "2024-06-02 17:00:00+00:00", "2024-06-02 18:00:00+00:00")
     if err != nil {
         log.Println("Error querying database: " + err.Error())
         return
     }
     defer rows.Close()
-
+    
+    // Initialize the priority slices
     Prio0 := []Reservering{}
     Prio1 := []Reservering{}
     Prio2 := []Reservering{}
     Prio3 := []Reservering{}
     Prio4 := []Reservering{}
-
+    
+    fmt.Println("we gaan nu verdelen")
+    
     for rows.Next() {
+        log.Println("Scanning row")
         var r Reservering
-        if err := rows.Scan(&r.ID, &r.UserID, &r.LaadpaalID, &r.Date, &r.Priority); err != nil {
+        if err := rows.Scan(&r.id, &r.UserID, &r.Date, &r.Priority); err != nil {
             log.Println("Error scanning row: " + err.Error())
             return
         }
+        fmt.Println("UserID:", r.UserID, "Date:", r.Date, "Priority:", r.Priority)
         switch r.Priority {
         case 0:
             Prio0 = append(Prio0, r)
@@ -71,8 +81,9 @@ func Indelen(db *sql.DB, date time.Time) {
             Prio4 = append(Prio4, r)
         }
     }
-
-    if err := rows.Err(); err != nil {
+    
+    // Check for any error that occurred during iteration
+    if err = rows.Err(); err != nil {
         log.Println("Error iterating rows: " + err.Error())
         return
     }
@@ -81,6 +92,9 @@ func Indelen(db *sql.DB, date time.Time) {
     if err != nil {
         log.Println("Error querying busy laadpalen: " + err.Error())
         return
+    }
+    for _, id := range busyLaadpalenIDs {
+        fmt.Println("Busy laadpaal ID:", id)
     }
 
     filteredLaadpalen := FilterLaadpalen(laadpalen, busyLaadpalenIDs)
@@ -139,5 +153,10 @@ func Quickreserveadd(db *sql.DB, userID int, laadpaalID int, date time.Time, pri
     _, err := db.Exec(query, userID, laadpaalID, date, priority)
     if err != nil {
         log.Println("Error adding reservation: " + err.Error())
+    }
+    // zodra toegevoegd wel verwijderen
+    _, err = db.Exec("DELETE FROM QuickReserveReservations WHERE UserID = ? AND Date = ? AND Priority = ?", userID, date, priority)
+    if err != nil {
+        log.Println("Error deleting quick reservation: " + err.Error())
     }
 }

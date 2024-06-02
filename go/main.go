@@ -26,10 +26,6 @@ func main() {
 	defer database.Close() // Close the database connection when main function exits
 
 	// drop QuickReservations table
-	if err := DropQuickReservations(database); err != nil {
-		fmt.Println("Error dropping QuickReservations table:", err)
-		return
-	}
 
 	// Create tables
 	if err := Maketables(database); err != nil {
