@@ -47,14 +47,9 @@ export default function LoginScreen({onLogin}) {
   const [authState, setAuthState] = useState(null);
 
   const discovery = AuthSession.useAutoDiscovery(oktaConfig.issuerUrl);
-  // const redirectUri = AuthSession.makeRedirectUri({
-  //   // For usage inbare and standalone
-  //   path: "callback",
-  // });
 
   const loginWithOkta = async () => {
     try {
-      console.log("Starting new login flow");
       setAuthState(null);
       const request = new AuthSession.AuthRequest({
         clientId: oktaConfig.clientId,
@@ -69,8 +64,6 @@ export default function LoginScreen({onLogin}) {
 
       const code = JSON.parse(JSON.stringify(result)).params.code;
       setAuthState(result);
-
-      console.log(code);
 
       const tokenRequestParams = {
         code,
@@ -87,7 +80,6 @@ export default function LoginScreen({onLogin}) {
 
       const accessToken = tokenResult.accessToken;
 
-      // make an HTTP direct call to the Okta User Info endpoint of our domain
       const usersRequest = `${oktaConfig.issuerUrl}/v1/userinfo`;
       const userPromise = await axios.get(usersRequest, {
         headers: {
@@ -96,30 +88,19 @@ export default function LoginScreen({onLogin}) {
       });
 
       const userData = userPromise.data;
-      console.log("\n\nUser data:", userPromise.data);
-      console.log("\n\nOkta Token: ", accessToken);
+      // console.log("\n\nUser data:", userPromise.data);
+      // console.log("\n\nOkta Token: ", accessToken);
 
       if (userData.email != null) {
         // Save the email of the logged-in user
-        console.log(userData.email)
-        await saveData("LoggedIn", userData.email);
+        saveData("LoggedIn", userData.email);
         onLogin()
       }
     } catch (error) {
       console.log("Error:", error);
     }
-
-    // if (authState != null)
-    // {
-    //   console.log("something2")
-    //   setAuthState(null)
-    //   console.log(authState)
-    //   await saveData("LoggedIn", "something");
-    //   onLogin()
-    // }
     
   };
-
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -128,7 +109,6 @@ export default function LoginScreen({onLogin}) {
   const saveData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
-      console.log('Data saved successfully!');
     } catch (error) {
       console.log('Error saving data:', error);
     }
@@ -154,9 +134,7 @@ export default function LoginScreen({onLogin}) {
     setAuthState(null)
     //handle login
     correct = false;
-    //getData('LoggedIn')
 
-    //ConvertPassword(password)
     correct = await handleSubmit(email, ConvertPassword(password))
     
     if (correct) 
