@@ -33,7 +33,6 @@ func main() {
 
   // zorg dat de db up to date is
 	UpdateDB()
-
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
   	http.HandleFunc("/readAccounts", GetAccounts)
