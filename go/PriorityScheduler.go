@@ -29,7 +29,14 @@ func PriorityScheduler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
     // TODO: roep method aan die de laadpalen voor ons update
     UpdateLaadpalen(db, date)
 
-	GetQRLaadpalen(db, w, date) // via deze method returne we de laadpalen die niet bezet zijn
+	// GetQRLaadpalen(db, w, date) // via deze method returne we de laadpalen die niet bezet zijn
+
+    // TODO: maak de priority scheduler
+    // zorg eerst een table "goingonrightnow" ofzo waarin de laadpaalid, userid en status van de laadpaal in staat. 
+    // begin eerst door de laadpalen erin te zetten met status van de laadpaal op standaard vrij
+
+    // dan voeg je alle userid toe die een reservatie hebben op die tijd vanuit de reservaties en op basis van hun prioriteit laad je een gegeven persoon eerder gaan
+    // issue nu is alle mensen toevoegen die een reservatie hebben op die tijd vanuit de quickreserve lijst alleen idk
 }
 
 // UpdateLaadpalen updates the "SystemLaadpalen" table based on reservations
@@ -56,6 +63,7 @@ func UpdateLaadpalen(db *sql.DB, Date time.Time) {
 }
 
 func GetQRLaadpalen(db *sql.DB, w http.ResponseWriter, date time.Time) {
+    // dit is duus een method die terug stuurt aan de qr welke laadpalen tussen 2 data's vrij is
 	dateNextHour := GetNextHour(date)
 
 	busyLaadpalenIDs, err := GetBusyLaadpalen(db, date, dateNextHour)

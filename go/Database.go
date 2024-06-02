@@ -213,3 +213,5 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 	// Return the reservations
 	return reservations, nil
 }
+
+// TODO: method maken die de quick reserve opslaat in een eigen table
