@@ -5,6 +5,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
+import { IP } from '@env';
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 // import {
@@ -245,7 +246,7 @@ const handleSubmit = async (email, password)  => {
   const Password = password; 
 
   try {
-    const response = await fetch('http://192.168.2.22:8080/checkAccounts', {
+    const response = await fetch(`http://${IP}:8080/checkAccounts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
