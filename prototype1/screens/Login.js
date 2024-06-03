@@ -1,18 +1,107 @@
 import {View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Logo from '../images/SchubergPhilis_White.png';
 import Pant from '../images/Brandpage-Schuberg-Philis.jpg';
 import { LinearGradient } from 'expo-linear-gradient';
+import { IP } from '@env';
+import CryptoJS from 'crypto-js';
+import axios from 'axios';
+// import {
+//   createConfig,
+//   signInWithBrowser,
+//   signOut,
+//   getAccessToken,
+//   isAuthenticated,
+//   getUser,
+//   getUserFromIdToken,
+//   refreshTokens,
+//   EventEmitter,
+// } from '@okta/okta-react-native';
 
-import App from '../App';
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
+
+const oktaConfig = {
+    //ypur application id from okta
+    clientId: "0oahdzst51ganDQP05d7",
+    //yout domain from okta
+    domain: "https://dev-50508157.okta.com",
+    // yout domain + /oauth2/default
+    issuerUrl: "https://dev-50508157.okta.com/oauth2/default",
+    //callback configured in okta signin url
+    callbackUrl: "com.dev-50508157.okta.ProjectTest2:/callback",
+};
+
+//import {oktaConfig}  from '../oktaConfig';
+
 
 export default function LoginScreen({onLogin}) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [errorMessage, setError] = useState('');
+
+  const [authState, setAuthState] = useState(null);
+
+  const discovery = AuthSession.useAutoDiscovery(oktaConfig.issuerUrl);
+
+  const loginWithOkta = async () => {
+    try {
+      setAuthState(null);
+      const request = new AuthSession.AuthRequest({
+        clientId: oktaConfig.clientId,
+        redirectUri: oktaConfig.callbackUrl,
+        prompt: AuthSession.Prompt.SelectAccount,
+        scopes: ["openid", "profile", "email"],
+        usePKCE: true,
+        extraParams: {},
+      });
+
+      const result = await request.promptAsync(discovery);
+
+      const code = JSON.parse(JSON.stringify(result)).params.code;
+      setAuthState(result);
+
+      const tokenRequestParams = {
+        code,
+        clientId: oktaConfig.clientId,
+        redirectUri: oktaConfig.callbackUrl,
+        extraParams: {
+          code_verifier: String(request?.codeVerifier),
+        },
+      };
+      const tokenResult = await AuthSession.exchangeCodeAsync(
+        tokenRequestParams,
+        discovery
+      );
+
+      const accessToken = tokenResult.accessToken;
+
+      const usersRequest = `${oktaConfig.issuerUrl}/v1/userinfo`;
+      const userPromise = await axios.get(usersRequest, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const userData = userPromise.data;
+      // console.log("\n\nUser data:", userPromise.data);
+      // console.log("\n\nOkta Token: ", accessToken);
+
+      if (userData.email != null) {
+        // Save the email of the logged-in user
+        saveData("LoggedIn", userData.email);
+        onLogin()
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+    
+  };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -21,7 +110,6 @@ export default function LoginScreen({onLogin}) {
   const saveData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
-      console.log('Data saved successfully!');
     } catch (error) {
       console.log('Error saving data:', error);
     }
@@ -44,11 +132,11 @@ export default function LoginScreen({onLogin}) {
   };
 
   const handleLogin = async (email, password) => {
+    setAuthState(null)
     //handle login
     correct = false;
-    //getData('LoggedIn')
 
-    correct = await handleSubmit(email, password)
+    correct = await handleSubmit(email, ConvertPassword(password))
     
     if (correct) 
     {
@@ -59,11 +147,6 @@ export default function LoginScreen({onLogin}) {
 
     setError("Email or Password is invalid.");
     
-  };
-
-  const handleMakeAccount = () => {
-    //handle Make Account
-    console.log('Make Account');
   };
 
   const handleForgotPassword = () => {
@@ -132,17 +215,25 @@ export default function LoginScreen({onLogin}) {
           </TouchableOpacity>
         </LinearGradient>
 
-        <View className="flex-row items-center ml-5 mr-5 mb-5">
+        <View className="flex-row items-center ml-5 mr-5">
           <View className="flex-1 h-0.5 bg-wit" />
           <View>
             <Text className="w-10 text-center text-wit" >Or</Text>
           </View>
           <View className="flex-1 h-0.5 bg-wit" />
         </View>
-        <View className="flex-row justify-center" >
-          <TouchableOpacity onPress={() => handleMakeAccount}>
-            <Text className="text-wit font-bold text-lg underline">Create Account</Text>
-          </TouchableOpacity>
+
+        <View className="justify-center" >
+        <LinearGradient
+            colors={['#6f39db', '#5FA6F4']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }} 
+          className="p-3 m-5 rounded-md"
+        >
+            <TouchableOpacity onPress={loginWithOkta} className="align-middle">
+            <Text className="text-wit text-center font-bold text-lg">Okta Login</Text>
+            </TouchableOpacity>
+        </LinearGradient>
         </View>
 
       </ImageBackground>
@@ -155,7 +246,7 @@ const handleSubmit = async (email, password)  => {
   const Password = password; 
 
   try {
-    const response = await fetch('http://192.168.2.22:8080/checkAccounts', {
+    const response = await fetch(`http://${IP}:8080/checkAccounts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -176,3 +267,8 @@ const handleSubmit = async (email, password)  => {
   }
 };
 
+const ConvertPassword = (password) =>
+  {
+    const hash = CryptoJS.SHA1(password).toString();
+    return hash
+  }

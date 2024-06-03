@@ -31,18 +31,29 @@ func main() {
 		return
 	}
 
-  // zorg dat de db up to date is
-	UpdateDB()
 
+  	// zorg dat de db up to date is
+	UpdateDB()
+	
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
   	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-	
+	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
         AddReservationHandler(w, r, database)
+    })
+
+	http.HandleFunc("/addQuickReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+        // Call the actual handler function with the argument
+        AddQuickReservationHandler(w, r, database)
+    })
+
+	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+        // Call the actual handler function with the argument
+        GetAllReservationOfDateHandler(w, r, database)
     })
 
 	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
@@ -50,7 +61,15 @@ func main() {
         GetAvailableStations(w, r, database)
     }) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
 
+	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request){
+        // Call the actual handler function with the argument
+        GetLaadpalenQRhandeler(w, r, database)
+    }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
+	
 	fmt.Println("Server is running...")
+	// roep priority scheduler aan die altijd runt
+	fmt.Println("Starting priority scheduler...")
+	go PriorityScheduler(database)
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
@@ -109,6 +128,65 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get all laadpalen
+		laadpalen, err := GetAllLaadpalen(database)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the laadpalen to JSON
+		laadpalenJSON, err := json.Marshal(laadpalen)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Send the response back to the client
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(laadpalenJSON)
+	}
+}
+
+func GetAllReservationOfDateHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		Date string `json:"Date"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// Parse the date string into a time.Time object nu met reuseable method
+	date, err := ParseDate(requestData.Date)
+	if err != nil {
+		http.Error(w, "Invalid date format: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Handle the return values from GetAllReservationOfDate
+	reservations, err := GetAllReservationOfDate(database, date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Convert the reservations to JSON
+	reservationsJSON, err := json.Marshal(reservations)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send the response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(reservationsJSON)
+}
+
 func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	// Decode the JSON request body into a struct
 	var requestData struct {
@@ -132,8 +210,6 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 		return
 	}
 
-	// fmt.Println("Received reservation:", requestData)
-
 	// Insert the reservation into the database
 	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -144,4 +220,45 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
+}
+
+func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		UserID     int    `json:"UserID"`
+		Date       string `json:"Date"`
+		Priority   int    `json:"Priority"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Parse the date string into a time.Time object
+	date, err := time.Parse(time.RFC3339, requestData.Date)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Insert the reservation into the database
+	if err := AddQuickReservation(database, requestData.UserID, date, requestData.Priority); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{}"))
+}
+
+func ParseDate(dateStr string) (time.Time, error) {
+	const format = time.RFC3339
+	date, err := time.Parse(format, dateStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid date format: %s", dateStr)
+	}
+	return date, nil
 }
