@@ -9,6 +9,7 @@ import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
+import { IP } from '@env';
 
 
 const ReservationsExpired = () => {
@@ -16,7 +17,7 @@ const ReservationsExpired = () => {
 
     const getData = async () => {
         try {
-            const response = await fetch('http://192.168.1.8:8080/items');
+            const response = await fetch(`http://${IP}:8080/items`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }

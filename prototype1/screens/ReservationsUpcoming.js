@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
+import { IP } from '@env';
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
 
   const getData = async () => {
     try {
-        const response = await fetch('http://192.168.1.8:8080/items');
+        const response = await fetch(`http://${IP}:8080/items`);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
