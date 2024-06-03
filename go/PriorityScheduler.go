@@ -11,7 +11,7 @@ type Reservering struct {
     id         int
     UserID     int
     Date       time.Time
-    Priority   int // Assuming Priority is an integer
+    Priority   int
 }
 
 func PriorityScheduler(db *sql.DB) {
