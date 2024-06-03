@@ -37,7 +37,7 @@ const ReservationsExpired = ({reservations}) => {
     };
 
     const renderReservationItem = ({ item }) => (
-        <View className={`${item.Date == new Date() ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
+        <View className={` bg-main_box_color w-full rounded-lg p-2.5 mb-3 opacity-75`}>
             <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-lg text-wit font-light" style={styles.font_semibold}>{formatDate(new Date(item.date))}</Text>
                 <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
@@ -55,7 +55,8 @@ const ReservationsExpired = ({reservations}) => {
                     <FontAwesomeIcon icon={faLocationDot} size={20} color="#1E80ED" />  
                 </View> 
                 <View className="flex-row items-center"> 
-                  <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.laadpaalID}</Text>
+                    <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_medium}>Schiphol-Rijk</Text>
+                  {/* <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.laadpaalID}</Text> */}
                   {/* <Text className="text-md font-normal text-profile-grijs" style={styles.font_thin}>{item.location}</Text> */}
                 </View>
             </View>
@@ -72,26 +73,6 @@ const ReservationsExpired = ({reservations}) => {
         </View>
     );
 };
-
-const stylesbox = StyleSheet.create({
-    reservationContainer: {
-        marginBottom: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        padding: 10,
-        borderRadius: 5,
-    },
-    row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    text: {
-        fontSize: 16,
-        flex: 1,
-        textAlign: 'center',
-    },
-});
 
 const styles = StyleSheet.create({
     font_regular: {

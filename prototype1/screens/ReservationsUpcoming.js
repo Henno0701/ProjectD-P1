@@ -30,7 +30,7 @@ const Reservations = ({ reservations }) => { // Destructure reservations from pr
   }
 
   const renderReservationItem = ({ item }) => (
-    <View className={`${item.Date == new Date() ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
+    <View className={`${reservations[0] == item ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
       <View className="flex-row items-center justify-between mb-1">
         <Text className="text-lg text-wit font-light" style={styles.font_semibold}>{formatDate(new Date(item.date))}</Text>
         <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
@@ -48,7 +48,8 @@ const Reservations = ({ reservations }) => { // Destructure reservations from pr
           <FontAwesomeIcon icon={faLocationDot} size={20} color="#1E80ED" />  
         </View> 
         <View className="flex-row items-center"> 
-          <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.laadpaalID}</Text>
+          <Text className={`${reservations[0] == item ? "text-wit" : "text-schuberg_blue"} text-lg font-bold mr-2`} style={styles.font_medium}>Schiphol-Rijk</Text>
+          {/* <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.laadpaalID}</Text> */}
           {/* <Text className="text-md font-normal text-profile-grijs" style={styles.font_thin}>{item.location}</Text> */}
         </View>
       </View>

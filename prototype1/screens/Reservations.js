@@ -48,12 +48,16 @@ export default function ReservationsScreen() {
                 const upcomingReservations = reservations.filter((reservation) => {
                     return new Date(reservation.date) > new Date();
                 });
-                setUpcomingReservations(upcomingReservations);
+
+                const upcomingReservationsSorted = upcomingReservations.sort((a, b) => new Date(a.date) - new Date(b.date));
+                setUpcomingReservations(upcomingReservationsSorted);
     
                 const expiredReservations = reservations.filter((reservation) => {
                     return new Date(reservation.date) < new Date();
                 });
-                setExpiredReservations(expiredReservations);
+
+                const expiredReservationsSorted = expiredReservations.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setExpiredReservations(expiredReservationsSorted);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
