@@ -1,12 +1,12 @@
-import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native';
+import { Button, Text, TouchableHighlight, TouchableOpacity, View, Pressable, ScrollView, Modal, ActivityIndicator, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { styled } from 'nativewind';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { useEffect, useRef, useState } from 'react';
-import SelectDropdown from 'react-native-picker-select';
 import { StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { IP } from '@env';
 
 import GenerateDateButtons from '../components/Buttons-Date';
 
@@ -53,7 +53,9 @@ function timesSlots(date) {
         if (current.getDate() === new Date().getDate() && hour < nowHour) {
             continue;
         }
-        times.push(hour); // Add hour to times array
+
+        // If the current hour is between 6 and 22, add the hour to the times array
+        if (hour >= 6 && hour <= 20) times.push(hour); // Add hour to times array
     }
 
     return times;
@@ -77,63 +79,184 @@ export default function StationsReserveScreen() {
     // The timeslots of the day
     const [times, setTimes] = useState([]);
 
-    // The selected item of the urgency dropdown
-    const [selectedItemSelect, setSelectedItemSelect] = useState("0");
-
     // The modal visibility
     const [indicator, setIndicator] = useState(false);
 
     var curr = new Date; // get current date
-    var first = curr.getDate(); // First day is the day of the month - the day of the week + 1
+    var first = curr.getDate() + 2; // First day is the day of the month - the day of the week + 1, Add 2 days to the current date
     var last = first + 6; // last day is the first day + 6
     var week = dates(new Date(curr.setDate(first))); // get the dates of the week
 
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
 
+    const getAllChargingStations = async () => {
+        try {
+            const response = await fetch(`http://${IP}:8080/getAllLaadpalen`, {
+                method: "GET",
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
 
-    // In the code below we are getting the timeslots of the day by every date change
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    const getAllReservationsOfDate = async (date) => {
+        if (!date) return []; // Return empty array if date is null or undefined
+        try {
+            const response = await fetch(`http://${IP}:8080/getAllReservationsOfDate`, {
+                method: "POST",
+                body: JSON.stringify({ Date: date }),
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+            return json || [];
+        } catch (error) {
+            console.error('Error:', error);
+            return [];
+        }
+    };
+
+    const filterUnavailableReservation = (timeslots, reservedStations, AllLaadpalen) => {
+        const filteredTimeslots = {};
+    
+        // First initialize the filteredTimeslots object with empty arrays
+        timeslots.forEach(hour => {
+            filteredTimeslots[hour] = [];
+        });
+    
+        // Iterate over each station in AllLaadpalen
+        AllLaadpalen.forEach(station => {
+            const stationID = station.id;
+    
+            // Iterate over each hour in timeslots
+            timeslots.forEach(hour => {
+                // Check if this station is reserved at this hour
+                const isReserved = reservedStations.some(reservation => {
+                    return new Date(reservation.date).getHours() === hour && reservation.laadpaalID === stationID;
+                });
+    
+                // If the station is not reserved at this hour, add it to the filteredTimeslots
+                if (!isReserved) {
+                    filteredTimeslots[hour].push(stationID);
+                }
+            });
+        });
+    
+        return filteredTimeslots;
+    };
+
     useEffect(() => {
-        // first reset the time state to null
-        setSelectedTime(null);
+        const fetchReservations = async () => {
+            // first reset the time state to null
+            setSelectedTime(null);
 
-        // generate every upcoming hour of the given day
-        var EveryHour = timesSlots(selectedDate);
-        setTimes(EveryHour);
-    }, [selectedDate]);
+            // generate every upcoming hour of the given day
+            var EveryHour = timesSlots(selectedDate);
+            const Reservations = await getAllReservationsOfDate(selectedDate); // Await every reservation of the selected date
+            const AllChargingStations = await getAllChargingStations(); // Get all charging stations
+            const FilteredTimes = filterUnavailableReservation(EveryHour, Reservations, AllChargingStations);
+            console.log(FilteredTimes);
+            
+
+            setTimes(FilteredTimes); // Set the timeslots of the day
+        };
+
+        fetchReservations();
+
+    }, [selectedDate]); // Run the effect when the selected date changes
 
     // Function to  account name from server
-    const AddToDatabase = async () => {
+    const AddToDatabase = async (date, laadpaalID) => {
         try {
-            const response = await fetch('http://192.168.1.39:8080/getName', {
+            fetch(`http://${IP}:8080/addReservation`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
-                    userID: 1,
-                    userID: 1,
-                    userID: 1,
+                    UserID: 1,
+                    LaadpaalID: laadpaalID,
+                    Date: date,
+                    Opgeladen: false,
+                    Opgehaald: false,
                 }),
                 headers: {
                 "Content-type": "application/json; charset=UTF-8"
                 }
-            }); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
-          const data = await response.json();
-          // Update the account name state
-          setAccountName(data.name);
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // when the response is not ok return an not ok status
+                    return false;
+                }
+                
+                return true;
+              })
         } catch (error) {
-          console.error('Error fetching account name:', error);
+          console.error('Error:', error);
         }
-      };
+    };
 
-    const addReservation = async (date, time, urgency) => {
+    const getChargingStationID = async (date) => {
+        const hour = date.getHours(); // Get the hour of the given date
+        const foundTime = Object.entries(times).find(([time, value]) => parseInt(time, 10) === hour); // Find the time slot in the times array
+        return foundTime ? foundTime[1][0] : null; // Return the first ID in the list for the found time slot
+    };
+            
+        
+
+    const addReservation = async (date, time) => {
         // Save the reservation to the database
-        console.log("date: " + date + ", time: " + time + ", urgency: " + urgency);
+        // Create a new date object with the selected date and time 
+        date.setHours(time);
+        date.setMinutes(0);
+        date.setSeconds(0);
+        date.setMilliseconds(0);
 
-        setIndicator(true);
+        // Get the first stationID of a given date time
+        const stationID = await getChargingStationID(date)
 
-        setInterval(() => {
-            setIndicator(false);
-        }, 5000);
+        // Add to the database
+        const result = AddToDatabase(date, stationID);
+
+        if (result) {
+            createConfirmationAlert();
+        } else {
+            createBadRequestAlert();
+        }
+        
     }
+
+    const resetForm = () => {
+        setSelectedDate(null);
+        setSelectedTime(null);
+    }
+
+    const createConfirmationAlert = () =>
+        Alert.alert('Reservation Confirmed', 'Your reservation has been placed in the system.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+          }]);
+
+    const createBadRequestAlert = () =>
+        Alert.alert('Reservation Canceled', 'There seems to be a mixup. Try it again.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+            }]);
 
     return (
       <View className="flex-1 relative bg-main_bg_color items-center">
@@ -165,59 +288,13 @@ export default function StationsReserveScreen() {
                             </View>
                         </View>
                     )}
-
-                    {selectedTime && (
-                        <View className="flex-row w-full items-center mb-10">
-                            <View className="bg-main_box_color w-full rounded-lg p-2.5">
-                                <View className="flex flex-row items-center justify-between">
-                                    <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Urgency</Text>
-                                    <FontAwesomeIcon icon={faBarChart} size={20} color="#fff" />
-                                </View>
-                                <View className="flex-row w-full items-center justify-between mt-2">
-                                    <SelectDropdown
-                                        style={{
-                                        inputIOS: {
-                                            width: 350,
-                                            height: 50,
-                                            fontSize: 16,
-                                            color: "white",
-                                            backgroundColor: "#121212",
-                                            borderRadius: 8,
-                                            padding: 10,
-                                            fontFamily: 'Montserrat_400Regular',
-                                        },
-                                        inputAndroid: {
-                                            width: 350,
-                                            height: 50,
-                                            fontSize: 16,
-                                            color: "white",
-                                            backgroundColor: "#121212",
-                                            borderRadius: 8,
-                                            padding: 10,
-                                            fontFamily: 'Montserrat_400Regular',
-                                        },
-                                        }}
-                                        value={selectedItemSelect}
-                                        onValueChange={(value) => setSelectedItemSelect(value)}
-                                        items={[
-                                            { label: 'None', value: '0' },
-                                            { label: 'I need it but someone can go first.', value: '1' },
-                                            { label: 'I need it.', value: '2' },
-                                            { label: 'I realy need it.', value: '3' },
-                                            { label: "I need it or i’m not be able to go.", value: '4' },
-                                        ]}
-                                    />
-                                    </View>
-                            </View>
-                        </View>
-                    )}
                 </View>
             </ScrollView>
             
         
             {selectedTime && (
             <View className='w-full p-3'>
-                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime, selectedItemSelect)}>
+                <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={() => addReservation(selectedDate, selectedTime) + resetForm()}>
                     <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                     {/* <ActivityIndicator color="#fff" className="ml-2" /> */}
                 </Pressable>

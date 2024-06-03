@@ -1,6 +1,5 @@
 {
   "expo": {
-
     "plugins": [
       [
         "expo-font",
@@ -9,9 +8,9 @@
         }
       ]
     ],
-
     "name": "prototype1",
     "slug": "prototype1",
+    "scheme": "com.dev-50508157.okta.ProjectTest2",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,7 +30,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.dev-50508157.okta.ProjectTest2"
     },
     "web": {
       "favicon": "./assets/favicon.png"

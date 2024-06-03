@@ -2,6 +2,7 @@ import { Image, Text, View, Pressable, Modal, TextInput, Button, TouchableOpacit
 import React, { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
+import { IP } from '@env';
 
 import ButtonList from '../components/Button-List';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -24,7 +25,7 @@ export default function ProfileOverviewScreen({ navigation }) {
     // Function to fetch account name from server
     const fetchAccountName = async () => {
       try {
-        const response = await fetch('http://192.168.1.39:8080/getName'); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+        const response = await fetch(`http://${IP}:8080/getName`); // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
         const data = await response.json();
         // Update the account name state
         setAccountName(data.name);
