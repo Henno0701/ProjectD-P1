@@ -247,9 +247,15 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	// Convert to the "Europe/Amsterdam" time zone
+	ceDateTime, err := GetTimeZone(date)
+	if err != nil {
+		log.Println("Error converting time zone:", err)
+		return
+	}
 
 	// Insert the reservation into the database
-	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, date, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
+	if err := AddReservation(database, requestData.UserID, requestData.LaadpaalID, ceDateTime, requestData.Priority, requestData.Opgeladen, requestData.Opgehaald); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -280,8 +286,15 @@ func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database
 		return
 	}
 
+	// Convert to the "Europe/Amsterdam" time zone
+	ceDateTime, err := GetTimeZone(date)
+	if err != nil {
+		log.Println("Error converting time zone:", err)
+		return
+	}
+
 	// Insert the reservation into the database
-	if err := AddQuickReservation(database, requestData.UserID, date, requestData.Priority); err != nil {
+	if err := AddQuickReservation(database, requestData.UserID, ceDateTime, requestData.Priority); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -299,4 +312,17 @@ func ParseDate(dateStr string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("invalid date format: %s", dateStr)
 	}
 	return date, nil
+}
+
+func GetTimeZone(date time.Time) (time.Time, error) {
+	// Load the "Europe/Amsterdam" time zone
+	location, err := time.LoadLocation("Europe/Amsterdam")
+	if err != nil {
+		log.Println("Error loading location:", err)
+		return time.Time{}, err
+	}
+
+	// Convert the date to the "Europe/Amsterdam" time zone
+	ceDateTime := date.In(location)
+	return ceDateTime, nil
 }
