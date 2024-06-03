@@ -172,8 +172,6 @@ export default function StationsReserveScreen() {
             const Reservations = await getAllReservationsOfDate(selectedDate); // Await every reservation of the selected date
             const AllChargingStations = await getAllChargingStations(); // Get all charging stations
             const FilteredTimes = filterUnavailableReservation(EveryHour, Reservations, AllChargingStations);
-            console.log(FilteredTimes);
-            
 
             setTimes(FilteredTimes); // Set the timeslots of the day
         };
@@ -185,7 +183,7 @@ export default function StationsReserveScreen() {
     // Function to  account name from server
     const AddToDatabase = async (date, laadpaalID) => {
         try {
-            fetch(`http://${IP}:8080/addReservation`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+            fetch(`http://${IP}:8080/addReservation`, {
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
