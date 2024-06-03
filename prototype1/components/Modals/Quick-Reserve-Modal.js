@@ -9,12 +9,13 @@ import SelectDropdown from 'react-native-picker-select';
 import Modal from '../Modal';
 import { ScrollView } from 'react-native-gesture-handler';
 
-function QuickReserveModal({ navigation }) {
-    const [selectedItemSelect, setSelectedItemSelect] = useState(0);
+function QuickReserveModal({ route, navigation }) {
+    const [selectedItemSelect, setSelectedItemSelect] = useState(route.params.selectedItemSelect);
 
-    const returnToStations = () => {
-        navigation.navigate('QuickReserve');
-    }
+    const { handleSubmit } = route.params;
+
+
+    const returnToStations = () => navigation.goBack();
 
     return (
         <Modal>
@@ -73,7 +74,7 @@ function QuickReserveModal({ navigation }) {
                     </View>
                     <View className="basis-[2%]"></View>
                     <View className='w-4/5 basis-[79%]'>
-                        <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => console.log()}>
+                        <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={handleSubmit}>
                             <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                         </Pressable>
                     </View>

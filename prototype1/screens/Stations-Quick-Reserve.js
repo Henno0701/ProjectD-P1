@@ -160,11 +160,13 @@ const QuickReserveMainScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (PressedTimeSlot !== null) {
+    if (PressedTimeSlot == null) {
       const date = new Date();
       date.setHours(PressedTimeSlot, 0, 0, 0);
 
-      await AddQuickReservation(date, selectedItemSelect);
+      console.log(date, selectedItemSelect);
+
+    //   await AddQuickReservation(date, selectedItemSelect);
     }
   };
 
@@ -174,7 +176,11 @@ const QuickReserveMainScreen = ({ navigation }) => {
   };
 
   const handleModalOpen = () => {
-    navigation.navigate('QuickReserveModal');
+    navigation.navigate('QuickReserveModal', {
+        selectedItemSelect,
+        setSelectedItemSelect,
+        handleSubmit,
+      });
   };
 
   return (
