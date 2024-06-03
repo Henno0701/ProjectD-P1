@@ -146,7 +146,6 @@ export default function LoginScreen({onLogin}) {
     }
 
     setError("Email or Password is invalid.");
-    
   };
 
   const handleForgotPassword = () => {
@@ -157,18 +156,18 @@ export default function LoginScreen({onLogin}) {
   return (
     <View className="flex-1 bg-main_bg_color">
       <ImageBackground
-      className="flex-1"
-      source={Pant}
-      imageStyle={{opacity:0.3, width: '200%', height: Dimensions.get('window').height,}}
+        className="flex-1"
+        source={Pant}
+        imageStyle={{ opacity: 0.3, width: '200%', height: Dimensions.get('window').height, }}
       >
         <View className="items-center mb-14 mt-44">
-        <Image
-          source={Logo}
-          style={{width: 225, height: 61}}
-        />
+          <Image
+            source={Logo}
+            style={{ width: 225, height: 61 }}
+          />
         </View>
         <View className="p-5 ml-5 mr-5 w-auto h-auto justify-between flex flex-col bg-secondary_bg_color rounded-xl">
-          <View className="items-center">{errorMessage != '' ? <Text className="text-[#fc0303] mb-1">{errorMessage}</Text>: null}</View>
+          <View className="items-center">{errorMessage != '' ? <Text className="text-[#fc0303] mb-1">{errorMessage}</Text> : null}</View>
           <TextInput
             placeholder="Email"
             value={email}
