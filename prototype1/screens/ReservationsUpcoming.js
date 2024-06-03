@@ -2,33 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
 import { IP } from '@env';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCalendarDays, faClock, faFlag, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 
-const Reservations = () => {
-  const [reservations, setReservations] = useState([]);
-
-  const getData = async () => {
-    try {
-        const response = await fetch(`http://${IP}:8080/items`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        console.log(data);
-        setReservations(data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-
-  useEffect(() => {
-    getData();
-    console.log(reservations);
-  }, []);
-
-const CalculateTime = (date) => {
-  var hours = date.getHours();
-  return hours + ":00 - " + (hours + 1) + ":00";
-}
+const Reservations = ({ reservations }) => { // Destructure reservations from props
+  const CalculateTime = (date) => {
+    var hours = date.getHours();
+    return hours + ":00 - " + (hours + 1) + ":00";
+  }
 
   const formatDate = (date, short = true) => {
     const nth = (d) => {
@@ -48,46 +29,39 @@ const CalculateTime = (date) => {
     else return monthS[date.getMonth()] + " " + date.getDate() + nth(date.getDate());
   }
 
-  // Function to filter upcoming reservations
-  const filterUpcomingReservations = () => {
-    const upcomingReservations = reservations.filter((reservation) => {
-      return new Date(reservation.Date) >= new Date();
-    });
-    return upcomingReservations;
-  };
-
   const renderReservationItem = ({ item }) => (
-    <View className={`${item.Date == new Date() ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
-            <View className="flex-row items-center justify-between mb-1">
-                <Text className="text-lg text-wit font-light" style={styles.font_semibold}>{formatDate(new Date(item.Date))}</Text>
-                <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
-            </View>
+    <View className={`${reservations[0] == item ? "bg-schuberg_blue" : "bg-main_box_color"} w-full rounded-lg p-2.5 mb-3`}>
+      <View className="flex-row items-center justify-between mb-1">
+        <Text className="text-lg text-wit font-light" style={styles.font_semibold}>{formatDate(new Date(item.date))}</Text>
+        <FontAwesomeIcon icon={faCalendarDays} size={20} color="#fff" />
+      </View>
 
-            <View className="flex-row items-center mb-0.5">
-                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
-                    <FontAwesomeIcon icon={faClock} size={20} color="#fff" />  
-                </View>  
-                <Text className="text-lg text-wit" style={styles.font_regular}>{CalculateTime(new Date(item.Date))}</Text>
-            </View>
+      <View className="flex-row items-center mb-0.5">
+        <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+          <FontAwesomeIcon icon={faClock} size={20} color="#fff" />  
+        </View>  
+        <Text className="text-lg text-wit" style={styles.font_regular}>{CalculateTime(new Date(item.date))}</Text>
+      </View>
 
-            <View className="flex-row items-center">
-                <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
-                    <FontAwesomeIcon icon={faLocationDot} size={20} color="#1E80ED" />  
-                </View> 
-                <View className="flex-row items-center"> 
-                  <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.chargingstation}</Text>
-                  <Text className="text-md font-normal text-profile-grijs" style={styles.font_thin}>{item.location}</Text>
-                </View>
-            </View>
+      <View className="flex-row items-center">
+        <View className="w-10 h-10 bg-main_bg_color rounded-full items-center justify-center mr-2">
+          <FontAwesomeIcon icon={faLocationDot} size={20} color="#1E80ED" />  
+        </View> 
+        <View className="flex-row items-center"> 
+          <Text className={`${reservations[0] == item ? "text-wit" : "text-schuberg_blue"} text-lg font-bold mr-2`} style={styles.font_medium}>Schiphol-Rijk</Text>
+          {/* <Text className="text-lg text-schuberg_blue font-bold mr-2" style={styles.font_thin}>{item.laadpaalID}</Text> */}
+          {/* <Text className="text-md font-normal text-profile-grijs" style={styles.font_thin}>{item.location}</Text> */}
         </View>
+      </View>
+    </View>
   );
 
   return (
     <View className="flex-1 bg-main_bg_color p-3">
       <FlatList
-        data={filterUpcomingReservations()}
-        keyExtractor={(item) => item.id.toString()}
+        data={reservations}
         renderItem={renderReservationItem}
+        keyExtractor={(item) => item.id.toString()} // Add a keyExtractor to ensure unique keys for each item
       />
     </View>
   );
@@ -135,6 +109,24 @@ const stylesbox = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
   },
+});
+
+const styles = StyleSheet.create({
+  font_regular: {
+      fontFamily: 'Montserrat_400Regular',
+  },
+  font_thin: {
+      fontFamily: 'Montserrat_300Light',
+  },
+  font_medium: {
+      fontFamily: 'Montserrat_500Medium',
+  },
+  font_semibold: {
+      fontFamily: 'Montserrat_600SemiBold',
+  },
+  font_bold: {
+      fontFamily: 'Montserrat_700Bold',
+  }
 });
 
 export default Reservations;
