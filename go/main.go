@@ -4,33 +4,68 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	_ "github.com/mattn/go-sqlite3"
 	"time"
 )
 
+type Item struct {
+	ID         int    `json:"id"`
+	UserID     string `json:"UserID"`
+	LaadpaalID int    `json:"LaadpaalID"`
+	Date       string `json:"Date"`
+	Priority   int    `json:"Priority"`
+	Opgeladen  bool   `json:"Opgeladen"`
+	Opgehaald  bool   `json:"Opgehaald"`
+}
+
 var (
 	nameStore string
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
 )
 
+func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	log.Println("Received request for /items")
+	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
+	if err != nil {
+		log.Println("Error querying database:", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var items []Item
+	for rows.Next() {
+		var item Item
+		err := rows.Scan(&item.ID, &item.UserID, &item.LaadpaalID, &item.Date, &item.Priority, &item.Opgeladen, &item.Opgehaald)
+		if err != nil {
+			log.Println("Error scanning row:", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		items = append(items, item)
+	}
+
+	log.Println("Returning items:", items)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(items)
+}
+
 func main() {
-	// stuff voor db
 	// Open database connection
 	database, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
-		fmt.Println("Error opening database:", err)
-		return
+		log.Fatalf("Error opening database: %v", err)
 	}
-	defer database.Close() // Close the database connection when main function exits
+	defer database.Close()
 
 	// Create tables
 	if err := Maketables(database); err != nil {
-		fmt.Println("Error creating tables:", err)
-		return
+		log.Fatalf("Error creating tables: %v", err)
 	}
-
 
   	// zorg dat de db up to date is
 	UpdateDB()
@@ -73,12 +108,14 @@ func main() {
 	http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux))
 }
 
+// Start the server with CORS headers
 func addCorsHeaders(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
 			return
 		}
 		handler.ServeHTTP(w, r)
@@ -98,6 +135,7 @@ func getNameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set response headers and write the response
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonResponse)
