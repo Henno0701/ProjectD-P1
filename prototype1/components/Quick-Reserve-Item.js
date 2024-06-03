@@ -19,7 +19,7 @@ const QuickReserveItem = ({ timeSlots, setPressedTimeSlot }) => {
 
     return (
         timeSlots.map((timeSlot, index) => (
-            <TouchableOpacity className="flex-row w-full items-center mb-3" onPress={() => handleClick(index, timeSlot)}>
+            <TouchableOpacity key={index} className="flex-row w-full items-center mb-3" onPress={() => handleClick(index, timeSlot)}>
                 <View className="bg-main_box_color w-full rounded-lg p-2.5" style={{backgroundColor: index === clickedID ? '#1E80ED' :  '#1E1E1E'}}>
                     <View className="flex flex-row items-center justify-between">
                         <Text className="text-lg text-[#fff]" style={styles.font_semibold}>Available Slot</Text>

@@ -93,6 +93,8 @@ func main() {
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to set the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
+	http.HandleFunc("/addReservation", AddReservation) // Endpoint to insert a new reservation
+	fmt.Println("Server is running...")
 
 	log.Fatal(http.ListenAndServe(":8080", addCorsHeaders(http.DefaultServeMux)))
 }
