@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, View, Text, Pressable } from 'react-native';
+import { Button, View, Text, Pressable, Alert } from 'react-native';
 import { useState } from 'react';
 import { faBarChart, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -11,7 +11,7 @@ import Modal from '../Modal';
 import { ScrollView } from 'react-native-gesture-handler';
 
 function QuickReserveModal({ route, navigation }) {
-    const [PressedTimeSlot, setPressedTimeSlot] = useState(route.params.PressedTimeSlot); // The selected 
+    const [PressedTimeSlot, setPressedTimeSlot] = useState(route.params?.PressedTimeSlot); // The selected 
     const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
 
     const returnToStations = (value = PressedTimeSlot) => 
@@ -34,23 +34,32 @@ function QuickReserveModal({ route, navigation }) {
           });
     
           if (!response.ok) {
-            throw new Error('Network response was not ok');
+            // throw new Error('Network response was not ok');
+            return false;
           }
     
-          const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
-          return json;
+          return true;
         } catch (error) {
-          console.error('Error:', error);
+        //   console.error('Error:', error);
+            createBadRequestAlert();
+            return false;
         }
       };
     
       const handleSubmit = async () => {
         if (PressedTimeSlot !== null) {
-          const date = new Date();
-          date.setHours(PressedTimeSlot, 0, 0, 0);
-    
-          await AddQuickReservation(date, selectedItemSelect);
-        resetForm();
+            const date = new Date();
+            date.setHours(PressedTimeSlot, 0, 0, 0);
+        
+            const result = AddQuickReservation(date, selectedItemSelect);
+
+            if (result) {
+                createConfirmationAlert();
+                resetForm();
+            } else {
+                createBadRequestAlert();
+                resetForm();
+            }
         }
       };
     
@@ -61,7 +70,7 @@ function QuickReserveModal({ route, navigation }) {
       };
 
     const createConfirmationAlert = () =>
-        Alert.alert('Reservation Confirmed', 'Your reservation has been placed in the system.', [{
+        Alert.alert('Reservation Confirmed', 'Your request has been submitted. You will get a notification when your request has been accepted.', [{
             text: 'Dismiss',
             // onPress: () => console.log('Ask me later pressed'),
         }]);

@@ -205,7 +205,8 @@ export default function StationsReserveScreen() {
                 return true;
               })
         } catch (error) {
-          console.error('Error:', error);
+        //   console.error('Error:', error);
+            return false;
         }
     };
 
