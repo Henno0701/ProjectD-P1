@@ -49,9 +49,7 @@ function QuickReserveModal({ route, navigation }) {
           const date = new Date();
           date.setHours(PressedTimeSlot, 0, 0, 0);
     
-          console.log(date, selectedItemSelect);
-    
-        //   await AddQuickReservation(date, selectedItemSelect);
+          await AddQuickReservation(date, selectedItemSelect);
         resetForm();
         }
       };
