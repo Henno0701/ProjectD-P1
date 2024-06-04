@@ -5,17 +5,74 @@ import { faBarChart, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StyleSheet } from 'react-native';
 import SelectDropdown from 'react-native-picker-select';
+import { IP } from '@env';
 
 import Modal from '../Modal';
 import { ScrollView } from 'react-native-gesture-handler';
 
 function QuickReserveModal({ route, navigation }) {
-    const [selectedItemSelect, setSelectedItemSelect] = useState(route.params.selectedItemSelect);
+    const [PressedTimeSlot, setPressedTimeSlot] = useState(route.params.PressedTimeSlot); // The selected 
+    const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
 
-    const { handleSubmit } = route.params;
+    const returnToStations = (value = PressedTimeSlot) => 
+        navigation.navigate('QuickReserve', {
+            PressedTimeSlot: value
+        });
 
+    const AddQuickReservation = async (date, priority) => {
+        try {
+          const response = await fetch(`http://${IP}:8080/addQuickReservation`, {
+            method: "POST",
+            body: JSON.stringify({
+              UserID: 1,
+              Date: date,
+              Priority: priority
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          });
+    
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+    
+          const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+          return json;
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+    
+      const handleSubmit = async () => {
+        if (PressedTimeSlot !== null) {
+          const date = new Date();
+          date.setHours(PressedTimeSlot, 0, 0, 0);
+    
+          console.log(date, selectedItemSelect);
+    
+        //   await AddQuickReservation(date, selectedItemSelect);
+        resetForm();
+        }
+      };
+    
+      const resetForm = () => {
+        setSelectedItemSelect(0); // Reset the urgency dropdown
 
-    const returnToStations = () => navigation.goBack();
+        returnToStations(null); // Return to the Quick Reserve Screen and reset the selected timeslot
+      };
+
+    const createConfirmationAlert = () =>
+        Alert.alert('Reservation Confirmed', 'Your reservation has been placed in the system.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+        }]);
+
+    const createBadRequestAlert = () =>
+        Alert.alert('Reservation Canceled', 'There seems to be a mixup. Try it again.', [{
+            text: 'Dismiss',
+            // onPress: () => console.log('Ask me later pressed'),
+        }]);
 
     return (
         <Modal>
@@ -74,7 +131,7 @@ function QuickReserveModal({ route, navigation }) {
                     </View>
                     <View className="basis-[2%]"></View>
                     <View className='w-4/5 basis-[79%]'>
-                        <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={handleSubmit}>
+                        <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={() => handleSubmit()}>
                             <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
                         </Pressable>
                     </View>

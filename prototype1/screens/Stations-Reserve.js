@@ -214,8 +214,6 @@ export default function StationsReserveScreen() {
         const foundTime = Object.entries(times).find(([time, value]) => parseInt(time, 10) === hour); // Find the time slot in the times array
         return foundTime ? foundTime[1][0] : null; // Return the first ID in the list for the found time slot
     };
-            
-        
 
     const addReservation = async (date, time) => {
         // Save the reservation to the database

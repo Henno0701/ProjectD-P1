@@ -11,13 +11,18 @@ import QuickReserveModal from '../components/Modals/Quick-Reserve-Modal';
 
 const Stack = createStackNavigator();
 
-const QuickReserveMainScreen = ({ navigation }) => {
-  const [PressedTimeSlot, setPressedTimeSlot] = useState(null); // The selected timeslot
+const QuickReserveMainScreen = ({ route, navigation }) => {
+  const [PressedTimeSlot, setPressedTimeSlot] = useState(route.params?.PressedTimeSlot || null); // The selected timeslot
   const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
 
   const [ReservedStations, setReservedStations] = useState([]);
   const [StandardTimeslots, setStandardTimeslots] = useState({});
   const [NumberAvailableStations, setNumberAvailableStations] = useState([]);
+
+  // Update the PressedTimeSlot state when the PressedTimeSlot prop changes
+  useEffect(() => {
+    setPressedTimeSlot(route.params?.PressedTimeSlot);
+  }, [route.params]);
 
   const getAllChargingStations = async () => {
     try {
@@ -134,53 +139,10 @@ const QuickReserveMainScreen = ({ navigation }) => {
     fetchData();
   }, []);
 
-  const AddQuickReservation = async (date, priority) => {
-    try {
-      const response = await fetch(`http://${IP}:8080/addQuickReservation`, {
-        method: "POST",
-        body: JSON.stringify({
-          UserID: 1,
-          Date: date,
-          Priority: priority
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
-      return json;
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (PressedTimeSlot == null) {
-      const date = new Date();
-      date.setHours(PressedTimeSlot, 0, 0, 0);
-
-      console.log(date, selectedItemSelect);
-
-    //   await AddQuickReservation(date, selectedItemSelect);
-    }
-  };
-
-  const resetForm = () => {
-    setPressedTimeSlot(null);
-    setSelectedItemSelect(0);
-  };
-
   const handleModalOpen = () => {
     navigation.navigate('QuickReserveModal', {
-        selectedItemSelect,
-        setSelectedItemSelect,
-        handleSubmit,
-      });
+      PressedTimeSlot: PressedTimeSlot,
+    });
   };
 
   return (
@@ -191,7 +153,7 @@ const QuickReserveMainScreen = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {!PressedTimeSlot && (
+      {PressedTimeSlot && (
         <View className='w-full p-3'>
           <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center" onPress={handleModalOpen}>
             <Text className="text-wit text-xl" style={styles.font_semibold}>Book</Text>
