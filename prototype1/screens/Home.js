@@ -7,7 +7,20 @@ import { faBattery2, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import ProgressBar from '../data/ProgressBar';
 
-export default function HomeScreen({ navigation: { navigate } }) {
+
+{/*             <CountDown
+                  until={checkTimeLeft(startRes)}
+                  size={16}
+                  digitStyle={{ backgroundColor: null, marginHorizontal: -2 }}
+                  digitTxtStyle={{ color: '#FFF', fontFamily: 'Montserrat_400Regular' }}
+                  timeToShow={['H', 'M', 'S']}
+                  timeLabels={{ h: null, m: null, s: null }}
+                  showSeparator
+                  separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
+                /> */}
+
+export default function HomeScreen({ navigation: { navigate }, route }) {
+  const { onLogout } = route.params;
   const date = new Date();
   var Name = "John";
   var reservation = false;
@@ -17,6 +30,10 @@ export default function HomeScreen({ navigation: { navigate } }) {
   var Charge = 10; // kW
   var startRes = (Date.now() / 1000) - 360; // Start time in seconds
   var TimeSlot = "13:00-14:00";
+
+  const removeData = async (key) => {
+    onLogout()
+  };
 
   const insets = useSafeAreaInsets();
 
@@ -74,16 +91,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
                 <View className="w-12 h-12 bg-main_bg_color justify-center items-center rounded-full">
                   <FontAwesomeIcon size={32} color="#56db21" icon={faClock} />
                 </View>
-                <CountDown
-                  until={checkTimeLeft(startRes)}
-                  size={16}
-                  digitStyle={{ backgroundColor: null, marginHorizontal: -2 }}
-                  digitTxtStyle={{ color: '#FFF', fontFamily: 'Montserrat_400Regular' }}
-                  timeToShow={['H', 'M', 'S']}
-                  timeLabels={{ h: null, m: null, s: null }}
-                  showSeparator
-                  separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
-                />
+                
               </View>
             </View>
           </View>
@@ -132,6 +140,11 @@ export default function HomeScreen({ navigation: { navigate } }) {
         <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
           onPress={() => navigate('Home')}>
           <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Example</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
+          onPress={() => removeData('LoggedIn')}>
+          <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Log out</Text>
         </TouchableOpacity>
       </View>
       {/* {chargerInfo()} */}

@@ -10,6 +10,10 @@ import { err } from 'react-native-svg';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    getData('LoggedIn');
+  }, []);
+
   const getData = async (key) => {
     try {
       const value = await AsyncStorage.getItem(key);
@@ -23,8 +27,6 @@ function App() {
       setIsLoggedIn(false);
     }
   };
-
-
   const removeData = async (key) => {
     try {
       await AsyncStorage.removeItem(key);
@@ -46,11 +48,16 @@ function App() {
     return null;
   }
 
-
   //removeData('LoggedIn')
-  getData('LoggedIn')
-  return !isLoggedIn ? <Layout /> : <LoginScreen onLogin={() => getData('LoggedIn')}/>;
-  
+  //getData('LoggedIn')
+  return isLoggedIn ? (
+    <Layout onLogout={() => {
+      removeData('LoggedIn');
+      setIsLoggedIn(false);
+    }} />
+    ) : (
+      <LoginScreen onLogin={() => getData('LoggedIn')} />
+    );
 }
 
 export default App;

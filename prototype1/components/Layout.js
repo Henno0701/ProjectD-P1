@@ -19,7 +19,7 @@ const profileName = "Profile";
 
 const Tab = createBottomTabNavigator();
 
-function MainContainer() {
+function MainContainer({ onLogout }) {
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -59,7 +59,7 @@ function MainContainer() {
         })}
         >
 
-        <Tab.Screen name={homeName} component={HomeScreen} />
+        <Tab.Screen name={homeName} component={HomeScreen} initialParams={{ onLogout }}/>
         <Tab.Screen name={stationsName} component={StationsScreen} />
         <Tab.Screen name={reservationsName} component={ReservationsScreen} />
         <Tab.Screen name={profileName} component={ProfileScreen} />
