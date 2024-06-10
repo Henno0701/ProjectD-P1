@@ -9,6 +9,7 @@ import HomeScreen from '../screens/Home';
 import StationsScreen from '../screens/Stations';
 import ReservationsScreen from '../screens/Reservations';
 import ProfileScreen from '../screens/Profile';
+import AdminPanelScreen from '../screens/AdminPanel';
 
 //Screen names
 const homeName = "Home";
@@ -59,7 +60,7 @@ function MainContainer() {
         })}
         >
 
-        <Tab.Screen name={homeName} component={HomeScreen} />
+        <Tab.Screen name={homeName} component={AdminPanelScreen} />
         <Tab.Screen name={stationsName} component={StationsScreen} />
         <Tab.Screen name={reservationsName} component={ReservationsScreen} />
         <Tab.Screen name={profileName} component={ProfileScreen} />
