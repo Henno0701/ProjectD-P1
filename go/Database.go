@@ -96,24 +96,6 @@ func PrintUsers(db *sql.DB) error {
 	return nil
 }
 
-func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
-    rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var reservations []Reservation
-    for rows.Next() {
-        var reservation Reservation
-        if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
-            return nil, err
-        }
-        reservations = append(reservations, reservation)
-    }
-    return reservations, nil
-}
-
 func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
 	// krijg alle laadpalen die beschikbaar zijn
 	// Log that the request has been received
