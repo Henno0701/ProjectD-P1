@@ -50,6 +50,8 @@ function App() {
 
   //removeData('LoggedIn')
   //getData('LoggedIn')
+  
+  //Henk@gmail.com, HenkPassword
   return isLoggedIn ? (
     <Layout onLogout={() => {
       removeData('LoggedIn');
