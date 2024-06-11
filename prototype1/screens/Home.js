@@ -19,8 +19,7 @@ import ProgressBar from '../data/ProgressBar';
                   separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
                 /> */}
 
-export default function HomeScreen({ navigation: { navigate }, route }) {
-  const { onLogout } = route.params;
+export default function HomeScreen({ navigation: { navigate }}) {
   const date = new Date();
   var Name = "John";
   var reservation = false;
@@ -30,10 +29,6 @@ export default function HomeScreen({ navigation: { navigate }, route }) {
   var Charge = 10; // kW
   var startRes = (Date.now() / 1000) - 360; // Start time in seconds
   var TimeSlot = "13:00-14:00";
-
-  const removeData = async (key) => {
-    onLogout()
-  };
 
   const insets = useSafeAreaInsets();
 
@@ -140,11 +135,6 @@ export default function HomeScreen({ navigation: { navigate }, route }) {
         <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
           onPress={() => navigate('Home')}>
           <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Example</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
-          onPress={() => removeData('LoggedIn')}>
-          <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Log out</Text>
         </TouchableOpacity>
       </View>
       {/* {chargerInfo()} */}

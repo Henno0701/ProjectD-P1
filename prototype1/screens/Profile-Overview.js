@@ -8,12 +8,13 @@ import ButtonList from '../components/Button-List';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard, faCircleHalfStroke, faBell } from '@fortawesome/free-solid-svg-icons';
 
-export default function ProfileOverviewScreen({ navigation }) {
+export default function ProfileOverviewScreen({ navigation , route}) {
     const insets = useSafeAreaInsets();
     const [accountName, setAccountName] = useState("Henno Passchier");
     const [isAccountModalVisible, setAccountModalVisible] = useState(false);
     const [editedAccountName, setEditedAccountName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null); // State for selected image
+    const { onLogout } = route.params || {};
 
     const [isEnabled, setIsEnabled] = useState(false);
   
@@ -125,6 +126,11 @@ export default function ProfileOverviewScreen({ navigation }) {
                     />
                 </View>
               </ButtonList>
+
+              <TouchableOpacity onPress={() => onLogout && onLogout()} className="align-middle">
+                <Text className="text-wit text-center font-bold text-lg">Logout</Text>
+              </TouchableOpacity>
+
             </View>
           </ScrollView>
         </View>
