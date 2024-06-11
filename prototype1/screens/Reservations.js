@@ -41,9 +41,9 @@ export default function ReservationsScreen() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const reservations = await getData();
+                const reservations = await getData() || [];
                 setAllReservations(reservations);
-                console.log('All Reservations:', reservations);
+                // console.log('All Reservations:', reservations);
     
                 const upcomingReservations = reservations.filter((reservation) => {
                     return new Date(reservation.date) > new Date();
