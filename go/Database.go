@@ -1,33 +1,34 @@
 package main
 
-import (	
-	"database/sql"	
+import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
 	"log"
 	"net/http"
-	"encoding/json"
+	"strconv"
+	"time"
 )
 
 type Laadpaal struct {
-	ID     int `json:"id"`
+	ID     int    `json:"id"`
 	Status string `json:"status"`
 }
 
 type Reservation struct {
-	ID     int `json:"id"`
-	UserID int `json:"userID"`
-	LaadpaalID int `json:"laadpaalID"`
-	Date time.Time `json:"date"`
-	Priority int `json:"priority"`
-	Opgeladen bool `json:"opgeladen"`
-	Opgehaald bool `json:"opgehaald"`
+	ID         int       `json:"id"`
+	UserID     int       `json:"userID"`
+	LaadpaalID int       `json:"laadpaalID"`
+	Date       time.Time `json:"date"`
+	Priority   int       `json:"priority"`
+	Opgeladen  bool      `json:"opgeladen"`
+	Opgehaald  bool      `json:"opgehaald"`
 }
 
 // alle methods/functies die te maken hebben met de database
 func Maketables(db *sql.DB) error {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255))")
+	_, err := db.Exec("DROP TABLE IF EXISTS Users")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255), OktaId VARCHAR(255) NULL)")
 	_, err = db.Exec(
 		"CREATE TABLE IF NOT EXISTS Reservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, LaadpaalID INTEGER, Date DATETIME, Priority INTEGER, Opgeladen BOOLEAN, Opgehaald BOOLEAN)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
@@ -60,23 +61,51 @@ func AddLaadpaal(db *sql.DB, status bool) error {
 	return err
 }
 
-func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
-	rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var reservations []Reservation
-	for rows.Next() {
-		var reservation Reservation
-		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
-			return nil, err
-		}
-		reservations = append(reservations, reservation)
-	}
-	return reservations, nil
+func LinkOktaId(db *sql.DB, userId int, oktaId string) error {
+	_, err := db.Exec("UPDATE Users SET OktaId = ? WHERE ID = ?", oktaId, userId)
+	return err
 }
+
+func LinkOktaIdHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := r.FormValue("id")
+		oktaId := r.FormValue("oktaId")
+
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			http.Error(w, "Invalid user ID", http.StatusBadRequest)
+			return
+		}
+
+		err = LinkOktaId(db, id, oktaId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"message":"User OktaId updated successfully"}`))
+	}
+}
+
+// func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
+// 	rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+
+// 	var reservations []Reservation
+// 	for rows.Next() {
+// 		var reservation Reservation
+// 		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
+// 			return nil, err
+// 		}
+// 		reservations = append(reservations, reservation)
+// 	}
+// 	return reservations, nil
+// }
 
 func PrintUsers(db *sql.DB) error {
 	rows, err := db.Query("SELECT * FROM Users")
@@ -97,24 +126,24 @@ func PrintUsers(db *sql.DB) error {
 }
 
 func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
-    rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+	rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-    var reservations []Reservation
-    for rows.Next() {
-        var reservation Reservation
-        if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
-            return nil, err
-        }
-        reservations = append(reservations, reservation)
-    }
-    return reservations, nil
+	var reservations []Reservation
+	for rows.Next() {
+		var reservation Reservation
+		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
+			return nil, err
+		}
+		reservations = append(reservations, reservation)
+	}
+	return reservations, nil
 }
 
-func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
+func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// krijg alle laadpalen die beschikbaar zijn
 	// Log that the request has been received
 	log.Println("Request received at /getAvailableStations")
@@ -126,7 +155,7 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 	// nu je alle laadpalen hebt, zorg dat je nu op basis van datum en tijd kijkt of er een reservatie is en beschikbaar zijn
 	// Decode the JSON request body into a struct (genomen van henno is meer monkey code hieronder, wil het graag testen op school met henno)
 	var requestData struct {
-		Date       string `json:"Date"`
+		Date string `json:"Date"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
@@ -157,9 +186,9 @@ func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){
 			fmt.Println("Laadpaal ID:", laadpaal.ID)
 			fmt.Println("Laadpaal Status:", reservationId)
 			if laadpaal.ID != reservationId {
-			  	filtered = append(filtered, laadpaal)
+				filtered = append(filtered, laadpaal)
 			}
-		  }
+		}
 	}
 
 	// Encode filtered laadpalen into JSON and write to response (gemini code)
@@ -244,7 +273,7 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
 			return nil, fmt.Errorf("scan error: %v", err) // return the error
 		}
-		
+
 		reservations = append(reservations, reservation)
 	}
 
@@ -252,7 +281,7 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("rows iteration error: %v", err) // return the error
 	}
-	
+
 	// Return the reservations
 	return reservations, nil
 }

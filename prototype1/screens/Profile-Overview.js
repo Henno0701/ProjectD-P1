@@ -1,12 +1,29 @@
-import { Image, Text, View, Pressable, Modal, TextInput, Button, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { Image, Text, View, Pressable, Modal, TextInput, Button, TouchableOpacity, ScrollView, Switch, Linking } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StyleSheet } from 'react-native';
 import { IP } from '@env';
+
+import * as AuthSession from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import axios from 'axios';
+
 
 import ButtonList from '../components/Button-List';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard, faCircleHalfStroke, faBell } from '@fortawesome/free-solid-svg-icons';
+
+const oktaConfig = {
+  //ypur application id from okta
+  clientId: "0oahdzst51ganDQP05d7",
+  //yout domain from okta
+  domain: "https://dev-50508157.okta.com",
+  // yout domain + /oauth2/default
+  issuerUrl: "https://dev-50508157.okta.com/oauth2/default",
+  //callback configured in okta signin url
+  callbackUrl: "com.dev-50508157.okta.ProjectTest2:/callback",
+};
 
 export default function ProfileOverviewScreen({ navigation , route}) {
     const insets = useSafeAreaInsets();
@@ -15,6 +32,9 @@ export default function ProfileOverviewScreen({ navigation , route}) {
     const [editedAccountName, setEditedAccountName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null); // State for selected image
     const { onLogout } = route.params || {};
+    const [authState, setAuthState] = useState(null);
+    const discovery = AuthSession.useAutoDiscovery(oktaConfig.issuerUrl);
+    const [response, setResponse] = useState('');
 
     const [isEnabled, setIsEnabled] = useState(false);
   
@@ -34,6 +54,94 @@ export default function ProfileOverviewScreen({ navigation , route}) {
         console.error('Error fetching account name:', error);
       }
     };
+
+    const linkOktaAccount = async () =>
+      {
+
+        WebBrowser.maybeCompleteAuthSession();
+
+        const loginWithOkta = async () => {
+
+          try {
+            setAuthState(null);
+            const request = new AuthSession.AuthRequest({
+              clientId: oktaConfig.clientId,
+              redirectUri: oktaConfig.callbackUrl,
+              prompt: AuthSession.Prompt.SelectAccount,
+              scopes: ["openid", "profile", "email"],
+              usePKCE: true,
+              extraParams: {},
+            });
+      
+            const result = await request.promptAsync(discovery);
+      
+            const code = JSON.parse(JSON.stringify(result)).params.code;
+            setAuthState(result);
+      
+            const tokenRequestParams = {
+              code,
+              clientId: oktaConfig.clientId,
+              redirectUri: oktaConfig.callbackUrl,
+              extraParams: {
+                code_verifier: String(request?.codeVerifier),
+              },
+            };
+            const tokenResult = await AuthSession.exchangeCodeAsync(
+              tokenRequestParams,
+              discovery
+            );
+      
+            const accessToken = tokenResult.accessToken;
+      
+            const usersRequest = `${oktaConfig.issuerUrl}/v1/userinfo`;
+            const userPromise = await axios.get(usersRequest, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            });
+      
+            const userData = userPromise.data;
+            // console.log("\n\nUser data:", userPromise.data);
+            // console.log("\n\nOkta Token: ", accessToken);
+      
+            if (userData.sub != null) {
+              // Save the email of the logged-in user
+              handleLinkOktaId(userData.sub)
+              console.log(userData.sub)
+
+            }
+          } catch (error) {
+            console.log("Error:", error);
+          }
+          
+        };
+
+        loginWithOkta()
+      }
+          
+      const handleLinkOktaId = async (oktaId) => {
+        const userIdString = await AsyncStorage.getItem('LoggedIn');
+        const userId = parseInt(userIdString);
+        try {
+          const response = await fetch('http://192.168.2.22:8080/updateUser', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `id=${encodeURIComponent(userId)}&oktaId=${encodeURIComponent(oktaId)}`,
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to link Okta ID');
+          }
+    
+          // Handle success response
+          Alert.alert('Success', 'Okta ID linked successfully');
+        } catch (error) {
+          // Handle errors
+          Alert.alert('Error', error.message);
+        }
+      };
 
 
 
@@ -129,6 +237,10 @@ export default function ProfileOverviewScreen({ navigation , route}) {
 
               <TouchableOpacity onPress={() => onLogout && onLogout()} className="align-middle">
                 <Text className="text-wit text-center font-bold text-lg">Logout</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => linkOktaAccount()} className="align-middle">
+                <Text className="text-wit text-center font-bold text-lg">Link okta account</Text>
               </TouchableOpacity>
 
             </View>
