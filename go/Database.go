@@ -33,10 +33,7 @@ func Maketables(db *sql.DB) error {
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Laadpalen (id INTEGER PRIMARY KEY AUTOINCREMENT, status BOOLEAN)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS QuickReserveReservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Date DATETIME, Priority INTEGER)")
-	return err
-}
-func AddUser(db *sql.DB, username string, email string, password string) error {
-	_, err := db.Exec("INSERT INTO Users (Username, Email, Password) VALUES (?, ?, ?)", username, email, password)
+	_, err = db.Exec("Create TABLE IF NOT EXISTS Meldingen (ID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Melding VARCHAR(255), DateOfNotification DATETIME)") 
 	return err
 }
 
@@ -47,11 +44,6 @@ func AddReservation(db *sql.DB, userID int, laadpaalID int, date time.Time, prio
 
 func AddQuickReservation(db *sql.DB, userID int, date time.Time, priority int) error {
 	_, err := db.Exec("INSERT INTO QuickReserveReservations (UserID, Date, Priority) VALUES (?, ?, ?)", userID, date, priority)
-	return err
-}
-
-func AddMedewerker(db *sql.DB, voornaam string, achternaam string, email string, adress string, telefoonNummer string, postCode string, provincie string, autoModel string, autoCapaciteit string) error {
-	_, err := db.Exec("INSERT INTO Medewerkers (Voornaam, Achternaam, Email, Adress, TelefoonNummer, PostCode, Provincie, AutoModel, AutoCapaciteit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", voornaam, achternaam, email, adress, telefoonNummer, postCode, provincie, autoModel, autoCapaciteit)
 	return err
 }
 
@@ -94,24 +86,6 @@ func PrintUsers(db *sql.DB) error {
 		fmt.Println(strconv.Itoa(id) + ": " + username + " " + email)
 	}
 	return nil
-}
-
-func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
-    rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-
-    var reservations []Reservation
-    for rows.Next() {
-        var reservation Reservation
-        if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
-            return nil, err
-        }
-        reservations = append(reservations, reservation)
-    }
-    return reservations, nil
 }
 
 func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
@@ -257,4 +231,7 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 	return reservations, nil
 }
 
-// TODO: method maken die de quick reserve opslaat in een eigen table
+func AddMelding(db *sql.DB, userID int, melding string, dateOfNotification time.Time) error {
+	_, err := db.Exec("INSERT INTO Meldingen (UserID, Melding, DateOfNotification) VALUES (?, ?, ?)", userID, melding, dateOfNotification)
+	return err
+}
