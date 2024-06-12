@@ -176,7 +176,7 @@ func DeleteUser(db *sql.DB, id int) error {
 
 // Get all meldingen
 func GetAllMeldingen(db *sql.DB) ([]Melding, error) {
-	rows, err := db.Query("SELECT id, user_id, type_melding, date_of_notification FROM Meldingen")
+	rows, err := db.Query("SELECT ID, UserID, Melding, DateOfNotification FROM Meldingen ORDER BY DateOfNotification DESC")
 	if err != nil {
 		return nil, err
 	}

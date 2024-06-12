@@ -4,33 +4,28 @@ import { faPersonCircleExclamation, faPlugCircleExclamation } from '@fortawesome
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StyleSheet } from 'react-native';
 
-const NotificationsButton = () => {
+const NotificationsButton = ({ Notifications }) => {
+    const FormatDate = (date) => {
+        const d = new Date(date);
+        // Prevent Minutes from being single digit
+        return `${d.getHours()}:${d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()}`;
+    }
     return (
         <ScrollView>
-            <TouchableOpacity className="w-full relative h-20 flex flex-row mt-1 p-3 bg-main_box_color rounded-xl items-center">
-                <Text className="text-box-information-text absolute top-3 right-3 text-sm -mt-1" style={styles.font_regular}>10:23</Text>
-                <View className="flex-row items-center">
-                    <View className="flex-row p-3 bg-main_bg_color rounded-full">
-                        <FontAwesomeIcon size={28} icon={faPlugCircleExclamation} color='#db2525'/>
-                    </View>
-                    <View className="ml-2">
-                        <Text className="text-schuberg_blue text-lg" style={styles.font_medium}>Station Report</Text>
-                        <Text className="text-box-information-text text-sm -mt-1" style={styles.font_thin}>Charger has been reported as defected.</Text>
-                    </View>
-                </View>       
-            </TouchableOpacity>
-            <TouchableOpacity className="w-full relative h-20 flex flex-row mt-1 p-3 bg-main_box_color rounded-xl items-center">
-                <Text className="text-box-information-text absolute top-3 right-3 text-sm -mt-1" style={styles.font_regular}>10:23</Text>
-                <View className="flex-row items-center">
-                    <View className="flex-row p-3 bg-main_bg_color rounded-full">
-                        <FontAwesomeIcon size={28} icon={faPersonCircleExclamation} color='#db2525'/>
-                    </View>
-                    <View className="ml-2">
-                        <Text className="text-schuberg_blue text-lg" style={styles.font_medium}>Reservation Report</Text>
-                        <Text className="text-box-information-text text-sm -mt-1" style={styles.font_thin}>Somebody is on my charging station.</Text>
-                    </View>
-                </View>       
-            </TouchableOpacity>
+            {Object.entries(Notifications).map(([value, melding], index) => (
+                <TouchableOpacity key={index} className="w-full relative h-20 flex flex-row mt-1 p-3 bg-main_box_color rounded-xl items-center">
+                    <Text className="text-box-information-text absolute top-3 right-3 text-sm -mt-1" style={styles.font_regular}>{FormatDate(melding.date)}</Text>
+                    <View className="flex-row items-center">
+                        <View className="flex-row p-3 bg-main_bg_color rounded-full">
+                           <FontAwesomeIcon size={28} icon={melding.text === "Somebody is on my charging station." ? faPersonCircleExclamation : faPlugCircleExclamation} color='#db2525' />
+                        </View>
+                        <View className="ml-2">
+                            <Text className="text-schuberg_blue text-lg" style={styles.font_medium}>{melding.text === "Somebody is on my charging station." ? "Reservation Report" : "Station Report"}</Text>
+                            <Text className="text-box-information-text text-sm -mt-1" style={styles.font_thin}>{melding.text}</Text>
+                        </View>
+                    </View>       
+                </TouchableOpacity>
+            ))}
         </ScrollView>
     );
 };

@@ -33,7 +33,7 @@ func Maketables(db *sql.DB) error {
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Laadpalen (id INTEGER PRIMARY KEY AUTOINCREMENT, status BOOLEAN)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS QuickReserveReservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Date DATETIME, Priority INTEGER)")
-	_, err = db.Exec("Create TABLE IF NOT EXISTS Meldingen (ID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Melding VARCHAR(255), DateOfNotification DATETIME)") 
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Meldingen (ID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Melding VARCHAR(255), DateOfNotification DATETIME)") 
 	return err
 }
 
@@ -50,6 +50,24 @@ func AddQuickReservation(db *sql.DB, userID int, date time.Time, priority int) e
 func AddLaadpaal(db *sql.DB, status bool) error {
 	_, err := db.Exec("INSERT INTO Laadpalen (status) VALUES (?)", status)
 	return err
+}
+
+func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
+	rows, err := db.Query("SELECT * FROM Reservations WHERE UserID = ?", userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var reservations []Reservation
+	for rows.Next() {
+		var reservation Reservation
+		if err := rows.Scan(&reservation.ID, &reservation.UserID, &reservation.LaadpaalID, &reservation.Date, &reservation.Priority, &reservation.Opgeladen, &reservation.Opgehaald); err != nil {
+			return nil, err
+		}
+		reservations = append(reservations, reservation)
+	}
+	return reservations, nil
 }
 
 func PrintUsers(db *sql.DB) error {

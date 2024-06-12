@@ -127,6 +127,9 @@ func main() {
 	http.HandleFunc("/deleteMelding", func(w http.ResponseWriter, r *http.Request) {
 		DeleteMeldingHandler(w, r, database)
 	})
+	http.HandleFunc("/AddMelding", func(w http.ResponseWriter, r *http.Request) {
+		AddMeldingHandler(w, r, database)
+	})
 
 	fmt.Println("Server is running...")
 	// roep priority scheduler aan die altijd runt
@@ -191,6 +194,38 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("{}"))
 
+}
+
+func DateTimeStamp() time.Time {
+	// Get the current date and time
+	return time.Now()
+}
+
+func AddMeldingHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		UserID int    `json:"UserID"`
+		Melding string `json:"Melding"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// create variable for the current date and time
+	dateTime := DateTimeStamp()
+
+	// Insert the melding into the database
+	if err := AddMelding(database, requestData.UserID, requestData.Melding, dateTime); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{}"))
 }
 
 func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {

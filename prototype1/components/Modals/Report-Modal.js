@@ -11,6 +11,47 @@ import Modal from '../Modal';
 import { ScrollView } from 'react-native-gesture-handler';
 
 function ReportModal({ navigation }) {
+    const [ issue, setIssue ] = useState(null);
+
+    const handleSubmit = () => {
+        if (issue === null) {
+            Alert.alert('Please select an issue.');
+            return;
+        }
+
+        if (SendReport()) {
+            Alert.alert('Issue reported.');
+            returnToStations();
+        } else {
+            Alert.alert('Something went wrong. Please try again.');
+        }
+        
+    }
+
+    const SendReport = async () => {
+        try {
+            fetch(`http://${IP}:8080/AddMelding`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+                method: "POST",
+                body: JSON.stringify({
+                    UserID: 1,
+                    Melding: issue
+                }),
+                headers: {
+                "Content-type": "application/json; charset=UTF-8"
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // when the response is not ok return an not ok status
+                    return false;
+                }
+                
+                return true;
+                })
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
 
     const returnToStations = () => {
         navigation.navigate('StationsOverview');
@@ -50,12 +91,10 @@ function ReportModal({ navigation }) {
                                 fontFamily: 'Montserrat_400Regular',
                             },
                             }}
-                            onValueChange={(value) => console.log(value)}
+                            onValueChange={(value) => setIssue(value)}
                             items={[
-                            { label: 'Somebody is on my charging station.', value: 0 },
-                            { label: 'Charging station is defect.', value: 1 },
-                            { label: 'Option 1', value: 2 },
-                            { label: 'Option 2', value: 3 },
+                            { label: 'Somebody is on my charging station.', value: 'Somebody is on my charging station.' },
+                            { label: 'Charging station is defect.', value: 'Charging station is defect.' },
                             ]}
                         />
                         </View>
