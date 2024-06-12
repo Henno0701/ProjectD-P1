@@ -12,7 +12,7 @@ import axios from 'axios';
 
 import ButtonList from '../components/Button-List';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard, faCircleHalfStroke, faBell } from '@fortawesome/free-solid-svg-icons';
+import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShieldHalved, faUser, faUserCircle, faAddressCard, faCircleHalfStroke, faBell, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 const oktaConfig = {
   //ypur application id from okta
@@ -123,7 +123,7 @@ export default function ProfileOverviewScreen({ navigation , route}) {
         const userIdString = await AsyncStorage.getItem('LoggedIn');
         const userId = parseInt(userIdString);
         try {
-          const response = await fetch('http://192.168.2.22:8080/updateUser', {
+          const response = await fetch(`http://${IP}:8080/updateUser`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -230,18 +230,30 @@ export default function ProfileOverviewScreen({ navigation , route}) {
                       trackColor={{false: '#767577', true: '#1E80ED'}}
                       ios_backgroundColor="#3e3e3e"
                       onValueChange={toggleSwitch}
-                      value={isEnabled}
+                      value={true}
                     />
                 </View>
               </ButtonList>
 
-              <TouchableOpacity onPress={() => onLogout && onLogout()} className="align-middle">
-                <Text className="text-wit text-center font-bold text-lg">Logout</Text>
-              </TouchableOpacity>
+              <Text className="text-profile-grijs text-base mt-5" style={styles.font_thin}>Extra</Text>
+              <ButtonList>
+                <TouchableOpacity onPress={() => linkOktaAccount()} className="flex flex-row justify-between items-center w-full py-4">
+                  <View className="flex flex-row items-center">
+                        <FontAwesomeIcon icon={faUser} size={20} color="#FFF"/>
+                        <Text className="ml-2 text-base text-[#fff]" style={styles.font_regular}>Link Okta Account</Text>
+                    </View>
+                    <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFF" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => onLogout && onLogout()} className="flex flex-row justify-between items-center w-full py-4">
+                <View className="flex flex-row items-center">
+                        <FontAwesomeIcon icon={faRightFromBracket} size={20} color="#db2525"/>
+                        <Text className="ml-2 text-base text-[#db2525]" style={styles.font_regular}>Logout</Text>
+                    </View>
+                </TouchableOpacity>
+              </ButtonList>
+              
 
-              <TouchableOpacity onPress={() => linkOktaAccount()} className="align-middle">
-                <Text className="text-wit text-center font-bold text-lg">Link okta account</Text>
-              </TouchableOpacity>
+              
 
             </View>
           </ScrollView>

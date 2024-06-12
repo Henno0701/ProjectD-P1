@@ -71,7 +71,7 @@ func main() {
 	// zorg dat de db up to date is
 	UpdateDB()
 	//Henk@gmail.com, HenkPassword
-	//AddUser(database, "Henk", "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
+	// AddUser(database, "Henk", "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
 
 	// print(checkAccounts(database, "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20"))
 	// print(checkAccounts(database, "Henk@gmail.com", "HenkPassword"))
