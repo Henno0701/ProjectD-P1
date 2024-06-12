@@ -27,16 +27,31 @@ export default function HomeScreen({ navigation: { navigate } }) {
 
   const getUserID = async () => {
     try {
-      const response = await axios.get('http://localhost:8081/getUserID');
-      setUserID(response.data.userID);
+      const response = await fetch(`http://145.24.238.76:8081/getUserID`);
+
+      if (!response.ok) {
+        // Handle non-200 responses
+        console.error(`Error: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await response.json();
+        setUserID(data.userID);
+      } else {
+        const text = await response.text();
+        console.error("Unexpected response format:", text);
+      }
     } catch (error) {
       console.error('Error fetching user ID:', error);
     }
   };
 
+
   const getEmailByID = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8081/getEmail?id=${id}`);
+      const response = await fetch(`http://145.24.238.76:8081/getEmail?id=${id}`);
       return response.data.email;
     } catch (error) {
       console.error('Error fetching email:', error);
@@ -45,7 +60,11 @@ export default function HomeScreen({ navigation: { navigate } }) {
   };
   const sendEmailNotification = async (email) => {
     try {
-      await axios.post('http://localhost:3000/sendEmail', {
+      ('http://145.24.238.76:3000/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         email: email,
         subject: 'Charging Complete',
         text: 'Your car has finished charging.'
