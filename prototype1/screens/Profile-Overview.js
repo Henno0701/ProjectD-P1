@@ -8,6 +8,7 @@ import { IP } from '@env';
 import * as AuthSession from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import axios from 'axios';
+import { Alert } from 'react-native';
 
 
 import ButtonList from '../components/Button-List';
@@ -55,8 +56,37 @@ export default function ProfileOverviewScreen({ navigation , route}) {
       }
     };
 
+    const selectUser = async (userID) => {
+
+      console.log(userID)
+      try {
+        const response = await fetch(`http://192.168.2.22:8080/selectUser?ID=${userID}`);
+    
+        if (!response.ok) {
+          return null;
+        }
+    
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Error:', error);
+        return null;
+      }
+    };
+    
+
     const linkOktaAccount = async () =>
       {
+        const userIdString = await AsyncStorage.getItem('LoggedIn');
+        const userId = parseInt(userIdString);
+
+        const result = await selectUser(userId);
+        console.log(result)
+
+        if (result.okta_id != null){
+          createAlreadyLinked()
+          return
+        }
 
         WebBrowser.maybeCompleteAuthSession();
 
@@ -106,7 +136,7 @@ export default function ProfileOverviewScreen({ navigation , route}) {
       
             if (userData.sub != null) {
               // Save the email of the logged-in user
-              handleLinkOktaId(userData.sub)
+              handleLinkOktaId(userData.sub, userId)
               console.log(userData.sub)
 
             }
@@ -119,11 +149,10 @@ export default function ProfileOverviewScreen({ navigation , route}) {
         loginWithOkta()
       }
           
-      const handleLinkOktaId = async (oktaId) => {
-        const userIdString = await AsyncStorage.getItem('LoggedIn');
-        const userId = parseInt(userIdString);
+      const handleLinkOktaId = async (oktaId, userId) => {
+
         try {
-          const response = await fetch(`http://${IP}:8080/updateUser`, {
+          const response = await fetch(`http://192.168.2.22:8080/updateUser`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
@@ -148,6 +177,12 @@ export default function ProfileOverviewScreen({ navigation , route}) {
     const toggleSwitch = () => {
       setIsEnabled(previousState => !previousState);
     }
+
+    const createAlreadyLinked = () =>
+      Alert.alert('Your account is already linked.', '', [{
+          text: 'Dismiss',
+          // onPress: () => console.log('Ask me later pressed'),
+        }]);
 
     return (
         <View className="flex-1 bg-main_bg_color items-center" style={{ paddingTop: insets.top }}>

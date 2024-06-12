@@ -250,7 +250,7 @@ const handleSubmit = async (email, password) => {
   const Password = password; 
 
   try {
-    const response = await fetch(`http://${IP}:8080/checkAccounts`, {
+    const response = await fetch(`http://192.168.2.22:8080/checkAccounts`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

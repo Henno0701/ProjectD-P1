@@ -71,7 +71,7 @@ func main() {
 	// zorg dat de db up to date is
 	UpdateDB()
 	//Henk@gmail.com, HenkPassword
-	// AddUser(database, "Henk", "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
+	//AddUser(database, "Henk", "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
 
 	// print(checkAccounts(database, "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20"))
 	// print(checkAccounts(database, "Henk@gmail.com", "HenkPassword"))
@@ -79,6 +79,7 @@ func main() {
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/updateUser", LinkOktaIdHandler(database))
+	http.HandleFunc("/selectUser", selectUserHandler(database))
 	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler)                                       // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler)                                       // Endpoint to set the name
