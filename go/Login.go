@@ -92,3 +92,32 @@ func checkAccountsHandler(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func getEmailByID(accounts []Account, id string) (string, error) {
+	for _, account := range accounts {
+		if account.ID == id {
+			return account.Email, nil
+		}
+	}
+	return "", fmt.Errorf("user not found")
+}
+
+func GetEmailHandler(w http.ResponseWriter, r *http.Request) {
+	// Assuming you get the user ID from the request (you can adjust this as needed)
+	userID := r.URL.Query().Get("id")
+
+	accounts, err := readAccountsFromFile("../prototype1/data/Accounts.json")
+	if err != nil {
+		http.Error(w, "Error reading accounts", http.StatusInternalServerError)
+		return
+	}
+
+	email, err := getEmailByID(accounts, userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"email": email})
+}

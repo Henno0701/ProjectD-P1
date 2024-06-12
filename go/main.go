@@ -7,8 +7,9 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	_ "github.com/mattn/go-sqlite3"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Item struct {
@@ -67,19 +68,20 @@ func main() {
 		log.Fatalf("Error creating tables: %v", err)
 	}
 
-  	// zorg dat de db up to date is
+	// zorg dat de db up to date is
 	UpdateDB()
-	
+
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
-  	http.HandleFunc("/readAccounts", GetAccounts)
-	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
-	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
-	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
+	http.HandleFunc("/readAccounts", GetAccounts)
+	http.HandleFunc("/getName", getNameHandler)                                       // Endpoint to get the name
+	http.HandleFunc("/setName", setNameHandler)                                       // Endpoint to set the name
+	http.HandleFunc("/getEmail", GetEmailHandler)                                     // Endpoint to get the email
+	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database))             // Endpoint to get all laadpalen
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-        // Call the actual handler function with the argument
-        AddReservationHandler(w, r, database)
-    })
+		// Call the actual handler function with the argument
+		AddReservationHandler(w, r, database)
+	})
 
 	http.HandleFunc("/getAllReservationsOfUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
 		// Call the actual handler function with the argument
@@ -87,25 +89,25 @@ func main() {
 	})
 
 	http.HandleFunc("/addQuickReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-        // Call the actual handler function with the argument
-        AddQuickReservationHandler(w, r, database)
-    })
+		// Call the actual handler function with the argument
+		AddQuickReservationHandler(w, r, database)
+	})
 
 	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-        // Call the actual handler function with the argument
-        GetAllReservationOfDateHandler(w, r, database)
-    })
+		// Call the actual handler function with the argument
+		GetAllReservationOfDateHandler(w, r, database)
+	})
 
-	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
-        // Call the actual handler function with the argument
-        GetAvailableStations(w, r, database)
-    }) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
+	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request) {
+		// Call the actual handler function with the argument
+		GetAvailableStations(w, r, database)
+	}) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
 
-	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request){
-        // Call the actual handler function with the argument
-        GetLaadpalenQRhandeler(w, r, database)
-    }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
-	
+	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request) {
+		// Call the actual handler function with the argument
+		GetLaadpalenQRhandeler(w, r, database)
+	}) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
+
 	fmt.Println("Server is running...")
 	// roep priority scheduler aan die altijd runt
 	fmt.Println("Starting priority scheduler...")
@@ -298,9 +300,9 @@ func AddReservationHandler(w http.ResponseWriter, r *http.Request, database *sql
 func AddQuickReservationHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	// Decode the JSON request body into a struct
 	var requestData struct {
-		UserID     int    `json:"UserID"`
-		Date       string `json:"Date"`
-		Priority   int    `json:"Priority"`
+		UserID   int    `json:"UserID"`
+		Date     string `json:"Date"`
+		Priority int    `json:"Priority"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {

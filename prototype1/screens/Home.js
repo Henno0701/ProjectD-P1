@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBattery2, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import ProgressBar from '../data/ProgressBar';
+import axios from 'axios';
 
 export default function HomeScreen({ navigation: { navigate } }) {
   const date = new Date();
@@ -19,9 +20,33 @@ export default function HomeScreen({ navigation: { navigate } }) {
   var TimeSlot = "13:00-14:00";
 
   const insets = useSafeAreaInsets();
-
+  const [userID, setUserID] = useState('');
   const [progress, setProgress] = useState(0);
   const [kWhCharged, setkWhCharged] = useState(0);
+
+  const getUserID = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/getUserID');
+      setUserID(response.data.userID);
+    } catch (error) {
+      console.error('Error fetching user ID:', error);
+    }
+  };
+  useEffect(() => {
+    getUserID();
+  }, []);
+  const sendEmailNotification = async () => {
+    try {
+      // Send the email notification to the user ID
+      await axios.post('http://localhost:3000/sendEmail', {
+        userID: userID, // Use the retrieved user ID
+        subject: 'Charging Complete',
+        text: 'Your car has finished charging.'
+      });
+    } catch (error) {
+      console.error('Error sending email notification:', error);
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,13 +58,16 @@ export default function HomeScreen({ navigation: { navigate } }) {
       // Calculate kWh charged
       const kWh = (Charge * elapsedTime) / 3600;
       setkWhCharged(kWh);
-
+      //get the current user id
+      sendEmailNotification(); //test
       if (elapsedTime >= duration) {
         clearInterval(interval);
+        sendEmailNotification();
       }
     }, 1000);
 
     return () => clearInterval(interval);
+
   }, [startRes, Charge]);
 
   return (
@@ -180,6 +208,11 @@ function checkTimeLeft(startTime) {
 //   var data = APICall();
 //   console.log(data);
 // }
+
+
+
+
+
 
 const styles = StyleSheet.create({
   font_regular: {
