@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { CountDown } from 'react-native-countdown-component';
+//import { CountDown } from 'react-native-countdown-component';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBattery2, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import ProgressBar from '../data/ProgressBar';
 import axios from 'axios';
+import { IP } from '@env';
 
 export default function HomeScreen({ navigation: { navigate } }) {
   const date = new Date();
@@ -26,20 +27,26 @@ export default function HomeScreen({ navigation: { navigate } }) {
 
   const getUserID = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/getUserID');
+      const response = await axios.get('http://localhost:8081/getUserID');
       setUserID(response.data.userID);
     } catch (error) {
       console.error('Error fetching user ID:', error);
     }
   };
-  useEffect(() => {
-    getUserID();
-  }, []);
-  const sendEmailNotification = async () => {
+
+  const getEmailByID = async (id) => {
     try {
-      // Send the email notification to the user ID
+      const response = await axios.get(`http://localhost:8081/getEmail?id=${id}`);
+      return response.data.email;
+    } catch (error) {
+      console.error('Error fetching email:', error);
+      return null;
+    }
+  };
+  const sendEmailNotification = async (email) => {
+    try {
       await axios.post('http://localhost:3000/sendEmail', {
-        userID: userID, // Use the retrieved user ID
+        email: email,
         subject: 'Charging Complete',
         text: 'Your car has finished charging.'
       });
@@ -49,7 +56,11 @@ export default function HomeScreen({ navigation: { navigate } }) {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    getUserID();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
       const elapsedTime = (Date.now() / 1000) - startRes;
       const duration = 3600; // Total duration in seconds (1 hour)
       const newProgress = (elapsedTime / duration) * 100;
@@ -62,13 +73,17 @@ export default function HomeScreen({ navigation: { navigate } }) {
       sendEmailNotification(); //test
       if (elapsedTime >= duration) {
         clearInterval(interval);
-        sendEmailNotification();
+        const email = await getEmailByID(userID);
+        if (email) {
+          sendEmailNotification(email);
+        }
       }
+
     }, 1000);
 
     return () => clearInterval(interval);
 
-  }, [startRes, Charge]);
+  }, [userID, startRes, Charge]);
 
   return (
     <View className="flex-1 bg-main_bg_color p-3" style={{ paddingTop: insets.top }}>
@@ -102,7 +117,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
                 <View className="w-12 h-12 bg-main_bg_color justify-center items-center rounded-full">
                   <FontAwesomeIcon size={32} color="#56db21" icon={faClock} />
                 </View>
-                <CountDown
+                {/* <CountDown
                   until={checkTimeLeft(startRes)}
                   size={16}
                   digitStyle={{ backgroundColor: null, marginHorizontal: -2 }}
@@ -111,7 +126,7 @@ export default function HomeScreen({ navigation: { navigate } }) {
                   timeLabels={{ h: null, m: null, s: null }}
                   showSeparator
                   separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
-                />
+                /> */}
               </View>
             </View>
           </View>

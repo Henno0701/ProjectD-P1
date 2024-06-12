@@ -103,7 +103,15 @@ func getEmailByID(accounts []Account, id string) (string, error) {
 }
 
 func GetEmailHandler(w http.ResponseWriter, r *http.Request) {
-	// Assuming you get the user ID from the request (you can adjust this as needed)
+	// Handle CORS preflight request
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	userID := r.URL.Query().Get("id")
 
 	accounts, err := readAccountsFromFile("../prototype1/data/Accounts.json")
@@ -119,5 +127,6 @@ func GetEmailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(map[string]string{"email": email})
 }
