@@ -60,7 +60,7 @@ export default function ProfileOverviewScreen({ navigation , route}) {
 
       console.log(userID)
       try {
-        const response = await fetch(`http://192.168.2.22:8080/selectUser?ID=${userID}`);
+        const response = await fetch(`http://${IP}/selectUser?ID=${userID}`);
     
         if (!response.ok) {
           return null;
@@ -152,7 +152,7 @@ export default function ProfileOverviewScreen({ navigation , route}) {
       const handleLinkOktaId = async (oktaId, userId) => {
 
         try {
-          const response = await fetch(`http://192.168.2.22:8080/updateUser`, {
+          const response = await fetch(`http://${IP}:8080/updateUser`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
