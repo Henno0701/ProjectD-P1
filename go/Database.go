@@ -3,7 +3,6 @@ package main
 import (	
 	"database/sql"	
 	"fmt"
-	"strconv"
 	"time"
 	"log"
 	"net/http"
@@ -77,29 +76,29 @@ func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
 	return reservations, nil
 }
 
-func GetAllUsers(db *sql.DB) error {
-	rows, err := db.Query("SELECT * FROM Users")
-	if err != nil {
-		log.Fatal(err) // log.Fatal will log the error and stop the program
-	}
-	defer rows.Close()
+func GetAllUsers(db *sql.DB) ([]User, error) {
+    rows, err := db.Query("SELECT * FROM Users")
+    if err != nil {
+        log.Fatal(err) // log.Fatal will log the error and stop the program
+    }
+    defer rows.Close()
 
-	// Check if the laadpalen are not null
-	var Users []User
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(&user.ID, &user.Status); err != nil {
-			log.Fatal(err) // log.Fatal will log the error and stop the program
-		}
-		Users = append(Users, user)
-	}
+    // Check if the laadpalen are not null
+    var Users []User
+    for rows.Next() {
+        var user User
+        if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password); err != nil {
+            log.Fatal(err) // log.Fatal will log the error and stop the program
+        }
+        Users = append(Users, user)
+    }
 
-	// Check for errors from iterating over rows
-	if err := rows.Err(); err != nil {
-		log.Fatal(err) // log.Fatal will log the error and stop the program
-	}
-	log.Println("stuur lijst terug")
-	return Users, nil
+    // Check for errors from iterating over rows
+    if err := rows.Err(); err != nil {
+        log.Fatal(err) // log.Fatal will log the error and stop the program
+    }
+    log.Println("stuur lijst terug")
+    return Users, nil
 }
 
 func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	

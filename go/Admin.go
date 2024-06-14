@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"fmt"
 	"strconv"
 )
 
@@ -131,7 +132,7 @@ func EditUser(w http.ResponseWriter, r *http.Request, db *sql.DB){
 }
 
 func DeleteUser(db *sql.DB, id int) error {
-	queryDeleteMedewerker := "DELETE FROM Medewerkers WHERE ID = ?"
+	queryDeleteMedewerker := "DELETE FROM Medewerkers WHERE id = ?"
 	queryDeleteUser := "DELETE FROM Users WHERE ID = ?"
 
 	tx, err := db.Begin()
@@ -206,21 +207,19 @@ func DeleteMelding(db *sql.DB, id int) error {
 
 // Handlers voor de delete methods
 func DeleteUserHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	// krijg de id van de user
-	idStr := r.URL.Query().Get("id")
-	if idStr == "" {
-		http.Error(w, "Missing user ID", http.StatusBadRequest)
+	// Decode the JSON request body into a struct
+	var requestData struct {
+		UserID int `json:"UserID"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
+	fmt.Println(requestData.UserID)
 
 	// Delete the user from the database
-	if err := DeleteUser(db, id); err != nil {
+	if err := DeleteUser(db, requestData.UserID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
