@@ -174,3 +174,41 @@ func selectUserHandler(db *sql.DB) http.HandlerFunc {
 		}
 	}
 }
+
+func getEmailByID(accounts []Account, id string) (string, error) {
+	for _, account := range accounts {
+		if account.ID == id {
+			return account.Email, nil
+		}
+	}
+	return "", fmt.Errorf("user not found")
+}
+
+func GetEmailHandler(w http.ResponseWriter, r *http.Request) {
+	// Handle CORS preflight request
+	if r.Method == http.MethodOptions {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	userID := r.URL.Query().Get("id")
+
+	accounts, err := readAccountsFromFile("../prototype1/data/Accounts.json")
+	if err != nil {
+		http.Error(w, "Error reading accounts", http.StatusInternalServerError)
+		return
+	}
+
+	email, err := getEmailByID(accounts, userID)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	json.NewEncoder(w).Encode(map[string]string{"email": email})
+}

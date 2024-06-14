@@ -44,7 +44,7 @@ func Indelen(db *sql.DB, date time.Time) {
     // log.Println("Aantal laadpalen: ", i)
 
     query := "SELECT * FROM QuickReserveReservations WHERE Date >= ? AND Date < ?"
-    rows, err := db.Query(query, "2024-06-03 18:00:00+00:00", "2024-06-03 19:00:00+00:00")
+    rows, err := db.Query(query, date, dateNextHour)
     log.Println(date.Format(time.RFC3339), dateNextHour.Format(time.RFC3339))   
     if err != nil {
         log.Println("Error querying database: " + err.Error())

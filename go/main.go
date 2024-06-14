@@ -72,7 +72,7 @@ func main() {
 	UpdateDB()
 	//Henk@gmail.com, HenkPassword
 	// AddUser(database, "Henk", "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
-	AddUser(database, "Henno", "Henno@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
+	// AddUser(database, "Henno", "Henno@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20")
 
 	// print(checkAccounts(database, "Henk@gmail.com", "6b31e5aa0543f8be4ef13fff7cd8bcbcb4013d20"))
 	// print(checkAccounts(database, "Henk@gmail.com", "HenkPassword"))
@@ -83,17 +83,18 @@ func main() {
 	http.HandleFunc("/selectUser", selectUserHandler(database))
 	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler)                                       // Endpoint to get the name
-	http.HandleFunc("/setName", setNameHandler)                                       // Endpoint to set the name
+	http.HandleFunc("/setName", setNameHandler)                                       // Endpoint to set the name                                       // Endpoint to set the name
+	http.HandleFunc("/getEmail", GetEmailHandler)                                     // Endpoint to get the email
 	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database))             // Endpoint to get all laadpalen
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
 		// Call the actual handler function with the argument
 		AddReservationHandler(w, r, database)
 	})
 
-	// http.HandleFunc("/getAllReservationsOfUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-	// 	// Call the actual handler function with the argument
-	// 	GetAllReservationsOfUserHandler(w, r, database)
-	// })
+	http.HandleFunc("/getAllReservationsOfUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
+		// Call the actual handler function with the argument
+		GetAllReservationsOfUserHandler(w, r, database)
+	})
 
 	http.HandleFunc("/addQuickReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
 		// Call the actual handler function with the argument
@@ -101,24 +102,19 @@ func main() {
 	})
 
 	http.HandleFunc("/getAllReservationsOfDate", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-		// Call the actual handler function with the argument
-		GetAllReservationOfDateHandler(w, r, database)
-	})
+        // Call the actual handler function with the argument
+        GetAllReservationOfDateHandler(w, r, database)
+    })
 
-	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request) {
-		// Call the actual handler function with the argument
-		GetAvailableStations(w, r, database)
-	}) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
+	http.HandleFunc("/getAvailableStations", func(w http.ResponseWriter, r *http.Request){
+        // Call the actual handler function with the argument
+        GetAvailableStations(w, r, database)
+    }) // Endpoint voor het ophalen van beschikbare stations op specifieke datum en tijd
 
-	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request) {
-		// Call the actual handler function with the argument
-		GetLaadpalenQRhandeler(w, r, database)
-	}) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
-
-	http.HandleFunc("/getAllReservationsOfUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-		// Call the actual handler function with the argument
-		GetAllReservationsOfUserHandler(w, r, database)
-	})
+	http.HandleFunc("/getQuickReserveStations", func(w http.ResponseWriter, r *http.Request){
+        // Call the actual handler function with the argument
+        GetLaadpalenQRhandeler(w, r, database)
+    }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
 
 	fmt.Println("Server is running...")
 	// roep priority scheduler aan die altijd runt
@@ -184,36 +180,6 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("{}"))
 
 }
-
-// func GetAllReservationsOfUserHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
-// 	// Decode the JSON request body into a struct
-// 	var requestData struct {
-// 		UserID int `json:"UserID"`
-// 	}
-// 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-// 		http.Error(w, err.Error(), http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	// Handle the return values from GetAllReservationsOfUser
-// 	reservations, err := GetAllReservationsOfUser(database, requestData.UserID)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Convert the reservations to JSON
-// 	reservationsJSON, err := json.Marshal(reservations)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Send the response back to the client
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write(reservationsJSON)
-// }
 
 func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

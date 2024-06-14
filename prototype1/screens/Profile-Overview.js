@@ -28,7 +28,7 @@ const oktaConfig = {
 
 export default function ProfileOverviewScreen({ navigation , route}) {
     const insets = useSafeAreaInsets();
-    const [accountName, setAccountName] = useState("Henno Passchier");
+    const [accountName, setAccountName] = useState("Henno");
     const [isAccountModalVisible, setAccountModalVisible] = useState(false);
     const [editedAccountName, setEditedAccountName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null); // State for selected image
