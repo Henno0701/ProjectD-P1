@@ -18,7 +18,7 @@ export default function ProfileScreen({route}) {
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
             <RootStack.Group>
-                <RootStack.Screen  name="Profile" component={ProfileOverviewScreen} initialParams={{ onLogout }} />
+                <RootStack.Screen  name="ProfileOverview" component={ProfileOverviewScreen} initialParams={{ onLogout }} />
             </RootStack.Group>
             <RootStack.Group 
             screenOptions={{ 
