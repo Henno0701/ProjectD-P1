@@ -172,8 +172,6 @@ export default function StationsReserveScreen() {
             const Reservations = await getAllReservationsOfDate(selectedDate); // Await every reservation of the selected date
             const AllChargingStations = await getAllChargingStations(); // Get all charging stations
             const FilteredTimes = filterUnavailableReservation(EveryHour, Reservations, AllChargingStations);
-            console.log(FilteredTimes);
-            
 
             setTimes(FilteredTimes); // Set the timeslots of the day
         };
@@ -185,7 +183,7 @@ export default function StationsReserveScreen() {
     // Function to  account name from server
     const AddToDatabase = async (date, laadpaalID) => {
         try {
-            fetch(`http://${IP}:8080/addReservation`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+            fetch(`http://${IP}:8080/addReservation`, {
                 method: "POST",
                 body: JSON.stringify({
                     UserID: 1,
@@ -207,7 +205,8 @@ export default function StationsReserveScreen() {
                 return true;
               })
         } catch (error) {
-          console.error('Error:', error);
+        //   console.error('Error:', error);
+            return false;
         }
     };
 
@@ -216,8 +215,6 @@ export default function StationsReserveScreen() {
         const foundTime = Object.entries(times).find(([time, value]) => parseInt(time, 10) === hour); // Find the time slot in the times array
         return foundTime ? foundTime[1][0] : null; // Return the first ID in the list for the found time slot
     };
-            
-        
 
     const addReservation = async (date, time) => {
         // Save the reservation to the database
