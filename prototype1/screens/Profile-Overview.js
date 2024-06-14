@@ -10,7 +10,7 @@ import { faAddressBook, faCar, faChevronRight, faCircle, faMinusCircle, faShield
 
 export default function ProfileOverviewScreen({ navigation }) {
     const insets = useSafeAreaInsets();
-    const [accountName, setAccountName] = useState("Henno Passchier");
+    const [accountName, setAccountName] = useState("Henno");
     const [isAccountModalVisible, setAccountModalVisible] = useState(false);
     const [editedAccountName, setEditedAccountName] = useState("");
     const [selectedImage, setSelectedImage] = useState(null); // State for selected image
