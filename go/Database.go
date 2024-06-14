@@ -15,6 +15,13 @@ type Laadpaal struct {
 	Status string `json:"status"`
 }
 
+type User struct {
+	ID	   int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type Reservation struct {
 	ID     int `json:"id"`
 	UserID int `json:"userID"`
