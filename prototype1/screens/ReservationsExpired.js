@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Button, Text, View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import { ListItem, Card } from 'react-native-elements';
-import { createStackNavigator } from '@react-navigation/stack';
-import { useNavigation } from '@react-navigation/native';
-import { styled } from 'nativewind';
 import { faCalendarDays, faClock, faFlag } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
-import { IP } from '@env';
 
 
 const ReservationsExpired = ({reservations}) => {

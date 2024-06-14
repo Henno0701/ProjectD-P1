@@ -17,7 +17,7 @@ export default function ProfileScreen() {
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
             <RootStack.Group>
-                <RootStack.Screen  name="Profile" component={ProfileOverviewScreen} />
+                <RootStack.Screen  name="ProfileOverview" component={ProfileOverviewScreen} />
             </RootStack.Group>
             <RootStack.Group 
             screenOptions={{ 

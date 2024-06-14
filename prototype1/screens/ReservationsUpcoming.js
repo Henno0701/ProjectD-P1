@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { Text } from 'react-native-elements';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import { IP } from '@env';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendarDays, faClock, faFlag, faLocationDot } from '@fortawesome/free-solid-svg-icons';
