@@ -11,7 +11,7 @@ type Reservering struct {
     id         int
     UserID     int
     Date       time.Time
-    Priority   int // Assuming Priority is an integer
+    Priority   int
 }
 
 func PriorityScheduler(db *sql.DB) {
@@ -44,7 +44,8 @@ func Indelen(db *sql.DB, date time.Time) {
     // log.Println("Aantal laadpalen: ", i)
 
     query := "SELECT * FROM QuickReserveReservations WHERE Date >= ? AND Date < ?"
-    rows, err := db.Query(query, "2024-06-02 17:00:00+00:00", "2024-06-02 18:00:00+00:00")
+    rows, err := db.Query(query, date, dateNextHour)
+    log.Println(date.Format(time.RFC3339), dateNextHour.Format(time.RFC3339))   
     if err != nil {
         log.Println("Error querying database: " + err.Error())
         return
