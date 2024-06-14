@@ -13,11 +13,12 @@ import SecurityModalScreen from '../components/Modals/Security-Modal';
 
 const RootStack = createStackNavigator();
 
-export default function ProfileScreen() {
+export default function ProfileScreen({route}) {
+    const { onLogout } = route.params || {};
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
             <RootStack.Group>
-                <RootStack.Screen  name="ProfileOverview" component={ProfileOverviewScreen} />
+                <RootStack.Screen  name="Profile" component={ProfileOverviewScreen} initialParams={{ onLogout }} />
             </RootStack.Group>
             <RootStack.Group 
             screenOptions={{ 

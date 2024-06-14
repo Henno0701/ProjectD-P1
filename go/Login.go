@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -61,32 +62,113 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
-func checkAccounts(db *sql.DB, email string, password string) bool {
+type User struct {
+	ID       int            `json:"id"`
+	Username string         `json:"username"`
+	Email    string         `json:"email"`
+	OktaID   sql.NullString `json:"okta_id"`
+}
+
+func checkAccounts(db *sql.DB, email string, password string) *User {
 	row := db.QueryRow("SELECT * FROM Users WHERE Email = ? AND Password = ?", email, password)
 
-	var Id int
-	var Username string
-	var Email string
+	// var Id int
+	// var Username string
+	// var Email string
 	var Password string
+	// var OktaId sql.NullString
 
-	err := row.Scan(&Id, &Username, &Email, &Password)
+	var user User
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false
+			return nil
 		}
 		fmt.Println("Error:", err)
-		return false
+		return nil
 	}
-	return true
+
+	print(user.Email)
+	return &user
 }
 
 func checkAccountsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		email := r.FormValue("email")
 		password := r.FormValue("password")
-		if checkAccounts(db, email, password) {
 
+		var correct = checkAccounts(db, email, password)
+		if correct != nil {
+
+			// Marshal the correct user into JSON format
+			userJSON, err := json.Marshal(correct)
+			if err != nil {
+				// Handle error if JSON marshaling fails
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Set response headers and write the user JSON to the response body
+
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
+			w.Write(userJSON)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func selectUser(db *sql.DB, id int) *User {
+	row := db.QueryRow("SELECT * FROM users WHERE ID = ?", (id))
+
+	// var Id int
+	// var Username string
+	// var Email string
+	var Password string
+	// var OktaId sql.NullString
+
+	var user User
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		fmt.Println("Error:", err)
+		return nil
+	}
+
+	return &user
+}
+
+func selectUserHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idStr := r.URL.Query().Get("ID")
+		id, err := strconv.Atoi(idStr)
+
+		if err != nil {
+			http.Error(w, "Invalid user ID", http.StatusBadRequest)
+			return
+		}
+
+		var correct = selectUser(db, id)
+		if correct != nil {
+
+			// Marshal the correct user into JSON format
+			userJSON, err := json.Marshal(correct)
+			if err != nil {
+				// Handle error if JSON marshaling fails
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Set response headers and write the user JSON to the response body
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(userJSON)
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 		}

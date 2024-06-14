@@ -10,7 +10,7 @@ import axios from 'axios';
 import { IP } from '@env';
 import ButtonList from '../components/Button-List';
 
-export default function HomeScreen({ navigation: { navigate } }) {
+export default function HomeScreen({ navigation: { navigate }}) {
   const date = new Date();
   var Name = "John";
 
