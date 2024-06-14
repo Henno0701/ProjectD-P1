@@ -25,20 +25,20 @@ function UsersModal({ navigation }) {
             });
 
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return {};
             }
 
             const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
             return json;
         } catch (error) {
-            console.error('Error:', error);
+            return {};
         }
     }
 
     useEffect(() => {
         const fetchData = async () => {
             const usersList = await getAllUsers();
-            setUsers(usersList);
+            setUsers(usersList || {});
         };
     
         fetchData();
@@ -106,7 +106,7 @@ function UsersModal({ navigation }) {
     return (
         <Modal>
             <View className="flex-1 bg-main_bg_color items-center p-3 w-full" style={{ paddingTop: insets.top }}>
-                <Text className="text-wit text-4xl w-full" style={styles.font_medium}>Users</Text>
+            <Text className="text-wit text-2xl" style={styles.font_semibold}>Users</Text>
                 <ScrollView className="w-full">
                     {Object.entries(users).map(([value, user], index) => {
                         return (
