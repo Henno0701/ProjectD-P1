@@ -58,10 +58,10 @@ export default function ProfileOverviewScreen({ navigation , route}) {
 
     const selectUser = async (userID) => {
 
-      console.log(userID)
       try {
-        const response = await fetch(`http://${IP}/selectUser?ID=${userID}`);
-    
+        const response = await fetch(`http://${IP}:8080/selectUser?ID=${userID}`);
+        
+        console.log(response)
         if (!response.ok) {
           return null;
         }
@@ -81,9 +81,9 @@ export default function ProfileOverviewScreen({ navigation , route}) {
         const userId = parseInt(userIdString);
 
         const result = await selectUser(userId);
-        console.log(result)
 
-        if (result.okta_id != null){
+        console.log(result)
+        if (result.oktaID != null){
           createAlreadyLinked()
           return
         }
