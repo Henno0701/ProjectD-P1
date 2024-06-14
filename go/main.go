@@ -80,6 +80,7 @@ func main() {
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
+	http.HandleFunc("/getAllUsers", GetAllUsersHandler(database)) // Endpoint to get all laadpalen
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
         AddReservationHandler(w, r, database)
@@ -248,6 +249,29 @@ func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(laadpalenJSON)
+	}
+}
+
+func GetAllUsersHandler(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get all laadpalen
+		Users, err := GetAllUsers(database)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Convert the laadpalen to JSON
+		UserJson, err := json.Marshal(Users)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Send the response back to the client
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(UserJson)
 	}
 }
 

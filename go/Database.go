@@ -70,22 +70,29 @@ func GetAllReservationsOfUser(db *sql.DB, userID int) ([]Reservation, error) {
 	return reservations, nil
 }
 
-func PrintUsers(db *sql.DB) error {
+func GetAllUsers(db *sql.DB) error {
 	rows, err := db.Query("SELECT * FROM Users")
 	if err != nil {
-		return err
+		log.Fatal(err) // log.Fatal will log the error and stop the program
 	}
 	defer rows.Close()
 
-	var id int
-	var username, email, password string
+	// Check if the laadpalen are not null
+	var Users []User
 	for rows.Next() {
-		if err := rows.Scan(&id, &username, &email, &password); err != nil {
-			return err
+		var user User
+		if err := rows.Scan(&user.ID, &user.Status); err != nil {
+			log.Fatal(err) // log.Fatal will log the error and stop the program
 		}
-		fmt.Println(strconv.Itoa(id) + ": " + username + " " + email)
+		Users = append(Users, user)
 	}
-	return nil
+
+	// Check for errors from iterating over rows
+	if err := rows.Err(); err != nil {
+		log.Fatal(err) // log.Fatal will log the error and stop the program
+	}
+	log.Println("stuur lijst terug")
+	return Users, nil
 }
 
 func GetAvailableStations(w http.ResponseWriter, r *http.Request, db *sql.DB){	
