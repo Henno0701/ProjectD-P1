@@ -5,8 +5,12 @@ import { StyleSheet } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBolt, faCalendarTimes, faCalendarWeek, faCar, faChargingStation, faChevronRight, faExclamation, faPlugCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { IP } from '@env';
+import { createStackNavigator } from '@react-navigation/stack';
+import ReportModal from '../components/Modals/Report-Modal';
 
 import ButtonList from '../components/Button-List';
+
+const Stack = createStackNavigator();
 
 const GetAvailableStations = async (date) => {
     try {
@@ -32,7 +36,8 @@ const GetAvailableStations = async (date) => {
     }
 };
 
-export default function StationsOverviewScreen() {
+function StationsOverviewMainScreen({ navigation }) {
+
     const [AvailableStations, setAvailableStations] = useState(0);
 
     // When the page gets loaded, the available stations will be fetched from the server
@@ -42,6 +47,10 @@ export default function StationsOverviewScreen() {
             setAvailableStations(NumberAvailable.length); // Set the available stations to the number
         })();
     }, []);
+
+    const handleModalOpen = () => {
+        navigation.navigate('StationsOverviewReportOccupied');
+      };
 
     return (
         <View className="flex-1 bg-main_bg_color items-center">
@@ -76,7 +85,7 @@ export default function StationsOverviewScreen() {
                     <View className="w-full mt-3">
                         <Text className="text-sm text-box-information-text font-light mb-1" style={styles.font_thin}>Quick Access</Text>
                         <ButtonList className="">
-                            <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4">
+                            <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={handleModalOpen}>
                                 <View className="flex flex-row items-center">
                                     <FontAwesomeIcon icon={faCar} size={20} color="#FFFFFF" />
                                     <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Occupied charging space</Text>
@@ -84,7 +93,7 @@ export default function StationsOverviewScreen() {
                                 <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
                             </TouchableOpacity>
 
-                            <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4">
+                            <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={handleModalOpen}>
                                 <View className="flex flex-row items-center">
                                     <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
                                     <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>I have got a defect Station</Text>
@@ -124,3 +133,24 @@ const styles = StyleSheet.create({
         fontFamily: 'Montserrat_700Bold',
     }
 });
+
+const StationsOverviewScreen = () => {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen 
+          name="StationsOverview" 
+          component={StationsOverviewMainScreen} 
+          options={{ headerShown: false }} 
+        />
+        <Stack.Screen 
+          name="StationsOverviewReportOccupied" 
+          component={ReportModal} 
+          options={{ 
+            headerShown: false,
+          }} 
+        />
+      </Stack.Navigator>
+    );
+  };
+
+export default StationsOverviewScreen;
