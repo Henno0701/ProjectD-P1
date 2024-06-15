@@ -10,7 +10,7 @@ import (
 )
 
 func TestCheckAccounts(t *testing.T) {
-	// Initialize mock database (you'll need to implement this)
+	// Initialize mock database (you'll need to implement this) 
 	db, err := sql.Open("sqlite3", "./database.db")
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)
