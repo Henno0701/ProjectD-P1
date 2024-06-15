@@ -4,10 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-	"time"
-=======
->>>>>>> main
 	"log"
 	"net/http"
 	"strconv"
@@ -17,13 +13,6 @@ import (
 type Laadpaal struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`
-}
-
-type User struct {
-	ID	   int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }
 
 type Reservation struct {
@@ -45,7 +34,10 @@ func Maketables(db *sql.DB) error {
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Laadpalen (id INTEGER PRIMARY KEY AUTOINCREMENT, status BOOLEAN)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS QuickReserveReservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Date DATETIME, Priority INTEGER)")
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Meldingen (ID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Melding VARCHAR(255), DateOfNotification DATETIME)") 
+	return err
+}
+func AddUser(db *sql.DB, username string, email string, password string) error {
+	_, err := db.Exec("INSERT INTO Users (Username, Email, Password) VALUES (?, ?, ?)", username, email, password)
 	return err
 }
 
@@ -56,6 +48,11 @@ func AddReservation(db *sql.DB, userID int, laadpaalID int, date time.Time, prio
 
 func AddQuickReservation(db *sql.DB, userID int, date time.Time, priority int) error {
 	_, err := db.Exec("INSERT INTO QuickReserveReservations (UserID, Date, Priority) VALUES (?, ?, ?)", userID, date, priority)
+	return err
+}
+
+func AddMedewerker(db *sql.DB, voornaam string, achternaam string, email string, adress string, telefoonNummer string, postCode string, provincie string, autoModel string, autoCapaciteit string) error {
+	_, err := db.Exec("INSERT INTO Medewerkers (Voornaam, Achternaam, Email, Adress, TelefoonNummer, PostCode, Provincie, AutoModel, AutoCapaciteit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", voornaam, achternaam, email, adress, telefoonNummer, postCode, provincie, autoModel, autoCapaciteit)
 	return err
 }
 
@@ -90,31 +87,6 @@ func LinkOktaIdHandler(db *sql.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"message":"User OktaId updated successfully"}`))
 	}
-}
-
-func GetAllUsers(db *sql.DB) ([]User, error) {
-    rows, err := db.Query("SELECT * FROM Users")
-    if err != nil {
-        log.Fatal(err) // log.Fatal will log the error and stop the program
-    }
-    defer rows.Close()
-
-    // Check if the laadpalen are not null
-    var Users []User
-    for rows.Next() {
-        var user User
-        if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password); err != nil {
-            log.Fatal(err) // log.Fatal will log the error and stop the program
-        }
-        Users = append(Users, user)
-    }
-
-    // Check for errors from iterating over rows
-    if err := rows.Err(); err != nil {
-        log.Fatal(err) // log.Fatal will log the error and stop the program
-    }
-    log.Println("stuur lijst terug")
-    return Users, nil
 }
 
 func PrintUsers(db *sql.DB) error {
@@ -296,7 +268,4 @@ func GetAllReservationOfDate(db *sql.DB, datum time.Time) ([]Reservation, error)
 	return reservations, nil
 }
 
-func AddMelding(db *sql.DB, userID int, melding string, dateOfNotification time.Time) error {
-	_, err := db.Exec("INSERT INTO Meldingen (UserID, Melding, DateOfNotification) VALUES (?, ?, ?)", userID, melding, dateOfNotification)
-	return err
-}
+// TODO: method maken die de quick reserve opslaat in een eigen table
