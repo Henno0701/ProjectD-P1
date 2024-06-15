@@ -113,7 +113,7 @@ func main() {
 	
 	http.HandleFunc("/AddUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
-        AddUser(w, r, database)
+        AddUserHandler(w, r, database)
     })
 
 	http.HandleFunc("/EditUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
@@ -201,6 +201,41 @@ func DateTimeStamp() time.Time {
 	// Get the current date and time
 	return time.Now()
 }
+
+func AddUserHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+	// Decode the JSON request body into a struct
+	var requestData struct {	
+		Voornaam 		string `json:"voornaam"`
+		Achternaam 		string `json:"achternaam"`
+		Adress 			string `json:"adress"`
+		TelefoonNummer 	string `json:"telefoonnummer"`
+		PostCode 		string `json:"postcode"`
+		Provincie 		string `json:"provincie"`
+		AutoModel 		string `json:"automodel"`
+		AutoCapaciteit 	string `json:"autocapaciteit"`
+		Email 			string `json:"email"`
+		Wachtwoord 		string `json:"wachtwoord"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("Received user:", requestData)
+
+	// Insert the user into the database
+	if err := AddUser(database, requestData.Voornaam, requestData.Achternaam, requestData.Adress, requestData.TelefoonNummer, requestData.PostCode, requestData.Provincie, requestData.AutoModel, requestData.AutoCapaciteit, requestData.Email, requestData.Wachtwoord); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Send a response back to the client
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("{}"))
+}
+
 
 func AddMeldingHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	// Decode the JSON request body into a struct

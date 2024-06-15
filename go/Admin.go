@@ -17,63 +17,23 @@ type Melding struct {
 
 
 // alle methods/functies die te maken hebben met de Admin
-func AddUser(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+func AddUser(db *sql.DB, voornaam string, achternaam string, adress string, telefoonnummer string, postcode string, provincie string, automodel string, autocapaciteit string, email string, wachtwoord string) error {
 	queryInsertMedewerker := "INSERT INTO Medewerkers (Voornaam, Achternaam, Email, Adress, TelefoonNummer, PostCode, Provincie, AutoModel, AutoCapaciteit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 	queryInsertUser := "INSERT INTO Users (ID, Username, Email, Password) VALUES (?, ?, ?, ?)"
 
-	// decode json
-	var requestData struct {	
-		Voornaam 		string `json:"voornaam"`
-		Achternaam 		string `json:"achternaam"`
-		Adress 			string `json:"adress"`
-		TelefoonNummer 	string `json:"telefoonnummer"`
-		PostCode 		string `json:"postcode"`
-		Provincie 		string `json:"provincie"`
-		AutoModel 		string `json:"automodel"`
-		AutoCapaciteit 	string `json:"autocapaciteit"`
-		Email 			string `json:"email"`
-		Wachtwoord 		string `json:"wachtwoord"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	tx, err := db.Begin()
+	// Insert Medewerker
+	_, err := db.Exec(queryInsertMedewerker, voornaam, achternaam, email, adress, telefoonnummer, postcode, provincie, automodel, autocapaciteit)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return err
 	}
 
-	// Insert into Medewerkers en krijg de id van de medewerker
-	result, err := tx.Exec(queryInsertMedewerker, requestData.Voornaam, requestData.Achternaam, requestData.Adress, requestData.TelefoonNummer, requestData.PostCode, requestData.Provincie, requestData.AutoModel, requestData.AutoCapaciteit)
+	// Insert User
+	_, err = db.Exec(queryInsertUser, 1, voornaam, email, wachtwoord)
 	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return err
 	}
 
-	// Get the ID of the inserted Medewerker
-	medewerkerID, err := result.LastInsertId()
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	// en gebruik die id om de user toe te voegen
-	_, err = tx.Exec(queryInsertUser, medewerkerID, requestData.Voornaam, requestData.Email, requestData.Wachtwoord)
-	if err != nil {
-		tx.Rollback()
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	// Commit the transaction
-	err = tx.Commit()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	// Send a response back to the client
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{}"))
+	return nil
 }
 
 func EditUser(w http.ResponseWriter, r *http.Request, db *sql.DB){
