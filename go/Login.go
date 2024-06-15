@@ -62,14 +62,14 @@ func GetAccounts(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
-type User struct {
+type Login struct {
 	ID       int            `json:"id"`
 	Username string         `json:"username"`
 	Email    string         `json:"email"`
 	OktaID   sql.NullString `json:"okta_id"`
 }
 
-func checkAccounts(db *sql.DB, email string, password string) *User {
+func checkAccounts(db *sql.DB, email string, password string) *Login {
 	row := db.QueryRow("SELECT * FROM Users WHERE Email = ? AND Password = ?", email, password)
 
 	// var Id int
@@ -78,7 +78,7 @@ func checkAccounts(db *sql.DB, email string, password string) *User {
 	var Password string
 	// var OktaId sql.NullString
 
-	var user User
+	var user Login
 
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
 	if err != nil {
@@ -120,7 +120,7 @@ func checkAccountsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
-func selectUser(db *sql.DB, id int) *User {
+func selectUser(db *sql.DB, id int) *Login {
 	row := db.QueryRow("SELECT * FROM users WHERE ID = ?", (id))
 
 	// var Id int
@@ -129,7 +129,7 @@ func selectUser(db *sql.DB, id int) *User {
 	var Password string
 	// var OktaId sql.NullString
 
-	var user User
+	var user Login
 
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
 	if err != nil {

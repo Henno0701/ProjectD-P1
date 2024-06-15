@@ -48,7 +48,7 @@ function App() {
     return null;
   }
 
-  //removeData('LoggedIn')
+  // removeData('LoggedIn')
   //getData('LoggedIn')
   
   //Henk@gmail.com, HenkPassword

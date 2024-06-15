@@ -54,10 +54,14 @@ const AdminPanelMainScreen = ({navigation}) => {
             <Text className="text-schuberg_blue text-4xl mt-10" style={styles.font_thin}>Welcome</Text>
             {/* !needs function that checks the name of the user. */}
             <Text className="text-[#ffffff] text-2xl -mt-2" style={styles.font_thin}>Admin</Text>
-            <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Notifications</Text>
-            <View>
-                <NotificationsButton Notifications={notifications}/>
-            </View>
+            {notifications != null && (
+                <View>
+                    <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Notifications</Text>
+                    <View>
+                        <NotificationsButton Notifications={notifications}/>
+                    </View>
+                </View>
+            )}   
 
             <View>
                 <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Users</Text>
