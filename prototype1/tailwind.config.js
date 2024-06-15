@@ -12,7 +12,7 @@ module.exports = {
             'schuberg_blue': '#1E80ED',
             'wit': '#FFFFFF',
             "profile-grijs": '#7C7C7C',
-            "rood": "#db2525",
+            "rood": "#FA8072",
             "box-information-text": "#7C7C7C",
 
             "Confirmation": "#1E80ED",
