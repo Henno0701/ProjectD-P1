@@ -79,6 +79,17 @@ func GetApiData(db *sql.DB, link string, token string, gegevens string) {
 }
 
 func UpdateLaadpalenDB(db *sql.DB, id string, status string) error {
-	_, err := db.Exec("UPDATE Laadpalen SET Status = ? WHERE ID = ?", status, id)
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM Laadpalen WHERE ID = ?", id).Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		_, err = db.Exec("INSERT INTO Laadpalen (ID, Status) VALUES (?, ?)", id, status)
+	} else {
+		_, err = db.Exec("UPDATE Laadpalen SET Status = ? WHERE ID = ?", status, id)
+	}
+
 	return err
 }

@@ -27,9 +27,6 @@ var (
 )
 
 
-
-
-
 func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	log.Println("Received request for /items")
 	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
@@ -76,8 +73,6 @@ func main() {
 
   	// zorg dat de db up to date is
 	UpdateDB()
-
-	GetAllLaadpalen(database)
 	
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
