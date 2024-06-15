@@ -136,16 +136,21 @@ export default function LoginScreen({onLogin}) {
     //handle login
     correct = false;
 
-    correct = await handleSubmit(email, ConvertPassword(password))
+    try {
+      correct = await handleSubmit(email, ConvertPassword(password));
+    } catch (error) {
+        console.error("Error in handleSubmit:", error);
+        return;
+    }
     
-    if (correct) 
+    if (correct != null) 
     {
         setError("")
-        await saveData("LoggedIn", email);
+        await saveData("LoggedIn", correct.id.toString());
         onLogin()
     }
-
-    setError("Email or Password is invalid.");
+    else
+      setError("Email or Password is invalid.");
   };
 
   const handleForgotPassword = () => {
@@ -240,7 +245,7 @@ export default function LoginScreen({onLogin}) {
   );
 }
 
-const handleSubmit = async (email, password)  => {
+const handleSubmit = async (email, password) => {
   const Email = email;
   const Password = password; 
 
@@ -254,15 +259,14 @@ const handleSubmit = async (email, password)  => {
     });
 
     if (!response.ok) {
-      return false
+      return null
     }
 
-    // const data = await response.text();
-    // console.log('Account exists:', data); // Will log "true" or "false" depending on server response
-    return true
+    const responseData = await response.json();
+    return responseData
   } catch (error) {
-    // console.error('Error:', error);
-    return false
+    console.error('Error:', error);
+    return null
   }
 };
 
