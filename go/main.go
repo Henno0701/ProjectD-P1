@@ -27,10 +27,6 @@ var (
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
 )
 
-
-
-
-
 func getItems(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	log.Println("Received request for /items")
 	rows, err := db.Query("SELECT ID, UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald FROM Reservations")
@@ -83,7 +79,6 @@ func main() {
 
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
-	http.HandleFunc("/getAllUsers", GetAllUsersHandler(database)) // Endpoint to get all laadpalen
 	http.HandleFunc("/updateUser", LinkOktaIdHandler(database))
 	http.HandleFunc("/selectUser", selectUserHandler(database))
 	http.HandleFunc("/readAccounts", GetAccounts)
@@ -91,7 +86,6 @@ func main() {
 	http.HandleFunc("/setName", setNameHandler)                                       // Endpoint to set the name                                       // Endpoint to set the name
 	http.HandleFunc("/getEmail", GetEmailHandler)                                     // Endpoint to get the email
 	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database))             // Endpoint to get all laadpalen
-
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
 		// Call the actual handler function with the argument
 		AddReservationHandler(w, r, database)
@@ -121,27 +115,6 @@ func main() {
         // Call the actual handler function with the argument
         GetLaadpalenQRhandeler(w, r, database)
     }) // Endpoint voor het ophalen van beschikbare stations tussen een specefieke tijd en datum
-	
-	http.HandleFunc("/AddUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-        // Call the actual handler function with the argument
-        AddUserHandler(w, r, database)
-    })
-
-	http.HandleFunc("/EditUser", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
-        // Call the actual handler function with the argument
-        EditUser(w, r, database)
-    })
-	http.HandleFunc("/getAllMeldingen", GetAllMeldingenhandler(database)) // Endpoint voor alle meldingen
-
-	http.HandleFunc("/deleteUser", func(w http.ResponseWriter, r *http.Request) {
-		DeleteUserHandler(w, r, database)
-	})
-	http.HandleFunc("/deleteMelding", func(w http.ResponseWriter, r *http.Request) {
-		DeleteMeldingHandler(w, r, database)
-	})
-	http.HandleFunc("/AddMelding", func(w http.ResponseWriter, r *http.Request) {
-		AddMeldingHandler(w, r, database)
-	})
 
 	fmt.Println("Server is running...")
 	// roep priority scheduler aan die altijd runt
@@ -208,73 +181,6 @@ func setNameHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func DateTimeStamp() time.Time {
-	// Get the current date and time
-	return time.Now()
-}
-
-func AddUserHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
-	// Decode the JSON request body into a struct
-	var requestData struct {	
-		Voornaam 		string `json:"voornaam"`
-		Achternaam 		string `json:"achternaam"`
-		Adress 			string `json:"adress"`
-		TelefoonNummer 	string `json:"telefoonnummer"`
-		PostCode 		string `json:"postcode"`
-		Provincie 		string `json:"provincie"`
-		AutoModel 		string `json:"automodel"`
-		AutoCapaciteit 	string `json:"autocapaciteit"`
-		Email 			string `json:"email"`
-		Wachtwoord 		string `json:"wachtwoord"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	fmt.Println("Received user:", requestData)
-
-	// Insert the user into the database
-	if err := AddUser(database, requestData.Voornaam, requestData.Achternaam, requestData.Adress, requestData.TelefoonNummer, requestData.PostCode, requestData.Provincie, requestData.AutoModel, requestData.AutoCapaciteit, requestData.Email, requestData.Wachtwoord); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Send a response back to the client
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{}"))
-}
-
-
-func AddMeldingHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
-	// Decode the JSON request body into a struct
-	var requestData struct {
-		UserID int    `json:"UserID"`
-		Melding string `json:"Melding"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// create variable for the current date and time
-	dateTime := DateTimeStamp()
-
-	// Insert the melding into the database
-	if err := AddMelding(database, requestData.UserID, requestData.Melding, dateTime); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Send a response back to the client
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{}"))
-}
-
 func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get all laadpalen
@@ -295,29 +201,6 @@ func GetAllLaadpalenHandler(database *sql.DB) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write(laadpalenJSON)
-	}
-}
-
-func GetAllUsersHandler(database *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Get all laadpalen
-		Users, err := GetAllUsers(database)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Convert the laadpalen to JSON
-		UserJson, err := json.Marshal(Users)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Send the response back to the client
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write(UserJson)
 	}
 }
 

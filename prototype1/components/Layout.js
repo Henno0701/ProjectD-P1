@@ -9,7 +9,6 @@ import HomeScreen from '../screens/Home';
 import StationsScreen from '../screens/Stations';
 import ReservationsScreen from '../screens/Reservations';
 import ProfileScreen from '../screens/Profile';
-import AdminPanelScreen from '../screens/AdminPanel';
 
 //Screen names
 const homeName = "Home";
