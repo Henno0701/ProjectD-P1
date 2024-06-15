@@ -4,14 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
 	"time"
-=======
->>>>>>> main
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type Laadpaal struct {
