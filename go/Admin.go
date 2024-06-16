@@ -19,16 +19,22 @@ type Melding struct {
 // alle methods/functies die te maken hebben met de Admin
 func AddUser(db *sql.DB, voornaam string, achternaam string, adress string, telefoonnummer string, postcode string, provincie string, automodel string, autocapaciteit string, email string, wachtwoord string) error {
 	queryInsertMedewerker := "INSERT INTO Medewerkers (Voornaam, Achternaam, Email, Adress, TelefoonNummer, PostCode, Provincie, AutoModel, AutoCapaciteit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	queryInsertUser := "INSERT INTO Users (ID, Username, Email, Password) VALUES (?, ?, ?, ?)"
+	queryInsertUser := "INSERT INTO Users (Username, Email, Password, Medewerker_ID) VALUES (?, ?, ?, ?)"
 
 	// Insert Medewerker
-	_, err := db.Exec(queryInsertMedewerker, voornaam, achternaam, email, adress, telefoonnummer, postcode, provincie, automodel, autocapaciteit)
+	result, err := db.Exec(queryInsertMedewerker, voornaam, achternaam, email, adress, telefoonnummer, postcode, provincie, automodel, autocapaciteit)
 	if err != nil {
 		return err
 	}
 
-	// Insert User
-	_, err = db.Exec(queryInsertUser, 1, voornaam, email, wachtwoord)
+	// Retrieve the ID of the newly inserted Medewerker
+	medewerkerID, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	// Insert User with the retrieved Medewerker_ID
+	_, err = db.Exec(queryInsertUser, voornaam, email, wachtwoord, medewerkerID)
 	if err != nil {
 		return err
 	}
