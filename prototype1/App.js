@@ -5,7 +5,6 @@ import Layout from './components/Layout';
 import { Montserrat_300Light, Montserrat_400Regular, Montserrat_500Medium, Montserrat_600SemiBold, Montserrat_700Bold, useFonts } from '@expo-google-fonts/montserrat';
 import LoginScreen from './screens/Login';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { err } from 'react-native-svg';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

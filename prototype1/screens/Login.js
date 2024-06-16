@@ -110,6 +110,7 @@ export default function LoginScreen({onLogin}) {
   const saveData = async (key, value) => {
     try {
       await AsyncStorage.setItem(key, value);
+      console.log('Data saved successfully:', value);
     } catch (error) {
       console.log('Error saving data:', error);
     }
@@ -118,13 +119,9 @@ export default function LoginScreen({onLogin}) {
   const getData = async (key) => {
     try {
       const value = await AsyncStorage.getItem(key);
-      if (value !== null) {
-        console.log('Data retrieved successfully:', value);
-        return value;
-      } else {
-        console.log('No data found for the given key');
-        return null;
-      }
+      if (value !== null) return value;
+      else return null;
+      
     } catch (error) {
       console.log('Error retrieving data:', error);
       return null;
@@ -147,6 +144,9 @@ export default function LoginScreen({onLogin}) {
     {
         setError("")
         await saveData("LoggedIn", correct.id.toString());
+        await saveData("ID", correct.id.toString());
+        await saveData("Username", correct.username.toString());
+        await saveData("Email", correct.email.toString());
         onLogin()
     }
     else

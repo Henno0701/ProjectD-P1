@@ -63,6 +63,7 @@ function timesSlots(date) {
 
 export default function StationsReserveScreen() {
     const insets = useSafeAreaInsets();
+    const [ ID, setID ] = useState(null);
     const [data, setData] = useState(
         {
             "station_id": null,
@@ -89,6 +90,12 @@ export default function StationsReserveScreen() {
 
     var firstday = FormatDate(new Date(curr.setDate(first)));
     var lastday = FormatDate(new Date(curr.setDate(last)));
+
+    useEffect(() => {
+        getData('ID').then((user) => {
+            setID(parseInt(user));
+          });
+    }, []);
 
     const getAllChargingStations = async () => {
         try {
@@ -180,15 +187,28 @@ export default function StationsReserveScreen() {
 
     }, [selectedDate]); // Run the effect when the selected date changes
 
+    const getData = async (key) => {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value !== null) return value;
+            else return null;
+          
+        } catch (error) {
+            console.log('Error retrieving data:', error);
+            return null;
+        }
+    };
+
     // Function to  account name from server
     const AddToDatabase = async (date, laadpaalID) => {
         try {
             fetch(`http://${IP}:8080/addReservation`, {
                 method: "POST",
                 body: JSON.stringify({
-                    UserID: 1,
+                    UserID: ID,
                     LaadpaalID: laadpaalID,
                     Date: date,
+                    Priority: 0,
                     Opgeladen: false,
                     Opgehaald: false,
                 }),
@@ -205,7 +225,7 @@ export default function StationsReserveScreen() {
                 return true;
               })
         } catch (error) {
-        //   console.error('Error:', error);
+          console.error('Error:', error);
             return false;
         }
     };

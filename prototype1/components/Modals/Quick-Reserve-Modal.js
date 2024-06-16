@@ -5,6 +5,7 @@ import { faBarChart, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StyleSheet } from 'react-native';
 import SelectDropdown from 'react-native-picker-select';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { IP } from '@env';
 
 import Modal from '../Modal';
@@ -13,18 +14,37 @@ import { ScrollView } from 'react-native-gesture-handler';
 function QuickReserveModal({ route, navigation }) {
     const [PressedTimeSlot, setPressedTimeSlot] = useState(route.params?.PressedTimeSlot); // The selected 
     const [selectedItemSelect, setSelectedItemSelect] = useState(0); // The selected item of the urgency dropdown
+    const [ UserID, setUserID ] = useState(null); // The ID of the user that is currently logged in
 
     const returnToStations = (value = PressedTimeSlot) => 
         navigation.navigate('QuickReserve', {
             PressedTimeSlot: value
         });
 
+    const getData = async (key) => {
+      try {
+          const value = await AsyncStorage.getItem(key);
+          if (value !== null) return value;
+          else return null;
+        
+      } catch (error) {
+          console.log('Error retrieving data:', error);
+          return null;
+      }
+    };
+
+    useEffect(() => {
+      getData('ID').then((user) => {
+          setUserID(parseInt(user));
+        });
+    }, []);
+
     const AddQuickReservation = async (date, priority) => {
         try {
           const response = await fetch(`http://${IP}:8080/addQuickReservation`, {
             method: "POST",
             body: JSON.stringify({
-              UserID: 1,
+              UserID: UserID,
               Date: date,
               Priority: priority
             }),
