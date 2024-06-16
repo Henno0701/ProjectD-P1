@@ -3,6 +3,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IP } from '@env';
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeScreen from './Home';
 
@@ -14,15 +15,16 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function ReservationsScreen() {
     const insets = useSafeAreaInsets();
+    const [ ID, setID ] = useState(null);
     const [ allReservations, setAllReservations ] = useState([]);
     const [ upcomingReservations, setUpcomingReservations ] = useState([]);
     const [ expiredReservations, setExpiredReservations ] = useState([]);
 
-    const getData = async () => {
+    const getReservations = async (id) => {
         try {
             const response = await fetch(`http://${IP}:8080/getAllReservationsOfUser`, {
                 method: "POST",
-                body: JSON.stringify({ UserID: 1 }),
+                body: JSON.stringify({ UserID: id }),
                 headers: {
                     "Content-type": "application/json; charset=UTF-8"
                 }
@@ -38,10 +40,27 @@ export default function ReservationsScreen() {
         }
     };
 
+    const getData = async (key) => {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value !== null) return value;
+            else return null;
+          
+        } catch (error) {
+            console.log('Error retrieving data:', error);
+            return null;
+        }
+      };
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const reservations = await getData() || [];
+                const user = await getData('ID');
+                const ID = parseInt(user);
+                setID(ID);
+
+                const reservations = await getReservations(ID) || [];
                 setAllReservations(reservations);
                 // console.log('All Reservations:', reservations);
     

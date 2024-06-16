@@ -4,6 +4,7 @@ import { CountDown } from 'react-native-countdown-component';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faBattery2, faChargingStation, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
 import ProgressBar from '../data/ProgressBar';
 import axios from 'axios';
@@ -12,7 +13,7 @@ import ButtonList from '../components/Button-List';
 
 export default function HomeScreen({ navigation }) {
   const date = new Date();
-  var Name = "John";
+  const [ Name, setName ] = useState("");
 
   const insets = useSafeAreaInsets();
   const [TimeLeft, setTimeLeft] = useState(null);
@@ -26,6 +27,18 @@ export default function HomeScreen({ navigation }) {
     var timeSlot = hours + ":00" + " - " + (hours + 1) + ":00";
 
     return timeSlot;
+  };
+
+  const getData = async (key) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) return value;
+      else return null;
+      
+    } catch (error) {
+      console.log('Error retrieving data:', error);
+      return null;
+    }
   };
 
   const getCurrentReservation = (reservations) => {
@@ -99,6 +112,10 @@ useEffect(() => {
         }
     };
 
+    getData('Username').then((user) => {
+      setName(user);
+    });
+    
     fetchReservations();
 }, []);
 
