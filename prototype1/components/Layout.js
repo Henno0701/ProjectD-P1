@@ -9,6 +9,7 @@ import HomeScreen from '../screens/Home';
 import StationsScreen from '../screens/Stations';
 import ReservationsScreen from '../screens/Reservations';
 import ProfileScreen from '../screens/Profile';
+import AdminPanelScreen from '../screens/AdminPanel';
 
 //Screen names
 const homeName = "Home";
@@ -19,7 +20,7 @@ const profileName = "Profile";
 
 const Tab = createBottomTabNavigator();
 
-function MainContainer() {
+function MainContainer({ onLogout }) {
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -59,10 +60,10 @@ function MainContainer() {
         })}
         >
 
-        <Tab.Screen name={homeName} component={HomeScreen} />
+        <Tab.Screen name={homeName} component={AdminPanelScreen} initialParams={{ onLogout }}/>
         <Tab.Screen name={stationsName} component={StationsScreen} />
         <Tab.Screen name={reservationsName} component={ReservationsScreen} />
-        <Tab.Screen name={profileName} component={ProfileScreen} />
+        <Tab.Screen name={profileName} component={ProfileScreen} initialParams={{ onLogout }}  />
 
       </Tab.Navigator>
     </NavigationContainer>

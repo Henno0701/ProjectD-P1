@@ -1,175 +1,191 @@
-import { Button, View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Button, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { CountDown } from 'react-native-countdown-component';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBattery2, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faBattery2, faChargingStation, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { faClock } from '@fortawesome/free-regular-svg-icons';
+import ProgressBar from '../data/ProgressBar';
+import axios from 'axios';
+import { IP } from '@env';
+import ButtonList from '../components/Button-List';
 
-export default function HomeScreen({ navigation: { navigate } }) {
+export default function HomeScreen({ navigation }) {
   const date = new Date();
   var Name = "John";
-  var reservation = false;
-  var Battery = 10;
-  var License = "XN-0A2-B2";
-  var Station = "LP-01A";
-  var Charge = 10;
-  var startRes = (Date.now() / 1000) - 360;
-  var TimeSlot = "13:00-14:00";
 
   const insets = useSafeAreaInsets();
+  const [TimeLeft, setTimeLeft] = useState(null);
+  const [ReservationActive, setReservationActive] = useState(false);
+  const [StationID, setStationID] = useState(0);
+  const [TimeSlot, setTimeSlot] = useState("");
+
+  const CreateTimeSlot = (time) => {
+    var date = new Date(time);
+    var hours = date.getHours();
+    var timeSlot = hours + ":00" + " - " + (hours + 1) + ":00";
+
+    return timeSlot;
+  };
+
+  const getCurrentReservation = (reservations) => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentDay = currentDate.getDate();
+    const currentHour = currentDate.getHours();
+
+    const currentReservation = reservations.find(reservation => {
+        const reservationDate = new Date(reservation.date);
+        const reservationYear = reservationDate.getFullYear();
+        const reservationMonth = reservationDate.getMonth();
+        const reservationDay = reservationDate.getDate();
+        const reservationHour = reservationDate.getHours();
+
+        if (currentYear === reservationYear && currentMonth === reservationMonth && currentDay === reservationDay && currentHour === reservationHour) {
+            return reservation;
+        }
+    });
+
+    if (!currentReservation) return false;
+
+    return currentReservation;
+};
+
+const getTimeLeft = (reservation) => {
+    const reservationDate = new Date(reservation.date);
+    const reservationEndTime = reservationDate.getTime() + 3600000; // 1 hour in milliseconds
+
+    const timeLeft = reservationEndTime - Date.now();
+
+    return Math.round(timeLeft / 1000); // Convert to seconds
+};
+
+const getUserReservations = async () => {
+    try {
+        const response = await fetch(`http://${IP}:8080/getAllReservationsOfUser`, {
+            method: "POST",
+            body: JSON.stringify({ UserID: 1 }),
+            headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        return data || [];
+    } catch (error) {
+        // console.error('Error fetching data:', error);
+        return []; // Return an empty array if the fetch fails
+    }
+};
+
+useEffect(() => {
+    const fetchReservations = async () => {
+        const data = await getUserReservations();
+        var currentReservation = getCurrentReservation(data);
+
+        if (!currentReservation) {
+          setReservationActive(false);
+        } else {
+          setReservationActive(true);
+          setStationID(currentReservation.laadpaalID);
+          setTimeSlot(CreateTimeSlot(currentReservation.date));
+          const time = getTimeLeft(currentReservation);
+
+          setTimeLeft(time);
+        }
+    };
+
+    fetchReservations();
+}, []);
 
   return (
-    <View className="flex-1 bg-main_bg_color p-3" style={{paddingTop: insets.top}}>
+    <View className="flex-1 bg-main_bg_color p-3" style={{ paddingTop: insets.top }}>
       <Text className="text-schuberg_blue text-4xl mt-10" style={styles.font_thin}>Welcome</Text>
-
-      {/* !needs function that checks the name of the user. */}
       <Text className="text-[#ffffff] text-2xl -mt-2" style={styles.font_thin}>{Name}</Text>
-
-      {/* If there is a reservation show information about it. */}
-      {/* !needs function that checks if there is a reservation. */}
-      {!reservation ?
+      {ReservationActive ?
         <View>
-          {/* Here needs to be an if statement that shows info of reservation if there is one */}
-          {/* !needs function that checks Battery */}
           <Text className="text-[#686868] text-sm mt-5" style={styles.font_thin}>Car Status</Text>
           <View className="w-full h-20 flex flex-row mt-1">
-            
-            <View className="flex-row w-1/2 basis-[48] bg-main_box_color rounded-xl justify-evenly items-center">
-              <View className="w-12 h-12 bg-main_bg_color justify-center items-center -rotate-90 rounded-full">
-                <FontAwesomeIcon size={32} color="#db2525" icon={faBattery2} />
-              </View>
-              <View className="">
-                <Text className="text-[#ffffff] text-base" style={styles.font_thin}>Battery</Text>
-                <Text className="text-[#686868]" style={styles.font_regular}>Power: {Battery}%</Text>
-              </View>
-            </View>
-
-            <View className="basis-[4]"></View>
-          
-            {/* Here needs to be an if statement that shows info of reservation if there is one */}
-            {/* !needs function that checks time left */}
-            <View className="w-1/2 basis-[48] bg-main_box_color justify-center rounded-xl">
+            <View className="w-1/2 bg-main_box_color justify-center rounded-xl">
               <View className="justify-evenly items-center flex flex-row ">
                 <View className="w-12 h-12 bg-main_bg_color justify-center items-center rounded-full">
-                  <FontAwesomeIcon size={32} color="#56db21" icon={faClock} />
+                  <FontAwesomeIcon size={32} color="#1E80ED" icon={faClock} />
                 </View>
-                <CountDown
-                  until={checkTimeLeft(startRes)}
-                  size={16}
-                  digitStyle={{ backgroundColor: null, marginHorizontal: -2}}
-                  digitTxtStyle={{ color: '#FFF', fontFamily: 'Montserrat_400Regular' }}
-                  timeToShow={['H', 'M', 'S']}
-                  timeLabels={{ h: null, m: null, s: null }}
-                  showSeparator
-                  separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
-                />
+                {TimeLeft !== null && (
+                  <CountDown
+                    key={TimeLeft} // Force re-render when TimeLeft changes
+                    until={TimeLeft}
+                    size={16}
+                    digitStyle={{ backgroundColor: null, marginHorizontal: -2 }}
+                    digitTxtStyle={{ color: '#FFF', fontFamily: 'Montserrat_400Regular' }}
+                    timeToShow={['H', 'M', 'S']}
+                    timeLabels={{ h: null, m: null, s: null }}
+                    showSeparator
+                    separatorStyle={{ color: '#FFF', marginHorizontal: -4 }}
+                  />
+                )}
               </View>
             </View>
           </View>
 
-          {/* Here needs to be an if statement that shows info of reservation if there is one */}
-          {/* !needs function that checks information about the charging station */}
-          <View className="w-full h-auto mt-3 bg-main_box_color rounded-xl">
-            <Text className="mt-5 ml-5 text-box-information-text" style={styles.font_thin}>info:</Text>
-            <View className="ml-5 mr-5 mt-1 mb-5 flex flex-row ">
+          <View className="w-full h-auto mt-3 bg-main_box_color rounded-xl p-3">
+            <Text className="mx-2 text-box-information-text" style={styles.font_thin}>info:</Text>
+            <View className="mx-2 flex flex-row ">
               <View className="mr-10">
-                <Text className=" text-box-information-text" style={styles.font_thin}>Charging Station:</Text>
-                <Text className="text-box-information-text" style={styles.font_thin}>Charging KW:</Text>
+                <Text className="text-box-information-text" style={styles.font_thin}>Charging Station ID:</Text>
                 <Text className="text-box-information-text" style={styles.font_thin}>Session Time:</Text>
                 <Text className="text-box-information-text" style={styles.font_thin}>License Plate:</Text>
               </View>
 
               <View className="mr-5">
-                <Text className="text-[#ffffff]" style={styles.font_regular}>{Station}</Text>
-                <Text className="text-[#ffffff]" style={styles.font_regular}>{Charge} kW</Text>
+                <Text className="text-[#ffffff]" style={styles.font_regular}>{StationID}</Text>
                 <Text className="text-[#ffffff]" style={styles.font_regular}>{TimeSlot}</Text>
-                <Text className="text-[#ffffff]" style={styles.font_regular}>{License}</Text>
+                <Text className="text-[#ffffff]" style={styles.font_regular}>Unknown</Text>
               </View>
             </View>
           </View>
         </View>
         : null}
 
-
-
-      {/* Button that leads to Reservations */}
-      <Text className="text-box-information-text text-sm mt-3" style={styles.font_thin}>Quick Access</Text>
-      <View className="mt-1">
-        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-full h-20 rounded-xl px-8"
-          onPress={() => navigate('Reservations')}>
-          <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Make Reservation</Text>
+      <Text className="text-box-information-text text-sm mt-3 mb-1" style={styles.font_thin}>Quick Access</Text>
+      <ButtonList>
+        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
+          <View className="flex flex-row items-center">
+              <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
+              <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Make Reservation</Text>
+          </View>
           <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
-
-        {/* example button */}
-        <TouchableOpacity className="flex flex-row justify-between items-center bg-main_box_color w-auto h-20 mt-3 rounded-xl px-8"
-          onPress={() => navigate('Home')}>
-          <Text className="text-[#FFFFFF] text-base" style={styles.font_regular}>Example</Text>
-          
+        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
+          <View className="flex flex-row items-center">
+              <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
+              <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Example</Text>
+          </View>
+          <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
-      </View>
-      {/* {chargerInfo()} */}
-      {/* server ligt eruit sadly */}
+      </ButtonList>
     </View>
   );
 }
 
-function checkTimeLeft(startTime) {
-  if (typeof startTime !== 'number') {
-    throw new Error('checkTimeLeft must get a number in seconds');
-  }
-  var timeNow = Date.now() / 1000;
-
-  var time = timeNow - startTime;
-  return time;
-}
-
-// function APICall() {
-//   var url = "https://schubergphilis.workflows.okta-emea.com/api/flo/d71da429cdb215bef89ffe6448097dee/invoke?clientToken=";
-//   var token = "01d762901510b3c7f422595fa18d8d7bd71c1f3e58ad860fd3ae2d0c87a80955";
-//   var url1 = "&url=/poi/v1/locations&method=GET&locationsVisibilityScopes=ACCOUNTS_STATIONS";
-
-//   fetch(url + token + url1, {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'application/json'
-//     }
-//   })
-//     .then(response => {
-//       if (!response.ok) {
-//         throw new Error('Network response was not ok');
-//       }
-//       return response.json();
-//     })
-//     .then(data => {
-//       const formattedData = JSON.stringify(data, null, 2);
-//       console.log(formattedData);
-//       return data;
-//     })
-//     .catch(error => {
-//       console.error('There was a problem with the fetch operation:', error);
-//     });
-// }
-
-// function chargerInfo() {
-//   var data = APICall();
-//   console.log(data);
-// }
-
 const styles = StyleSheet.create({
-    font_regular: {
-        fontFamily: 'Montserrat_400Regular',
-    },
-    font_thin: {
-        fontFamily: 'Montserrat_300Light',
-    },
-    font_medium: {
-        fontFamily: 'Montserrat_500Medium',
-    },
-    font_semibold: {
-        fontFamily: 'Montserrat_600SemiBold',
-    },
-    font_bold: {
-        fontFamily: 'Montserrat_700Bold',
-    }
+  font_regular: {
+    fontFamily: 'Montserrat_400Regular',
+  },
+  font_thin: {
+    fontFamily: 'Montserrat_300Light',
+  },
+  font_medium: {
+    fontFamily: 'Montserrat_500Medium',
+  },
+  font_semibold: {
+    fontFamily: 'Montserrat_600SemiBold',
+  },
+  font_bold: {
+    fontFamily: 'Montserrat_700Bold',
+  }
 });

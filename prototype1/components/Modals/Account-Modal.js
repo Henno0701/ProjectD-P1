@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, View, Text, Pressable, TextInput } from 'react-native';
 import { useState } from 'react';
+import { IP } from '@env';
 
 import Modal from '../Modal';
 
@@ -10,7 +11,7 @@ function AccountModalScreen({}) {
     // Function to save the name to the server
     const handleAccountSave = async () => {
         try {
-          const response = await fetch('http://192.168.1.39:8080/setName', { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
+          const response = await fetch(`http://${IP}:8080/setName`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
