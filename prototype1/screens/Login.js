@@ -1,4 +1,4 @@
-import {View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FontAwesome5 } from '@expo/vector-icons';
@@ -26,20 +26,20 @@ import * as WebBrowser from "expo-web-browser";
 WebBrowser.maybeCompleteAuthSession();
 
 const oktaConfig = {
-    //ypur application id from okta
-    clientId: "0oahdzst51ganDQP05d7",
-    //yout domain from okta
-    domain: "https://dev-50508157.okta.com",
-    // yout domain + /oauth2/default
-    issuerUrl: "https://dev-50508157.okta.com/oauth2/default",
-    //callback configured in okta signin url
-    callbackUrl: "com.dev-50508157.okta.ProjectTest2:/callback",
+  //ypur application id from okta
+  clientId: "0oahdzst51ganDQP05d7",
+  //yout domain from okta
+  domain: "https://dev-50508157.okta.com",
+  // yout domain + /oauth2/default
+  issuerUrl: "https://dev-50508157.okta.com/oauth2/default",
+  //callback configured in okta signin url
+  callbackUrl: "com.dev-50508157.okta.ProjectTest2:/callback",
 };
 
 //import {oktaConfig}  from '../oktaConfig';
 
 
-export default function LoginScreen({onLogin}) {
+export default function LoginScreen({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -100,7 +100,7 @@ export default function LoginScreen({onLogin}) {
     } catch (error) {
       console.log("Error:", error);
     }
-    
+
   };
 
   const toggleShowPassword = () => {
@@ -121,7 +121,7 @@ export default function LoginScreen({onLogin}) {
       const value = await AsyncStorage.getItem(key);
       if (value !== null) return value;
       else return null;
-      
+
     } catch (error) {
       console.log('Error retrieving data:', error);
       return null;
@@ -136,18 +136,17 @@ export default function LoginScreen({onLogin}) {
     try {
       correct = await handleSubmit(email, ConvertPassword(password));
     } catch (error) {
-        console.error("Error in handleSubmit:", error);
-        return;
+      console.error("Error in handleSubmit:", error);
+      return;
     }
-    
-    if (correct != null) 
-    {
-        setError("")
-        await saveData("LoggedIn", correct.id.toString());
-        await saveData("ID", correct.id.toString());
-        await saveData("Username", correct.username.toString());
-        await saveData("Email", correct.email.toString());
-        onLogin()
+
+    if (correct != null) {
+      setError("")
+      await saveData("LoggedIn", correct.id.toString());
+      await saveData("ID", correct.id.toString());
+      await saveData("Username", correct.username.toString());
+      await saveData("Email", correct.email.toString());
+      onLogin()
     }
     else
       setError("Email or Password is invalid.");
@@ -209,9 +208,9 @@ export default function LoginScreen({onLogin}) {
 
 
         <LinearGradient
-            colors={['#1E80ED', '#5FA6F4']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }} 
+          colors={['#1E80ED', '#5FA6F4']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
           className="p-3 m-5 rounded-md"
         >
           <TouchableOpacity onPress={() => handleLogin(email, password)} className="align-middle">
@@ -228,16 +227,16 @@ export default function LoginScreen({onLogin}) {
         </View>
 
         <View className="justify-center" >
-        <LinearGradient
+          <LinearGradient
             colors={['#6f39db', '#5FA6F4']}
             start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }} 
-          className="p-3 m-5 rounded-md"
-        >
+            end={{ x: 1, y: 0 }}
+            className="p-3 m-5 rounded-md"
+          >
             <TouchableOpacity onPress={loginWithOkta} className="align-middle">
-            <Text className="text-wit text-center font-bold text-lg">Okta Login</Text>
+              <Text className="text-wit text-center font-bold text-lg">Okta Login</Text>
             </TouchableOpacity>
-        </LinearGradient>
+          </LinearGradient>
         </View>
 
       </ImageBackground>
@@ -247,7 +246,7 @@ export default function LoginScreen({onLogin}) {
 
 const handleSubmit = async (email, password) => {
   const Email = email;
-  const Password = password; 
+  const Password = password;
 
   try {
     const response = await fetch(`http://${IP}:8080/checkAccounts`, {
@@ -270,8 +269,7 @@ const handleSubmit = async (email, password) => {
   }
 };
 
-const ConvertPassword = (password) =>
-  {
-    const hash = CryptoJS.SHA1(password).toString();
-    return hash
-  }
+const ConvertPassword = (password) => {
+  const hash = CryptoJS.SHA1(password).toString();
+  return hash
+}
