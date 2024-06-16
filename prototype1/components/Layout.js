@@ -1,8 +1,9 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCalendar, faCalendarDays, faChargingStation, faClipboardList, faHome, faUser } from '@fortawesome/free-solid-svg-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Screens
 import HomeScreen from '../screens/Home';
@@ -21,6 +22,26 @@ const profileName = "Profile";
 const Tab = createBottomTabNavigator();
 
 function MainContainer({ onLogout }) {
+  const [ user, setUser ] = useState(null);
+
+  const getData = async (key) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) return value;
+      else return null;
+      
+    } catch (error) {
+      console.log('Error retrieving data:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    getData('Username').then((user) => {
+      setUser(user);
+    });
+  }, []);
+
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -59,8 +80,10 @@ function MainContainer({ onLogout }) {
           
         })}
         >
-
-        <Tab.Screen name={homeName} component={AdminPanelScreen} initialParams={{ onLogout }}/>
+        {/* If user is Admin allow AdminPanel */}
+        {user === "Admin" && <Tab.Screen name="AdminPanel" component={AdminPanelScreen} initialParams={{ onLogout }} />}
+        {/* If user is not Admin dont Allow HomeScreen */}
+        {user !== "Admin" && <Tab.Screen name={homeName} component={HomeScreen} initialParams={{ user }} />}
         <Tab.Screen name={stationsName} component={StationsScreen} />
         <Tab.Screen name={reservationsName} component={ReservationsScreen} />
         <Tab.Screen name={profileName} component={ProfileScreen} initialParams={{ onLogout }}  />

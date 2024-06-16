@@ -84,6 +84,7 @@ func main() {
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
 	http.HandleFunc("/getAllUsers", GetAllUsersHandler(database)) // Endpoint to get all laadpalen
+
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
         AddReservationHandler(w, r, database)

@@ -67,20 +67,16 @@ type Login struct {
 	Username string         `json:"username"`
 	Email    string         `json:"email"`
 	OktaID   sql.NullString `json:"okta_id"`
+	Medewerker_ID sql.NullInt64 `json:"medewerkerId"`
 }
 
 func checkAccounts(db *sql.DB, email string, password string) *Login {
 	row := db.QueryRow("SELECT * FROM Users WHERE Email = ? AND Password = ?", email, password)
 
-	// var Id int
-	// var Username string
-	// var Email string
 	var Password string
-	// var OktaId sql.NullString
-
 	var user Login
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID, &user.Medewerker_ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil
@@ -89,7 +85,7 @@ func checkAccounts(db *sql.DB, email string, password string) *Login {
 		return nil
 	}
 
-	print(user.Email)
+	// print(user.Email)
 	return &user
 }
 
