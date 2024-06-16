@@ -74,6 +74,7 @@ function UsersModal({ navigation }) {
                 {
                     text: 'OK',
                     style: 'cancel',
+                    
                 }
             ]);
         } else {
@@ -84,6 +85,8 @@ function UsersModal({ navigation }) {
                 }
             ]);
         }
+
+        returnToAdminScreen();
     };
 
     const ShowUserActions = (id) =>

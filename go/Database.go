@@ -21,6 +21,7 @@ type User struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 	OktaID   sql.NullString `json:"oktaId"`
+	Medewerker_ID sql.NullInt64 `json:"medewerkerId"`
 }
 
 type Reservation struct {
@@ -35,10 +36,10 @@ type Reservation struct {
 
 // alle methods/functies die te maken hebben met de database
 func Maketables(db *sql.DB) error {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255), OktaId VARCHAR(255) NULL)")
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS Users (ID INTEGER PRIMARY KEY AUTOINCREMENT, Username VARCHAR(255), Email VARCHAR(255), Password VARCHAR(255), OktaId VARCHAR(255) NULL, Medewerker_ID INTEGER NULL, FOREIGN KEY(Medewerker_ID) REFERENCES Medewerkers(id) ON DELETE SET NULL)")
 	_, err = db.Exec(
 		"CREATE TABLE IF NOT EXISTS Reservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, LaadpaalID INTEGER, Date DATETIME, Priority INTEGER, Opgeladen BOOLEAN, Opgehaald BOOLEAN)")
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255));")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Medewerkers (id INTEGER PRIMARY KEY AUTOINCREMENT, Voornaam VARCHAR(255), Achternaam VARCHAR(255), Email VARCHAR(255), Adress VARCHAR(255), TelefoonNummer VARCHAR(255), PostCode VARCHAR(255), Provincie VARCHAR(255), AutoModel VARCHAR(255), AutoCapaciteit VARCHAR(255))")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Laadpalen (id INTEGER PRIMARY KEY AUTOINCREMENT, status BOOLEAN)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS QuickReserveReservations (id INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Date DATETIME, Priority INTEGER)")
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Meldingen (ID INTEGER PRIMARY KEY AUTOINCREMENT, UserID INTEGER, Melding VARCHAR(255), DateOfNotification DATETIME)") 
@@ -117,7 +118,7 @@ func GetAllUsers(db *sql.DB) ([]User, error) {
     var Users []User
     for rows.Next() {
         var user User
-        if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.OktaID); err != nil {
+        if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.OktaID, &user.Medewerker_ID); err != nil {
             log.Fatal(err) // log.Fatal will log the error and stop the program
         }
         Users = append(Users, user)

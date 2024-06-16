@@ -65,6 +65,7 @@ func main() {
 
 	// // Drop table Users for new column
 	// database.Exec("DROP TABLE Users")
+	// database.Exec("DROP TABLE Medewerkers")
 
 	// Create tables
 	if err := Maketables(database); err != nil {

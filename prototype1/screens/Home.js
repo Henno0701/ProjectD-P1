@@ -10,7 +10,7 @@ import axios from 'axios';
 import { IP } from '@env';
 import ButtonList from '../components/Button-List';
 
-export default function HomeScreen({ navigation: { navigate }}) {
+export default function HomeScreen({ navigation }) {
   const date = new Date();
   var Name = "John";
 
@@ -75,9 +75,10 @@ const getUserReservations = async () => {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        return data;
+        return data || [];
     } catch (error) {
-        console.error('Error fetching data:', error);
+        // console.error('Error fetching data:', error);
+        return []; // Return an empty array if the fetch fails
     }
 };
 
@@ -152,14 +153,14 @@ useEffect(() => {
 
       <Text className="text-box-information-text text-sm mt-3 mb-1" style={styles.font_thin}>Quick Access</Text>
       <ButtonList>
-        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigate('Stations')}>
+        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
           <View className="flex flex-row items-center">
               <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
               <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Make Reservation</Text>
           </View>
           <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
-        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigate('Stations')}>
+        <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
           <View className="flex flex-row items-center">
               <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
               <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Example</Text>
