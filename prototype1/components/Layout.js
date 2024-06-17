@@ -90,7 +90,7 @@ function MainContainer({ onLogout }) {
         {user !== "Admin" && <Tab.Screen name={homeName} component={HomeScreen} initialParams={{ user }} />}
         <Tab.Screen name={stationsName} component={StationsScreen} />
         <Tab.Screen name={reservationsName} component={ReservationsScreen} />
-        <Tab.Screen name={profileName} component={ProfileScreen} initialParams={{ onLogout }}  />
+        <Tab.Screen name={profileName} component={ProfileScreen} initialParams={{ onLogout }} />
 
       </Tab.Navigator>
     </NavigationContainer>

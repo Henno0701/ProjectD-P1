@@ -29,6 +29,7 @@ export default function ProfileScreen({route}) {
                     shadowColor: 'transparent',
                     elevation: 0,
                 }, 
+                headerBackTitle: 'Back',
                 headerTintColor: '#fff', headerTitleStyle: {
                     fontFamily: 'Montserrat_500Medium',
                     fontSize: 18,

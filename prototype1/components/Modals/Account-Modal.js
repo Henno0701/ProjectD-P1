@@ -4,6 +4,7 @@ import { IP } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CryptoJS from 'crypto-js';
 import Modal from '../Modal';
+import { StyleSheet } from 'react-native';
 
 function AccountModalScreen({ navigation }) {
   const [AccountName, setAccountName] = useState("");
@@ -65,39 +66,67 @@ function AccountModalScreen({ navigation }) {
   }
   return (
     <Modal>
-      <Text style={{ fontSize: 20, color: 'white' }}>Gebruikersnaam:</Text>
-      <TextInput
-        placeholder="Naam..."
-        placeholderTextColor="grey"
-        value={AccountName}
-        onChangeText={(text) => setAccountName(text)}
-        style={{ fontSize: 16, color: 'white' }}
-      />
-      <Text style={{ fontSize: 20, color: 'white' }}>Wachtwoord:</Text>
-      <TextInput
-        placeholder="Wachtwoord..."
-        placeholderTextColor="grey"
-        value={AccountPassword}
-        onChangeText={(text) => setAccountPassword(text)}
-        style={{ fontSize: 16, color: 'white' }}
-        secureTextEntry={true}
-      />
-      <Text style={{ fontSize: 20, color: 'white' }}>Foto:</Text>
-      <Pressable style={{ borderRadius: 10, padding: 10 }}>
-        <Text style={{ fontSize: 16, color: 'white' }}>COMMING SOON!</Text>
-      </Pressable>
-      <View style={{ marginTop: 20 }}>
-        <Pressable onPress={handleAccountSave}>
-          <Text style={{ fontSize: 20, color: 'white' }}>Save</Text>
-        </Pressable>
-      </View>
-      {isLoading && (
-        <View style={{ marginTop: 20 }}>
-          <ActivityIndicator size="large" color="white" />
+      <View className="flex-1 bg-main_bg_color items-center p-3 w-full">
+        <View className="w-full mt-3 mb-3">
+          <Text className="text-wit text-sm" style={styles.font_semibold}>Username</Text>
+          <TextInput
+            placeholder="Name..."
+            className="w-full h-10 bg-main_box_color rounded-lg justify-center items-center text-wit p-2"
+            placeholderTextColor="grey"
+            value={AccountName}
+            style={styles.font_thin}
+            onChangeText={(text) => setAccountName(text)}
+          />
         </View>
-      )}
+
+        <View className="w-full mb-3">
+          <Text className="text-wit text-sm" style={styles.font_semibold}>Password</Text>
+          <TextInput
+            placeholder="Password..."
+            placeholderTextColor="grey"
+            value={AccountPassword}
+            style={styles.font_thin}
+            onChangeText={(text) => setAccountPassword(text)}
+            className="w-full h-10 bg-main_box_color rounded-lg justify-center items-center text-wit p-2"
+            secureTextEntry={true}
+          />
+        </View>
+
+        <Text className="text-lg text-wit"style={styles.font_semibold}>Foto:</Text>
+        <Pressable style={{ borderRadius: 10, padding: 10 }}>
+          <Text className="text-sm text-wit" style={styles.font_thin}>COMMING SOON!</Text>
+        </Pressable>
+        <View className="w-full mt-3">
+          <Pressable className="h-14 bg-schuberg_blue rounded-lg justify-center items-center flex-row" onPress={handleAccountSave}>
+            <Text className="text-wit text-xl" style={styles.font_semibold}>Save</Text>
+          </Pressable>
+        </View>
+        {isLoading && (
+          <View style={{ marginTop: 20 }}>
+            <ActivityIndicator size="large" color="white" />
+          </View>
+        )}
+      </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  font_regular: {
+    fontFamily: 'Montserrat_400Regular',
+  },
+  font_thin: {
+    fontFamily: 'Montserrat_300Light',
+  },
+  font_medium: {
+    fontFamily: 'Montserrat_500Medium',
+  },
+  font_semibold: {
+    fontFamily: 'Montserrat_600SemiBold',
+  },
+  font_bold: {
+    fontFamily: 'Montserrat_700Bold',
+  }
+});
 
 export default AccountModalScreen;
