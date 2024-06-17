@@ -63,9 +63,10 @@ func main() {
 	}
 	defer database.Close()
 
-	// // Drop table Users for new column
+	// // Drop table for testing
 	// database.Exec("DROP TABLE Users")
 	// database.Exec("DROP TABLE Medewerkers")
+	// database.Exec("DROP TABLE Reservations")
 
 	// Create tables
 	if err := Maketables(database); err != nil {
@@ -78,6 +79,7 @@ func main() {
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/updateUser", LinkOktaIdHandler(database))
+	http.HandleFunc("/checkOktaID", checkOktaIDHandler(database))
 	http.HandleFunc("/selectUser", selectUserHandler(database))
   	http.HandleFunc("/readAccounts", GetAccounts)
 	http.HandleFunc("/getName", getNameHandler) // Endpoint to get the name
