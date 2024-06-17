@@ -279,3 +279,25 @@ func AddMelding(db *sql.DB, userID int, melding string, dateOfNotification time.
 	_, err := db.Exec("INSERT INTO Meldingen (UserID, Melding, DateOfNotification) VALUES (?, ?, ?)", userID, melding, dateOfNotification)
 	return err
 }
+
+func updateUser(db *sql.DB, id, username, password string) error {
+    var err error
+    if password != "" && username != "" {
+        _, err = db.Exec("UPDATE Users SET Username = ?, Password = ? WHERE ID = ?", username, password, id)
+        if err != nil {
+            return fmt.Errorf("error updating username and password: %v", err)
+        }
+    } else if password != "" {
+        _, err = db.Exec("UPDATE Users SET Password = ? WHERE ID = ?", password, id)
+        if err != nil {
+            return fmt.Errorf("error updating password: %v", err)
+        }
+    } else if username != "" {
+        _, err = db.Exec("UPDATE Users SET Username = ? WHERE ID = ?", username, id)
+        if err != nil {
+            return fmt.Errorf("error updating username: %v", err)
+        }
+    }
+
+    return nil
+}

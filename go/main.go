@@ -21,6 +21,16 @@ type Item struct {
 	Opgehaald  bool   `json:"Opgehaald"`
 }
 
+type UserData struct {
+    ID string  `json:"id"`
+    Username string `json:"name,omitempty"`
+    Password string `json:"password,omitempty"`
+}
+
+type Username struct {
+    Username string `json:"username"`
+}
+
 var (
 	nameStore string
 	mu        sync.Mutex // Mutex for synchronizing access to nameStore
@@ -75,7 +85,7 @@ func main() {
 
   	// zorg dat de db up to date is
 	UpdateDB()
-	
+
 	// start de server of 8080 en voeg CORS headers toe
 	http.HandleFunc("/checkAccounts", checkAccountsHandler(database))
 	http.HandleFunc("/updateUser", LinkOktaIdHandler(database))
@@ -86,6 +96,8 @@ func main() {
 	http.HandleFunc("/setName", setNameHandler) // Endpoint to set the name
 	http.HandleFunc("/getAllLaadpalen", GetAllLaadpalenHandler(database)) // Endpoint to get all laadpalen
 	http.HandleFunc("/getAllUsers", GetAllUsersHandler(database)) // Endpoint to get all laadpalen
+    http.HandleFunc("/Updateuserself", updateUserHandler(database)) // Endpoint zodat user zichzelf kan updaten
+    http.HandleFunc("/getUsernameById", getUsernameByIDHandler(database)) // Endpoint om username te krijgen van een user
 
 	http.HandleFunc("/addReservation", func(w http.ResponseWriter, r *http.Request) { // Endpoint to insert a new reservation
         // Call the actual handler function with the argument
@@ -482,4 +494,66 @@ func GetTimeZone(date time.Time) (time.Time, error) {
 	// Convert the date to the "Europe/Amsterdam" time zone
 	ceDateTime := date.In(location)
 	return ceDateTime, nil
+}
+
+func updateUserHandler(db *sql.DB) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+            http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+            return
+        }
+        log.Println("Received request for /updateUser")
+        var req UserData
+        decoder := json.NewDecoder(r.Body)
+        if err := decoder.Decode(&req); err != nil {
+            http.Error(w, "Error decoding JSON body", http.StatusBadRequest)
+            log.Printf("Error decoding JSON body: %v", err)
+            return
+        }
+        
+        log.Printf("Received user: %+v", req.Username , req.Password , req.ID)
+        if err := updateUser(db, req.ID, req.Username, req.Password); err != nil {
+            http.Error(w, fmt.Sprintf("Error updating user: %v", err), http.StatusInternalServerError)
+            return
+        }
+    
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("User updated successfully"))
+    }
+}
+func getUsernameByIDHandler(db *sql.DB) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        if r.Method != http.MethodPost {
+            http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+            return
+        }
+
+        // Decode the request body to get the ID
+        var req struct {
+            ID string `json:"id"`
+        }
+        if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+            http.Error(w, "Error decoding JSON body", http.StatusBadRequest)
+            return
+        }
+
+        // Query the database for the username associated with the ID
+        var username string
+        query := "SELECT username FROM users WHERE id = ?"
+        err := db.QueryRow(query, req.ID).Scan(&username)
+        if err != nil {
+            log.Printf("Error querying database: %v", err)
+            http.Error(w, fmt.Sprintf("Error querying database: %v", err), http.StatusInternalServerError)
+            return
+        }
+
+        // Return the username as JSON response
+        resp := struct {
+            Username string `json:"username"`
+        }{
+            Username: username,
+        }
+        w.Header().Set("Content-Type", "application/json")
+        json.NewEncoder(w).Encode(resp)
+    }
 }

@@ -1,25 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Button, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { CountDown } from 'react-native-countdown-component';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBattery2, faChargingStation, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faClock, faChargingStation, faChevronRight, faBattery2 } from '@fortawesome/free-solid-svg-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
-import ProgressBar from '../data/ProgressBar';
-import axios from 'axios';
 import { IP } from '@env';
 import ButtonList from '../components/Button-List';
+import { useFocusEffect } from '@react-navigation/native';
+import ProgressBar from '../data/ProgressBar';
+import axios from 'axios';
 
 export default function HomeScreen({ navigation }) {
   const date = new Date();
-  const [ Name, setName ] = useState("");
+  const [Name, setName] = useState("");
+  const [ID, setID] = useState("");
 
   const insets = useSafeAreaInsets();
   const [TimeLeft, setTimeLeft] = useState(null);
   const [ReservationActive, setReservationActive] = useState(false);
   const [StationID, setStationID] = useState(0);
   const [TimeSlot, setTimeSlot] = useState("");
+
 
   const CreateTimeSlot = (time) => {
     var date = new Date(time);
@@ -34,7 +36,7 @@ export default function HomeScreen({ navigation }) {
       const value = await AsyncStorage.getItem(key);
       if (value !== null) return value;
       else return null;
-      
+
     } catch (error) {
       console.log('Error retrieving data:', error);
       return null;
@@ -49,76 +51,109 @@ export default function HomeScreen({ navigation }) {
     const currentHour = currentDate.getHours();
 
     const currentReservation = reservations.find(reservation => {
-        const reservationDate = new Date(reservation.date);
-        const reservationYear = reservationDate.getFullYear();
-        const reservationMonth = reservationDate.getMonth();
-        const reservationDay = reservationDate.getDate();
-        const reservationHour = reservationDate.getHours();
+      const reservationDate = new Date(reservation.date);
+      const reservationYear = reservationDate.getFullYear();
+      const reservationMonth = reservationDate.getMonth();
+      const reservationDay = reservationDate.getDate();
+      const reservationHour = reservationDate.getHours();
 
-        if (currentYear === reservationYear && currentMonth === reservationMonth && currentDay === reservationDay && currentHour === reservationHour) {
-            return reservation;
-        }
+      if (currentYear === reservationYear && currentMonth === reservationMonth && currentDay === reservationDay && currentHour === reservationHour) {
+        return reservation;
+      }
     });
 
     if (!currentReservation) return false;
 
     return currentReservation;
-};
+  };
 
-const getTimeLeft = (reservation) => {
+  const getTimeLeft = (reservation) => {
     const reservationDate = new Date(reservation.date);
     const reservationEndTime = reservationDate.getTime() + 3600000; // 1 hour in milliseconds
 
     const timeLeft = reservationEndTime - Date.now();
 
     return Math.round(timeLeft / 1000); // Convert to seconds
-};
-
-const getUserReservations = async () => {
+  };
+  const getUserReservations = async () => {
     try {
-        const response = await fetch(`http://${IP}:8080/getAllReservationsOfUser`, {
-            method: "POST",
-            body: JSON.stringify({ UserID: 1 }),
-            headers: {
-                "Content-type": "application/json; charset=UTF-8"
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+      const response = await fetch(`http://${IP}:8080/getAllReservationsOfUser`, {
+        method: "POST",
+        body: JSON.stringify({ UserID: 1 }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
         }
-        const data = await response.json();
-        return data || [];
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      return data || [];
     } catch (error) {
-        // console.error('Error fetching data:', error);
-        return []; // Return an empty array if the fetch fails
+      // console.error('Error fetching data:', error);
+      return []; // Return an empty array if the fetch fails
     }
-};
+  };
 
-useEffect(() => {
+  useEffect(() => {
     const fetchReservations = async () => {
-        const data = await getUserReservations();
-        var currentReservation = getCurrentReservation(data);
+      const data = await getUserReservations();
+      var currentReservation = getCurrentReservation(data);
 
-        if (!currentReservation) {
-          setReservationActive(false);
-        } else {
-          setReservationActive(true);
-          setStationID(currentReservation.laadpaalID);
-          setTimeSlot(CreateTimeSlot(currentReservation.date));
-          const time = getTimeLeft(currentReservation);
+      if (!currentReservation) {
+        setReservationActive(false);
+      } else {
+        setReservationActive(true);
+        setStationID(currentReservation.laadpaalID);
+        setTimeSlot(CreateTimeSlot(currentReservation.date));
+        const time = getTimeLeft(currentReservation);
 
-          setTimeLeft(time);
-        }
+        setTimeLeft(time);
+      }
     };
 
-    getData('Username').then((user) => {
-      setName(user);
-    });
-    
     fetchReservations();
-}, []);
+  }, []);
 
+  const fetchUsername = async (userId) => {
+    try {
+      const response = await fetch(`http://${IP}:8080/getUsernameById`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch username');
+      }
+
+      const data = await response.json();
+      return data.username;
+    } catch (error) {
+      console.error('Error fetching username:', error);
+      return null;
+    }
+  };
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const userId = await getData('ID');
+          setID(userId);
+
+          const username = await fetchUsername(userId);
+          setName(username);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+
+      fetchData();
+    }, []) // Empty dependency array ensures this runs only on initial mount
+  );
   return (
     <View className="flex-1 bg-main_bg_color p-3" style={{ paddingTop: insets.top }}>
       <Text className="text-schuberg_blue text-4xl mt-10" style={styles.font_thin}>Welcome</Text>
@@ -172,15 +207,15 @@ useEffect(() => {
       <ButtonList>
         <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
           <View className="flex flex-row items-center">
-              <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
-              <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Make Reservation</Text>
+            <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
+            <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Make Reservation</Text>
           </View>
           <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
         <TouchableOpacity className="flex flex-row justify-between items-center w-full py-4" onPress={() => navigation.navigate('Stations')}>
           <View className="flex flex-row items-center">
-              <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
-              <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Example</Text>
+            <FontAwesomeIcon icon={faChargingStation} size={20} color="#FFFFFF" />
+            <Text className="ml-2 text-base text-[#fff] font-medium" style={styles.font_regular}>Example</Text>
           </View>
           <FontAwesomeIcon icon={faChevronRight} size={20} color="#FFFFFF" />
         </TouchableOpacity>
