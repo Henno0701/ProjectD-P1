@@ -2,8 +2,9 @@ import { Button, Text, View } from 'react-native';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IP } from '@env';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
 import HomeScreen from './Home';
 
@@ -15,10 +16,10 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function ReservationsScreen() {
     const insets = useSafeAreaInsets();
-    const [ ID, setID ] = useState(null);
-    const [ allReservations, setAllReservations ] = useState([]);
-    const [ upcomingReservations, setUpcomingReservations ] = useState([]);
-    const [ expiredReservations, setExpiredReservations ] = useState([]);
+    const [ID, setID] = useState(null);
+    const [allReservations, setAllReservations] = useState([]);
+    const [upcomingReservations, setUpcomingReservations] = useState([]);
+    const [expiredReservations, setExpiredReservations] = useState([]);
 
     const getReservations = async (id) => {
         try {
@@ -45,47 +46,45 @@ export default function ReservationsScreen() {
             const value = await AsyncStorage.getItem(key);
             if (value !== null) return value;
             else return null;
-          
+
         } catch (error) {
             console.log('Error retrieving data:', error);
             return null;
         }
-      };
+    };
 
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                try {
+                    const user = await getData('ID');
+                    const ID = parseInt(user);
+                    setID(ID);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const user = await getData('ID');
-                const ID = parseInt(user);
-                setID(ID);
+                    const reservations = await getReservations(ID) || [];
+                    setAllReservations(reservations);
+                    // console.log('All Reservations:', reservations);
 
-                const reservations = await getReservations(ID) || [];
-                setAllReservations(reservations);
-                // console.log('All Reservations:', reservations);
-    
-                const upcomingReservations = reservations.filter((reservation) => {
-                    return new Date(reservation.date) > new Date();
-                });
+                    const upcomingReservations = reservations.filter((reservation) => {
+                        return new Date(reservation.date) > new Date();
+                    });
 
-                const upcomingReservationsSorted = upcomingReservations.sort((a, b) => new Date(a.date) - new Date(b.date));
-                setUpcomingReservations(upcomingReservationsSorted);
-    
-                const expiredReservations = reservations.filter((reservation) => {
-                    return new Date(reservation.date) < new Date();
-                });
+                    const upcomingReservationsSorted = upcomingReservations.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    setUpcomingReservations(upcomingReservationsSorted);
 
-                const expiredReservationsSorted = expiredReservations.sort((a, b) => new Date(b.date) - new Date(a.date));
-                setExpiredReservations(expiredReservationsSorted);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-    
-        fetchData(); // Retrieve data
-    }, []);
-    
+                    const expiredReservations = reservations.filter((reservation) => {
+                        return new Date(reservation.date) < new Date();
+                    });
 
+                    const expiredReservationsSorted = expiredReservations.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    setExpiredReservations(expiredReservationsSorted);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            };
+            fetchData();
+        }, [])
+    );
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
