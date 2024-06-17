@@ -150,8 +150,8 @@ func Indelen(db *sql.DB, date time.Time) {
 }
 
 func Quickreserveadd(db *sql.DB, userID int, laadpaalID int, date time.Time, priority int, laadpaal Laadpaal) {
-    query := "INSERT INTO Reservations (UserID, LaadpaalID, Date, Priority) VALUES (?, ?, ?, ?)"
-    _, err := db.Exec(query, userID, laadpaalID, date, priority)
+    query := "INSERT INTO Reservations (UserID, LaadpaalID, Date, Priority, Opgeladen, Opgehaald) VALUES (?, ?, ?, ?, ?, ?)"
+    _, err := db.Exec(query, userID, laadpaalID, date, priority, 0, 0)
     if err != nil {
         log.Println("Error adding reservation: " + err.Error())
     }

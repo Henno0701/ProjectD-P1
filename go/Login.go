@@ -116,6 +116,54 @@ func checkAccountsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func checkOktaIDHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		oktaId := r.FormValue("oktaId")
+
+		var correct = CheckOktaID(db, oktaId)
+		if correct != nil {
+
+			// Marshal the correct user into JSON format
+			userJSON, err := json.Marshal(correct)
+			if err != nil {
+				// Handle error if JSON marshaling fails
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			// Set response headers and write the user JSON to the response body
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			w.Write(userJSON)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+func CheckOktaID(db *sql.DB, id string) *Login {
+	row := db.QueryRow("SELECT * FROM Users WHERE OktaId = ?", id)
+
+	fmt.Println("ID:", id)
+
+	var Password string
+	var user Login
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID, &user.Medewerker_ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil
+		}
+		fmt.Println("Error:", err)
+		return nil
+	}
+
+	fmt.Println(&user)
+
+	return &user
+}
+
 func selectUser(db *sql.DB, id int) *Login {
 	row := db.QueryRow("SELECT * FROM users WHERE ID = ?", (id))
 
@@ -127,7 +175,7 @@ func selectUser(db *sql.DB, id int) *Login {
 
 	var user Login
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &Password, &user.OktaID, &user.Medewerker_ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil

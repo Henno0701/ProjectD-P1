@@ -14,6 +14,7 @@ import AdminPanelScreen from '../screens/AdminPanel';
 
 //Screen names
 const homeName = "Home";
+const adminName = "Home";
 const stationsName = "Stations";
 const reservationsName = "Reservations";
 const profileName = "Profile";
@@ -62,6 +63,9 @@ function MainContainer({ onLogout }) {
                 if (rn === homeName) {
                 iconName = faHome;
 
+                } else if (rn === adminName) {
+                  iconName = faHome;
+                  
                 } else if (rn === stationsName) {
                 iconName = faChargingStation;
                 
@@ -81,7 +85,7 @@ function MainContainer({ onLogout }) {
         })}
         >
         {/* If user is Admin allow AdminPanel */}
-        {user === "Admin" && <Tab.Screen name="AdminPanel" component={AdminPanelScreen} initialParams={{ onLogout }} />}
+        {user == "Admin" && <Tab.Screen name={adminName} component={AdminPanelScreen} initialParams={{ onLogout }} />}
         {/* If user is not Admin dont Allow HomeScreen */}
         {user !== "Admin" && <Tab.Screen name={homeName} component={HomeScreen} initialParams={{ user }} />}
         <Tab.Screen name={stationsName} component={StationsScreen} />

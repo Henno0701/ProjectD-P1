@@ -94,7 +94,19 @@ export default function LoginScreen({onLogin}) {
 
       if (userData.email != null) {
         // Save the email of the logged-in user
-        saveData("LoggedIn", userData.email);
+        // saveData("Email", userData.email);
+
+        // Check if the user is in the database with this OktaID
+        var user = await CheckOktaLoginInDB(userData.sub);
+        if (user.length === 0 || user == null) {
+            return;
+        }
+
+        setError("")
+        await saveData("LoggedIn", user.id.toString());
+        await saveData("ID", user.id.toString());
+        await saveData("Username", user.username.toString());
+        await saveData("Email", user.email.toString());
         onLogin()
       }
     } catch (error) {
@@ -102,6 +114,28 @@ export default function LoginScreen({onLogin}) {
     }
     
   };
+
+  const CheckOktaLoginInDB = async (OktaID) => {
+    try {
+      const response = await fetch(`http://${IP}:8080/checkOktaID`, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `oktaId=${encodeURIComponent(OktaID)}`,
+        });
+
+      if (!response.ok) {
+          return null;
+      }
+
+      const json = await response.json(); // Assuming response is JSON, use appropriate method accordingly
+      return json || [];
+  } catch (error) {
+      console.error('Error:', error);
+      return [];
+  }
+}
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
