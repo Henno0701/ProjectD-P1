@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { TouchableOpacity, Text, View, ScrollView } from 'react-native';
 import { faCalendarDays, faChevronRight, faCircleExclamation, faPersonCircleExclamation, faPlugCircleExclamation, faUser, faUserPlus, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
@@ -10,6 +10,7 @@ import ButtonList from '../components/Button-List';
 import { createStackNavigator } from '@react-navigation/stack';
 import UsersModal from '../components/Modals/Admin-Users-Modal';
 import AddUserModal from '../components/Modals/Admin-Add-User-Modal';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 
@@ -37,12 +38,14 @@ const AdminPanelMainScreen = ({navigation}) => {
         }
     }
 
-    useEffect(() => {
-        // Fetch data
-        getNotifications().then(notificationsList => {
-            setNotifications(notificationsList);
-        });
-    }, []);
+    useFocusEffect(
+        useCallback (() => {
+            // Fetch data
+            getNotifications().then(notificationsList => {
+                setNotifications(notificationsList);
+            });
+        }, [])
+    );
 
     const handleModalOpen = (screen) => {
         navigation.navigate(screen);

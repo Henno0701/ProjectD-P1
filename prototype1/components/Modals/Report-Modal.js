@@ -1,17 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, View, Text, Pressable, Alert } from 'react-native';
-import { useState } from 'react';
 import { faBarChart, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { StyleSheet } from 'react-native';
 import SelectDropdown from 'react-native-picker-select';
 import { IP } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Modal from '../Modal';
 import { ScrollView } from 'react-native-gesture-handler';
 
 function ReportModal({ navigation }) {
     const [ issue, setIssue ] = useState(null);
+    const [ user, setUser ] = useState(1);
+
+    const getData = async (key) => {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value !== null) return value;
+            else return null;
+
+        } catch (error) {
+            console.log('Error retrieving data:', error);
+            return null;
+        }
+    };
 
     const handleSubmit = () => {
         if (issue === null) {
@@ -19,7 +32,7 @@ function ReportModal({ navigation }) {
             return;
         }
 
-        if (SendReport()) {
+        if (SendReport(user)) {
             Alert.alert('Issue reported.');
             returnToStations();
         } else {
@@ -28,12 +41,13 @@ function ReportModal({ navigation }) {
         
     }
 
-    const SendReport = async () => {
+    const SendReport = async (id) => {
+        id = parseInt(id);
         try {
             fetch(`http://${IP}:8080/AddMelding`, { // ONTHOUD DE NUMMERS MOETEN JOUW IP ADRESS ZIJN VAN JE PC ZODRA CLLIENT EN SERVER RUNNEN OP JE LAPTOP/PC
                 method: "POST",
                 body: JSON.stringify({
-                    UserID: 1,
+                    UserID: id,
                     Melding: issue
                 }),
                 headers: {
@@ -56,6 +70,12 @@ function ReportModal({ navigation }) {
     const returnToStations = () => {
         navigation.navigate('StationsOverview');
     }
+
+    useEffect(() => {
+        getData('ID').then((user) => {
+          setUser(user);
+        });
+      }, []);
 
     return (
         <Modal>
