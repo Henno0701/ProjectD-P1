@@ -34,30 +34,83 @@ function AccountModalScreen({ navigation }) {
     }
 
     setIsLoading(true);
+    console.log('ID:', ID);
+    console.log('Name:', AccountName);
+    if (AccountPassword == "") {
+      try {
+        const response = await fetch(`http://${IP}:8080/Updateuserself`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: ID.toString(), name: AccountName || undefined, password: "" || undefined }),
+        });
 
-    try {
-      const response = await fetch(`http://${IP}:8080/Updateuserself`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: ID.toString(), name: AccountName || undefined, password: ConvertPassword(AccountPassword) || undefined }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update user');
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        if (AccountName) await AsyncStorage.setItem('Name', AccountName);
+        console.log('User updated successfully');
+        Alert.alert('Success', 'User updated successfully');
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error updating account:', error);
+        Alert.alert('Error', 'Failed to update user. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
-      if (AccountName) await AsyncStorage.setItem('Name', AccountName);
-      console.log('User updated successfully');
-      Alert.alert('Success', 'User updated successfully');
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error updating account:', error);
-      Alert.alert('Error', 'Failed to update user. Please try again later.');
-    } finally {
-      setIsLoading(false);
     }
-  };
+    else if (AccountName == "") {
+      try {
+        const response = await fetch(`http://${IP}:8080/Updateuserself`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: ID.toString(), name: AccountName, password: ConvertPassword(AccountPassword) }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        if (AccountName) await AsyncStorage.setItem('Name', AccountName);
+        console.log('User updated successfully');
+        Alert.alert('Success', 'User updated successfully');
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error updating account:', error);
+        Alert.alert('Error', 'Failed to update user. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    else {
+
+      try {
+        const response = await fetch(`http://${IP}:8080/Updateuserself`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: ID.toString(), name: AccountName, password: ConvertPassword(AccountPassword) }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update user');
+        }
+        if (AccountName) await AsyncStorage.setItem('Name', AccountName);
+        console.log('User updated successfully');
+        Alert.alert('Success', 'User updated successfully');
+        navigation.goBack();
+      } catch (error) {
+        console.error('Error updating account:', error);
+        Alert.alert('Error', 'Failed to update user. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  }
+
 
   const ConvertPassword = (password) => {
     const hash = CryptoJS.SHA1(password).toString();
@@ -92,7 +145,7 @@ function AccountModalScreen({ navigation }) {
           />
         </View>
 
-        <Text className="text-lg text-wit"style={styles.font_semibold}>Foto:</Text>
+        <Text className="text-lg text-wit" style={styles.font_semibold}>Foto:</Text>
         <Pressable style={{ borderRadius: 10, padding: 10 }}>
           <Text className="text-sm text-wit" style={styles.font_thin}>COMMING SOON!</Text>
         </Pressable>

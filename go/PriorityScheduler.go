@@ -30,6 +30,8 @@ func PriorityScheduler(db *sql.DB) {
 
 func Indelen(db *sql.DB, date time.Time) {
     dateNextHour := GetNextHour(date)
+    // zet date terug naar laagste uur so 12:36 -> 12:00
+    date = date.Add(-time.Minute * time.Duration(date.Minute()))
 
     laadpalen, err := GetAllLaadpalen(db)
     if err != nil {
